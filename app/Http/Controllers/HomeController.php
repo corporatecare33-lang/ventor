@@ -22,6 +22,9 @@ class HomeController extends Controller
     /** Categories shown together in the "Smart additions" carousel instead of their own collection grid. */
     private const ADDITIONS = ['smart-accessories', 'key-holders', 'accessories'];
 
+    /** Corporate gift sets are shown inside the corporate gifting section, not as a collection. */
+    private const CORPORATE = 'corporate-gifts';
+
     /** The two collections compared side by side after the first collection. */
     private const COMPARE = ['smart-wallets', 'classic-wallets'];
 
@@ -30,7 +33,7 @@ class HomeController extends Controller
         $data = StorefrontCache::remember('home', function () {
             // Each featured category is a homepage collection: title, feature line and its products.
             $collections = Category::active()->whereNull('parent_id')->where('is_featured', true)
-                ->whereNotIn('slug', self::ADDITIONS)->withCount('activeProducts')->orderBy('sort_order')
+                ->whereNotIn('slug', [...self::ADDITIONS, self::CORPORATE])->withCount('activeProducts')->orderBy('sort_order')
                 ->get(['id', 'name', 'slug', 'tagline'])
                 ->map(function (Category $category) {
                     $all = Product::visible()->forCard()->where('category_id', $category->id)
@@ -112,7 +115,9 @@ class HomeController extends Controller
                     'pieces' => Product::visible()->where('engraving_available', true)->count(),
                     'styles' => count(EngravingRequest::FONTS),
                 ],
-                'corporateProduct' => Product::visible()->forCard()->whereHas('category', fn ($q) => $q->where('slug', 'corporate-gifts'))->orderBy('sort_order')->first(),
+                'corporateProducts' => $corporate = Product::visible()->forCard()
+                    ->whereHas('category', fn ($query) => $query->where('slug', self::CORPORATE))->orderBy('sort_order')->limit(2)->get(),
+                'corporateProduct' => $corporate->first(),
                 'reviews' => Review::approved()->where('rating', '>=', 4)->whereHas('product', fn ($query) => $query->visible()->withoutTrashed())
                     ->with('product:id,name,slug')->latest()->limit(8)->get(),
                 'reviewStats' => ['average' => round((float) Review::approved()->avg('rating'), 1), 'count' => Review::approved()->count()],

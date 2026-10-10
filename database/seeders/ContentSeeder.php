@@ -40,7 +40,7 @@ class ContentSeeder extends Seeder
             [
                 'eyebrow' => 'Laser engraving',
                 'title' => 'Your name,|engraved in leather.',
-                'subtitle' => 'Add a name, initials, a short line or a company logo to any piece marked “Engravable”. We check every design with you before it is engraved.',
+                'subtitle' => 'Four lettering styles, a live preview, and every design checked with you before it is engraved.',
                 'button_text' => 'Personalise a piece', 'button_link' => '/engraving',
                 'secondary_button_text' => 'Shop the collection', 'secondary_button_link' => '/shop',
                 'image' => ['banners/laser-engraving-wallet.png', 'A laser engraving a monogram onto a tan leather wallet', '60% 55%'],
@@ -49,7 +49,7 @@ class ContentSeeder extends Seeder
                 'eyebrow' => 'Corporate gifting',
                 'title' => 'Gifts your team|will actually use.',
                 'subtitle' => 'Boxed leather sets for employees and clients, with optional logo engraving and one quotation for the whole order.',
-                'button_text' => 'Request a quote', 'button_link' => '/corporate',
+                'button_text' => 'Request a quotation', 'button_link' => '/corporate',
                 'secondary_button_text' => 'View gift sets', 'secondary_button_link' => '/category/corporate-gifts',
                 'image' => ['banners/executive-gift-set.png', 'Executive gift set of a black leather briefcase, wallet and card holder on an office desk', '65% 60%'],
             ],
@@ -66,33 +66,33 @@ class ContentSeeder extends Seeder
         }
 
         $sections = [
-            'tap_intro' => ['What is LeatherX Tap™?', 'A small passive NFC chip inside your wallet that opens your digital contact card on any phone — no app and no battery.', [
+            'tap_intro' => ['What is LeatherX Tap™?', 'A passive NFC chip in your wallet opens your digital contact card on the other person’s phone.', [
                 'items' => [
-                    ['title' => 'Tap your wallet', 'icon' => 'signal', 'text' => 'Hold your LeatherX Tap wallet near an NFC-enabled phone — most Android phones and recent iPhones.'],
-                    ['title' => 'Your profile opens', 'icon' => 'phone', 'text' => 'Your name, phone, WhatsApp, email, company and social links open in the browser.'],
-                    ['title' => 'Saved in one tap', 'icon' => 'check', 'text' => 'They save you as a contact straight away. A QR code works for phones without NFC.'],
+                    ['title' => 'Tap your wallet', 'icon' => 'signal', 'text' => 'Hold it near an NFC phone — most Android phones and recent iPhones.'],
+                    ['title' => 'Your profile opens', 'icon' => 'phone', 'text' => 'Name, phone, WhatsApp, email and social links open in the browser.'],
+                    ['title' => 'Saved in one tap', 'icon' => 'check', 'text' => 'They save you as a contact. A QR code covers phones without NFC.'],
                 ],
                 'points' => ['No app needed', 'No battery', 'Edit your profile any time', 'QR code backup'],
                 'button_text' => 'Learn more about LeatherX Tap',
                 'button_link' => '/leatherx-tap',
             ]],
             // One block per featured category; this title and subtitle head the accessories carousel at the end.
-            'collections' => ['Smart additions', 'Key holders, trackers and desk pieces that work alongside your wallet.', []],
-            'comparison' => ['Smart or classic?', 'Both are leather bifolds with room for your everyday cards. Here is how they differ.', []],
-            'engraving' => ['Laser engraving, checked before it is cut', 'Add a name, initials, a short line or your company logo to any piece marked “Engravable”.', [
+            'collections' => ['Smart Additions', 'Key holders, trackers and desk pieces that work alongside your wallet.', []],
+            'comparison' => ['Smart vs Classic', 'Both block RFID skimming and carry your everyday cards. Here is how they differ.', []],
+            'engraving' => ['Laser engraving, approved by you first', 'Add a name, initials, a short line or your company logo to any piece marked “Engravable”.', [
                 'items' => [
                     ['title' => 'Choose an engravable piece', 'icon' => 'leather', 'text' => 'Tick “Add laser engraving” on the product page.'],
                     ['title' => 'Enter your text and style', 'icon' => 'pen', 'text' => 'Pick one of four styles and where it should sit, with a live preview.'],
                     ['title' => 'We confirm the details', 'icon' => 'check', 'text' => 'We check spelling and placement with you before engraving.'],
                     ['title' => 'Delivered ready to give', 'icon' => 'gift', 'text' => 'Engraved orders need two to three extra working days.'],
                 ],
-                'points' => ['Names & initials', 'Short messages', 'Company logos', 'Checked before engraving'],
+                'points' => ['Names & initials', 'Short messages', 'Company logos', 'Live preview'],
                 'button_text' => 'Start your engraving',
                 'button_link' => '/engraving',
             ]],
-            'corporate' => ['Corporate gifts your team will actually use', 'Leather wallets, card holders and gift sets for employees, clients and events — engraved with your logo and invoiced as one order.', [
+            'corporate' => ['Corporate Gifting', 'Wallets, card holders and gift sets for teams, clients and events — engraved with your logo and invoiced as one order.', [
                 'items' => [
-                    ['title' => 'Logo or name engraving', 'text' => 'per piece'],
+                    ['title' => 'Logo or name engraving', 'text' => 'on every piece'],
                     ['title' => 'Mixed products in one order', 'text' => 'wallets, card holders, key holders'],
                     ['title' => 'Delivery to one or several addresses', 'text' => null],
                     ['title' => 'A written quotation before you commit', 'text' => null],

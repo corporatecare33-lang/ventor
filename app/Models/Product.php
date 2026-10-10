@@ -211,7 +211,7 @@ class Product extends Model implements HasMedia
             : null;
 
         return collect([
-            $this->namedLeather() ? ['icon' => 'leather', 'title' => $this->leather_type, 'note' => 'Leather'] : null,
+            $this->namedLeather() ? ['icon' => 'leather', 'title' => $this->leather_type, 'note' => 'Material'] : null,
             $this->nfc_enabled ? ['icon' => 'signal', 'title' => 'LeatherX Tap™', 'note' => 'Tap to share'] : null,
             $this->rfid_protection ? ['icon' => 'shield', 'title' => 'RFID blocking', 'note' => 'Card protection'] : null,
             $warranty ? ['icon' => 'badge', 'title' => ucfirst($warranty), 'note' => 'Stitching & hardware'] : null,

@@ -52,7 +52,7 @@ class CollectionSummary
             'LeatherX Tap™ NFC' => fn (Collection $p) => self::share($p, 'nfc_enabled'),
             'RFID protection' => fn (Collection $p) => self::share($p, 'rfid_protection'),
             'Card capacity' => fn (Collection $p) => $p->max('card_capacity') ? 'Up to '.$p->max('card_capacity').' cards' : '—',
-            'Warranty' => fn (Collection $p) => self::warranty($p) ?? '—',
+            'Warranty' => fn (Collection $p) => self::warrantyYears($p) ?? '—',
             'Price range' => fn (Collection $p) => self::priceRange($p),
             'Engraving' => fn (Collection $p) => self::share($p, 'engraving_available'),
         ];
@@ -60,9 +60,6 @@ class CollectionSummary
         $result = [];
         foreach ($rows as $label => $value) {
             $result[] = ['label' => $label, 'values' => [$value($a), $value($b)]];
-        }
-        if ($first->tagline || $second->tagline) {
-            $result[] = ['label' => 'In short', 'values' => [$first->tagline ?: '—', $second->tagline ?: '—']];
         }
 
         return $result;
@@ -77,6 +74,19 @@ class CollectionSummary
         }
         $max = (int) $months->max();
         $text = $max % 12 === 0 ? ($max / 12).'-year warranty' : $max.'-month warranty';
+
+        return ($months->unique()->count() > 1 ? 'Up to ' : '').$text;
+    }
+
+    /** Warranty for a table cell, e.g. "Up to 2 years" or "1 year". @param  Collection<int, Product>  $products */
+    private static function warrantyYears(Collection $products): ?string
+    {
+        $months = $products->pluck('warranty_months')->filter();
+        if ($months->isEmpty()) {
+            return null;
+        }
+        $max = (int) $months->max();
+        $text = $max % 12 === 0 ? ($max / 12).' '.str('year')->plural($max / 12) : $max.' months';
 
         return ($months->unique()->count() > 1 ? 'Up to ' : '').$text;
     }
