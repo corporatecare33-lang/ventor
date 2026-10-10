@@ -88,7 +88,7 @@ class HomeController extends Controller
                         'note' => 'Share your contact card with one tap',
                         'icon' => 'signal',
                     ] : null,
-                    'engraving' => ($price = (clone $visible)->where('engraving_available', true)->min('engraving_price')) !== null ? [
+                    'engraving' => ($price = (clone $visible)->where('engraving_available', true)->where('engraving_price', '>', 0)->min('engraving_price')) !== null ? [
                         'label' => 'Engraving',
                         'value' => 'Engraving from '.money($price),
                         'note' => 'Names, initials or logos',
@@ -111,13 +111,12 @@ class HomeController extends Controller
                     ->whereHas('category', fn ($query) => $query->whereIn('slug', self::ADDITIONS))
                     ->orderByDesc('is_featured')->orderBy('sort_order')->limit(12)->get(),
                 'engraving' => [
-                    'from' => ($price = Product::visible()->where('engraving_available', true)->min('engraving_price')) !== null ? money($price) : null,
+                    'from' => ($price = Product::visible()->where('engraving_available', true)->where('engraving_price', '>', 0)->min('engraving_price')) !== null ? money($price) : null,
                     'pieces' => Product::visible()->where('engraving_available', true)->count(),
                     'styles' => count(EngravingRequest::FONTS),
                 ],
-                'corporateProducts' => $corporate = Product::visible()->forCard()
+                'corporateProducts' => Product::visible()->forCard()
                     ->whereHas('category', fn ($query) => $query->where('slug', self::CORPORATE))->orderBy('sort_order')->limit(2)->get(),
-                'corporateProduct' => $corporate->first(),
                 'reviews' => Review::approved()->where('rating', '>=', 4)->whereHas('product', fn ($query) => $query->visible()->withoutTrashed())
                     ->with('product:id,name,slug')->latest()->limit(8)->get(),
                 'reviewStats' => ['average' => round((float) Review::approved()->avg('rating'), 1), 'count' => Review::approved()->count()],

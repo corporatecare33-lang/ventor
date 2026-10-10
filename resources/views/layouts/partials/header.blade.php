@@ -8,9 +8,11 @@
             ? [$label, route('categories.show', $category), request()->is('category/'.$slug)]
             : null;
     };
+    // Desktop bar (after "Shop"). Category links drop out while the category has no live products;
+    // smart accessories and the other categories stay reachable through the Shop menu.
     $nav = array_values(array_filter([
+        $categoryLink('classic-wallets', 'Wallets'),
         $categoryLink('bags', 'Bags'),
-        $categoryLink('smart-accessories', 'Smart Accessories'),
         ['Engraving', route('engraving'), request()->routeIs('engraving')],
         ['LeatherX Tap™', route('tap'), request()->routeIs('tap')],
         ['Corporate Gifts', route('corporate'), request()->routeIs('corporate')],
@@ -35,7 +37,7 @@
         @keydown.escape.window="menu = false; search = false">
     <div class="border-b border-line bg-white transition-[border-radius] duration-200 {{ $announcementText ? 'rounded-t-[1.25rem]' : '' }}" :class="scrolled && 'rounded-t-none'">
         {{-- Utility row: menu + search · logo · account + cart --}}
-        <div class="container-site grid h-16 grid-cols-[1fr_auto_1fr] items-center lg:h-[4.75rem]">
+        <div class="container-wide grid h-16 grid-cols-[1fr_auto_1fr] items-center lg:h-[4.75rem]">
             <div class="-ml-2.5 flex items-center">
                 <button type="button" class="inline-flex size-11 items-center justify-center text-ink-950 hover:text-leather-700" @click="menu = true"
                         aria-controls="mobile-menu" :aria-expanded="menu.toString()" aria-label="Open menu">
@@ -60,16 +62,17 @@
             </div>
         </div>
 
-        {{-- Primary navigation (desktop) --}}
+        {{-- Primary navigation (desktop): eight items at 15px need about 690px with the lg gap, so the row fits on one line from 1024px --}}
         <nav class="hidden lg:block" aria-label="Primary">
-            <ul class="container-site flex h-12 items-stretch justify-center gap-8 text-[15px] xl:gap-10">
+            <ul class="container-wide flex h-12 items-stretch justify-center gap-6 text-[15px] xl:gap-9">
                 <li class="relative flex items-stretch" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false" @focusout="if (! $el.contains($event.relatedTarget)) open = false">
                     <button type="button" @click="open = ! open" :aria-expanded="open.toString()" aria-controls="shop-menu"
                             class="flex items-center gap-1 border-b-2 {{ $shopActive ? 'border-ink-950 text-ink-950' : 'border-transparent text-ink-800 hover:text-ink-950' }}">
                         Shop <x-lx-icon name="chevron-down" class="size-3.5 transition-transform" ::class="open && 'rotate-180'" />
                     </button>
+                    {{-- Opens from "Shop" (text lined up with it) rather than centred on it, which pushed it off-screen at 1024–1280px --}}
                     <div id="shop-menu" x-cloak x-show="open" x-transition.opacity.duration.150ms
-                         class="absolute top-full left-1/2 w-[36rem] -translate-x-1/2 border border-line bg-white p-6 shadow-pop">
+                         class="absolute top-full -left-6 w-[36rem] border border-line bg-white p-6 shadow-pop">
                         <p class="label-caps mb-3 text-ink-500">Categories</p>
                         <ul class="grid grid-cols-2 gap-x-6">
                             @foreach ($layout['menuCategories'] as $category)
@@ -95,7 +98,7 @@
     </div>
 
     <div id="site-search" x-cloak x-show="search" x-transition.opacity.duration.150ms class="absolute inset-x-0 top-full border-b border-line bg-white shadow-pop">
-        <form action="{{ route('shop') }}" method="GET" role="search" class="container-site flex items-center gap-3 py-4">
+        <form action="{{ route('shop') }}" method="GET" role="search" class="container-wide flex items-center gap-3 py-4">
             <label for="header-q" class="sr-only">Search products</label>
             <x-lx-icon name="search" class="size-5 shrink-0 text-ink-500" />
             <input x-ref="q" id="header-q" type="search" name="q" value="{{ request('q') }}" placeholder="Search wallets, card holders, bags…" autocomplete="off"

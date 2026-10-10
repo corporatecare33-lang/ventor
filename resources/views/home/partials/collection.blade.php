@@ -31,9 +31,9 @@
 ])>
     <div class="container-wide">
         <header class="reveal text-center">
-            <h2 id="{{ $titleId }}" @class(['title-collection', 'text-ink-950 leading-[1.12]' => $isLead, 'text-cognac-500' => ! $isLead])>
+            <h2 id="{{ $titleId }}" @class(['title-collection', 'text-ink-950 leading-[1.15]' => $isLead, 'text-cognac-500' => ! $isLead])>
                 @if ($isLead)
-                    {{-- Inline (not inline-block) so a wrapped title gets a swoosh under each line. --}}
+                    {{-- Inline (not inline-block) so a wrapped title gets a swoosh under each line; 1.15 leading keeps the first swoosh clear of the next line's caps. --}}
                     <span class="underline-swoosh">{{ $category->name }}</span>
                 @else
                     {{ $category->name }}
@@ -114,11 +114,22 @@
             @endif
         </ul>
 
+        {{--
+            min-h-11 gives the lone link a 44px touch target; the underline stays on the text.
+            When every piece is already shown, phones still get a way into the category
+            (the dark fill tile that links there is hidden below md).
+        --}}
         @if ($total > $count)
-            {{-- min-h-11 gives the lone link a 44px touch target; the underline stays on the text. --}}
             <p class="mt-5 text-center lg:mt-6">
                 <a href="{{ route('categories.show', $category) }}" class="link-arrow min-h-11">
                     View all {{ $total }} {{ $category->name }}
+                    <x-lx-icon name="arrow-right" class="size-4" />
+                </a>
+            </p>
+        @else
+            <p class="mt-5 text-center md:hidden">
+                <a href="{{ route('categories.show', $category) }}" class="link-arrow min-h-11">
+                    Shop {{ $category->name }}
                     <x-lx-icon name="arrow-right" class="size-4" />
                 </a>
             </p>

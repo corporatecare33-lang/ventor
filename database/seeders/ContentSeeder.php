@@ -78,7 +78,7 @@ class ContentSeeder extends Seeder
             ]],
             // One block per featured category; this title and subtitle head the accessories carousel at the end.
             'collections' => ['Smart Additions', 'Key holders, trackers and desk pieces that work alongside your wallet.', []],
-            'comparison' => ['Smart vs Classic', 'Both block RFID skimming and carry your everyday cards. Here is how they differ.', []],
+            'comparison' => ['LeatherX Tap vs Classic', 'Both block RFID skimming and carry your everyday cards. Here is how they differ.', []],
             'engraving' => ['Laser engraving, approved by you first', 'Add a name, initials, a short line or your company logo to any piece marked “Engravable”.', [
                 'items' => [
                     ['title' => 'Choose an engravable piece', 'icon' => 'leather', 'text' => 'Tick “Add laser engraving” on the product page.'],

@@ -22,6 +22,10 @@
         ! empty($engraving['pieces']) ? ['value' => $engraving['pieces'], 'label' => 'Engravable pieces'] : null,
         ['value' => '2–3', 'suffix' => 'days', 'label' => 'Extra making time'],
     ]));
+
+    // On tablets the header stacks above the stats, so a full set of four sits in one row (md) instead of 2x2,
+    // then returns to 2x2 beside the header at lg. Other counts keep 2x2, where an odd last box spans the row.
+    $statColumns = count($stats) === 4 ? 'md:grid-cols-4 lg:grid-cols-2' : '';
 @endphp
 <section class="bg-white py-10 sm:py-12 lg:py-14" aria-labelledby="engraving-title">
     <div class="container-wide">
@@ -37,7 +41,7 @@
                         @endif
                     </div>
 
-                    <dl class="grid grid-cols-2 gap-3">
+                    <dl class="grid grid-cols-2 gap-3 {{ $statColumns }}">
                         @foreach ($stats as $stat)
                             {{-- Label (dt) comes first in the markup for screen readers but sits under the figure visually.
                                  An odd last box spans both columns so the grid never shows a hole.

@@ -205,11 +205,13 @@
     .btn-secondary { @apply btn border border-line-strong bg-transparent text-ink-950 hover:border-ink-950; }
     .btn-inverse { @apply btn bg-paper text-ink-950 hover:bg-white; }
     .btn-ghost-inverse { @apply btn border border-white/30 text-white hover:border-white; }
-    .btn-sm { @apply min-h-10 px-4 text-[13px]; }
 
     /* Hero / campaign buttons: pill shape, small caps label. Used only on dark photography. */
     .btn-brass { @apply btn rounded-full bg-brass-300 px-7 text-[12px] font-semibold tracking-[0.12em] text-ink-950 uppercase hover:bg-paper; }
     .btn-outline-inverse { @apply btn rounded-full border border-white/35 px-6 text-[13px] font-semibold text-white hover:border-white hover:bg-white/10; }
+
+    /* Size modifier — defined after every button style so it wins in the cascade */
+    .btn-sm { @apply min-h-10 px-4 text-[13px]; }
     .pill-label {
         @apply inline-flex items-center gap-2 rounded-full border border-white/25 bg-ink-950/40 px-3.5 py-1.5 text-[10.5px] font-semibold tracking-[0.18em] text-white/90 uppercase;
     }

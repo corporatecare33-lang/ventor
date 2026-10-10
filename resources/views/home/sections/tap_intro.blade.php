@@ -9,8 +9,8 @@
     {{-- Compact Ventro-style band; the bottom padding stays short because the fade band below adds the gap. --}}
     <div class="container-wide pt-14 pb-8 text-center lg:pt-16 lg:pb-10">
         <div class="reveal mx-auto max-w-2xl">
-            {{-- "How it works" rather than the product name, which the hero directly above already shows. --}}
-            <p class="pill-label border-brass-300/40 text-brass-300"><span class="size-1.5 rounded-full bg-brass-300" aria-hidden="true"></span>How it works</p>
+            {{-- A short label rather than the product name, which the hero directly above already shows. --}}
+            <p class="pill-label border-brass-300/40 text-brass-300"><span class="size-1.5 rounded-full bg-brass-300" aria-hidden="true"></span>Tap to share</p>
             <h2 id="tap-title" class="mt-4 font-sans text-[clamp(1.625rem,1.3rem+1.2vw,2.25rem)] leading-tight font-bold tracking-[-0.025em] text-balance text-white">{{ $section->title }}</h2>
             @if ($section->subtitle)
                 <p class="mx-auto mt-3 max-w-lg text-[15px] leading-relaxed text-pretty text-white/60">{{ $section->subtitle }}</p>

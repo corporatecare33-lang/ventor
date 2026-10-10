@@ -79,11 +79,15 @@
                     </table>
 
                     @if ($shared->isNotEmpty())
-                        {{-- Items are inline-blocks so each one wraps as a unit; the dots are visual, commas are for screen readers. --}}
+                        {{--
+                            Each item is an inline-block that carries its own separator, so an item and its
+                            dot wrap as one unit (a dot never starts a line). Dots are visual; commas are for
+                            screen readers.
+                        --}}
                         <p class="border-t border-line px-4 py-3 text-center text-[12px] leading-relaxed text-ink-600">
                             <span class="{{ $caps }} mb-1 block text-ink-500">Included in both<span class="sr-only">:</span></span>
                             @foreach ($shared as $row)
-                                <span class="inline-block">{{ $row['values'][0] === 'Yes' ? $row['label'] : $row['label'].': '.$row['values'][0] }}</span>@if (! $loop->last)<span class="sr-only">,</span><span class="pr-1 pl-1.5 text-ink-500" aria-hidden="true">·</span>@endif
+                                <span class="inline-block">{{ $row['values'][0] === 'Yes' ? $row['label'] : $row['label'].': '.$row['values'][0] }}@if (! $loop->last)<span class="sr-only">,</span><span class="pr-1 pl-1.5 text-ink-500" aria-hidden="true">·</span>@endif</span>
                             @endforeach
                         </p>
                     @endif

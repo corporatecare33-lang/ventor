@@ -25,7 +25,7 @@
 {{-- Service information: delivery, payment and exchanges — all read from admin settings --}}
 <section aria-labelledby="service-info" class="border-t border-line bg-paper">
     <h2 id="service-info" class="sr-only">Delivery, payment and exchanges</h2>
-    <div class="container-site grid gap-10 py-12 md:grid-cols-3 md:gap-8 lg:gap-12 lg:py-14">
+    <div class="container-wide grid gap-8 py-8 md:grid-cols-3 lg:gap-12 lg:py-10">
         @if ($zones->isNotEmpty())
             <div>
                 <h3 class="flex items-center gap-3 text-sm font-semibold tracking-normal text-ink-950">
@@ -77,13 +77,14 @@
 </section>
 
 <footer class="bg-ink-950 text-white/75">
-    <div class="container-site grid gap-12 py-14 lg:grid-cols-12 lg:gap-8 lg:py-20">
-        <div class="lg:col-span-4">
+    {{-- Same frame as the header; the brand column sits beside the links from lg, above them below lg --}}
+    <div class="container-wide grid gap-8 py-10 lg:grid-cols-12 lg:gap-12 lg:py-16">
+        <div class="lg:col-span-3 xl:col-span-4">
             <a href="{{ route('home') }}" class="inline-block">
                 <x-logo inverse height="h-12" />
             </a>
             @if ($about = setting('footer_about'))
-                <p class="mt-5 max-w-sm text-sm leading-relaxed wrap-break-word text-white/65">{{ $about }}</p>
+                <p class="mt-4 max-w-sm text-sm leading-relaxed wrap-break-word text-white/65">{{ $about }}</p>
             @endif
             @if ($contact)
                 {{-- Rows are 44px tall below lg (links are tap targets); the plain-text rows match that rhythm with py-3 --}}
@@ -117,14 +118,18 @@
             @endif
         </div>
 
-        <nav class="grid grid-cols-2 gap-x-6 gap-y-7 wrap-break-word sm:grid-cols-3 lg:col-span-7 lg:col-start-6" aria-label="Footer">
-            <div>
+        {{--
+            Four equal tracks from md (two on phones). The long Shop list takes two tracks and flows into two columns
+            whose gap matches the grid gap, so all five link columns line up. On phones it is a 2-up grid instead.
+        --}}
+        <nav class="grid grid-cols-2 gap-x-6 gap-y-6 wrap-break-word md:grid-cols-4 lg:col-span-9 lg:gap-x-8 xl:col-span-8" aria-label="Footer">
+            <div class="col-span-2">
                 <h2 class="text-[11px] font-semibold tracking-[0.16em] text-white/50 uppercase">Shop</h2>
-                <ul class="mt-2 text-sm lg:mt-5 lg:space-y-3">
-                    <li><a href="{{ route('shop') }}" class="{{ $footerLink }}">All products</a></li>
-                    <li><a href="{{ route('shop', ['sort' => 'popular']) }}" class="{{ $footerLink }}">Best sellers</a></li>
+                <ul class="mt-2 grid grid-cols-2 gap-x-6 text-sm md:block md:columns-2 lg:mt-5 lg:gap-x-8 lg:space-y-3">
+                    <li class="break-inside-avoid"><a href="{{ route('shop') }}" class="{{ $footerLink }}">All products</a></li>
+                    <li class="break-inside-avoid"><a href="{{ route('shop', ['sort' => 'popular']) }}" class="{{ $footerLink }}">Best sellers</a></li>
                     @foreach ($categories as $category)
-                        <li><a href="{{ route('categories.show', $category) }}" class="{{ $footerLink }}">{{ $category->name }}</a></li>
+                        <li class="break-inside-avoid"><a href="{{ route('categories.show', $category) }}" class="{{ $footerLink }}">{{ $category->name }}</a></li>
                     @endforeach
                 </ul>
             </div>
@@ -152,7 +157,7 @@
     </div>
 
     <div id="footer-bottom" class="border-t border-white/10">
-        <div class="container-site">
+        <div class="container-wide">
             {{--
                 Right padding keeps the legal links clear of the fixed WhatsApp button. Below lg the links are 44px
                 touch targets, so the bar's own padding shrinks to keep the same visual spacing.
@@ -169,19 +174,27 @@
         </div>
     </div>
 
-    {{-- Floating controls live inside the footer landmark so no page content sits outside a landmark --}}
+    {{--
+        Floating controls live inside the footer landmark so no page content sits outside a landmark. They float over
+        any section, so they override the footer's brass focus ring (too faint on white) with a ring drawn on their own
+        surface: leather on the white pill, white inset on the green WhatsApp button.
+    --}}
     @if ($showBestSellers)
         {{--
             Floating "Shop best sellers" shortcut (Ventro-style). Appears after 600px of scrolling, steps aside once the
             footer's legal bar is on screen so it never covers those links, and remembers a dismissal per browser.
+            On phones it also tucks away while the visitor scrolls down and returns on any scroll up.
             With a WhatsApp button it sits bottom-left on small screens and left of the button on large ones.
         --}}
         <div x-data="{
                  shown: false,
                  dismissed: false,
                  frame: null,
+                 lastY: 0,
+                 scrollingDown: false,
                  init() {
                      try { this.dismissed = localStorage.getItem('lx-bestsellers-dismissed') === '1' } catch (e) {}
+                     this.lastY = Math.max(0, window.scrollY)
                      this.update()
                  },
                  {{-- One check per animation frame: unlike .throttle, the final scroll position is never skipped --}}
@@ -190,9 +203,19 @@
                      this.frame = requestAnimationFrame(() => { this.frame = null; this.update() })
                  },
                  update() {
+                     const y = Math.max(0, window.scrollY)
+                     {{-- An 8px dead zone stops tiny scroll jitter (and iOS bounce) from flickering the pill --}}
+                     if (Math.abs(y - this.lastY) > 8) {
+                         this.scrollingDown = y > this.lastY
+                         this.lastY = y
+                     }
+                     {{-- Phones only, and never while the pill holds keyboard focus --}}
+                     const tucked = this.scrollingDown
+                         && window.matchMedia('(max-width: 639px)').matches
+                         && ! this.$root.contains(document.activeElement)
                      const bar = document.getElementById('footer-bottom')
                      const atFooter = bar ? bar.getBoundingClientRect().top < window.innerHeight : false
-                     this.shown = ! this.dismissed && window.scrollY > 600 && ! atFooter
+                     this.shown = ! this.dismissed && y > 600 && ! atFooter && ! tucked
                  },
                  dismiss() {
                      this.dismissed = true
@@ -204,9 +227,9 @@
              x-cloak x-show="shown"
              x-transition:enter="transition duration-300 ease-out-quart" x-transition:enter-start="translate-y-3 opacity-0" x-transition:enter-end="translate-y-0 opacity-100"
              x-transition:leave="transition duration-200 ease-out-quart" x-transition:leave-start="translate-y-0 opacity-100" x-transition:leave-end="translate-y-3 opacity-0"
-             class="fixed bottom-4 z-30 print:hidden lg:bottom-6 {{ $wa ? 'left-4 lg:right-24 lg:left-auto' : 'right-4 lg:right-6' }}">
+             class="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 print:hidden sm:bottom-4 lg:bottom-6 {{ $wa ? 'left-4 lg:right-24 lg:left-auto' : 'right-4 lg:right-6' }}">
             <a href="{{ route('shop', ['sort' => 'popular']) }}"
-               class="group flex items-center gap-3 rounded-full bg-white py-1.5 pr-10 pl-1.5 text-ink-950 shadow-pop ring-1 ring-line transition hover:ring-line-strong">
+               class="group flex items-center gap-3 rounded-full bg-white py-1.5 pr-10 pl-1.5 text-ink-950 shadow-pop ring-1 ring-line transition hover:ring-line-strong focus-visible:outline-leather-700 focus-visible:-outline-offset-4">
                 <span class="grid size-11 shrink-0 place-items-center rounded-full bg-ink-950 text-white transition-transform group-hover:scale-105">
                     <x-lx-icon name="sparkles" class="size-5" />
                 </span>
@@ -214,7 +237,7 @@
             </a>
             {{-- Sibling of the link (never nested in it); the ::before pad gives a 44px tap area --}}
             <button type="button" @click="dismiss()" aria-label="Hide best sellers shortcut"
-                    class="absolute top-1/2 right-1.5 grid size-8 -translate-y-1/2 place-items-center rounded-full text-ink-500 transition-colors before:absolute before:-inset-1.5 hover:bg-paper hover:text-ink-950">
+                    class="absolute top-1/2 right-1.5 grid size-8 -translate-y-1/2 place-items-center rounded-full text-ink-500 transition-colors before:absolute before:-inset-1.5 hover:bg-paper hover:text-ink-950 focus-visible:outline-leather-700">
                 <x-lx-icon name="x" class="size-4" />
             </button>
         </div>
@@ -222,7 +245,7 @@
 
     @if ($wa)
         <a href="https://wa.me/{{ preg_replace('/\D/', '', $wa) }}" target="_blank" rel="noopener"
-           class="fixed right-4 bottom-20 z-30 inline-flex size-12 items-center justify-center rounded-full bg-[#1d7a46] text-white shadow-pop transition-transform hover:scale-105 print:hidden lg:bottom-6">
+           class="fixed right-4 bottom-20 z-30 inline-flex size-12 items-center justify-center rounded-full bg-[#1d7a46] text-white shadow-pop transition-transform hover:scale-105 focus-visible:outline-white focus-visible:-outline-offset-4 print:hidden lg:bottom-6">
             <x-lx-icon name="chat" class="size-6" /><span class="sr-only">Chat with us on WhatsApp (opens in a new tab)</span>
         </a>
     @endif
