@@ -11,6 +11,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -58,6 +59,7 @@ class HomeSectionResource extends Resource
                         TextInput::make('meta')->label('Small label / value')->maxLength(60),
                         Textarea::make('text')->rows(2)->maxLength(400)->columnSpanFull(),
                     ]),
+                TagsInput::make('content.points')->label('Short points')->helperText('Shown as a row of check marks, e.g. “No app needed”.')->columnSpanFull(),
                 TextInput::make('content.button_text')->maxLength(40),
                 TextInput::make('content.button_link')->maxLength(255),
             ]),

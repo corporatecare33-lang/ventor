@@ -49,7 +49,8 @@ class BannerResource extends Resource
         return $schema->columns(2)->components([
             Select::make('position')->options(BannerPosition::class)->required()->default(BannerPosition::Hero)->live(),
             TextInput::make('eyebrow')->label('Small label above title')->maxLength(80),
-            TextInput::make('title')->required()->maxLength(255)->columnSpanFull(),
+            TextInput::make('title')->required()->maxLength(255)->columnSpanFull()
+                ->helperText('Hero slides: text after a "|" goes on a second line in brass, e.g. "Full-grain leather,|made smarter."'),
             Textarea::make('subtitle')->maxLength(500)->rows(2)->columnSpanFull(),
             TextInput::make('button_text')->maxLength(40),
             TextInput::make('button_link')->maxLength(255)->placeholder('/shop'),

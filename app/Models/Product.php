@@ -103,7 +103,7 @@ class Product extends Model implements HasMedia
         return $query->select([
             'id', 'category_id', 'name', 'slug', 'sku', 'short_description', 'regular_price', 'sale_price',
             'stock_quantity', 'status', 'rating_avg', 'reviews_count', 'rfid_protection', 'nfc_enabled',
-            'warranty_months', 'card_capacity', 'engraving_available', 'leather_type', 'is_featured', 'sold_count',
+            'warranty_months', 'card_capacity', 'cash_capacity', 'engraving_available', 'leather_type', 'is_featured', 'sold_count',
         ])->with([
             'category:id,name,slug',
             'activeVariants:id,product_id,color_id,stock_quantity',
@@ -197,6 +197,26 @@ class Product extends Model implements HasMedia
             $this->card_capacity ? $this->card_capacity.' cards' : null,
             $this->engraving_available ? 'Engravable' : null,
         ])->filter()->take(3)->implode(' · ');
+    }
+
+    /**
+     * Up to two short feature callouts for product cards, built only from real attributes.
+     *
+     * @return array<int, array{icon: string, title: string, note: string}>
+     */
+    public function cardFeatures(): array
+    {
+        $warranty = $this->warranty_months
+            ? ($this->warranty_months % 12 === 0 ? ($this->warranty_months / 12).'-year warranty' : $this->warranty_months.'-month warranty')
+            : null;
+
+        return collect([
+            $this->leather_type ? ['icon' => 'leather', 'title' => $this->leather_type, 'note' => 'Leather'] : null,
+            $this->nfc_enabled ? ['icon' => 'signal', 'title' => 'LeatherX Tap™', 'note' => 'Tap to share'] : null,
+            $this->rfid_protection ? ['icon' => 'shield', 'title' => 'RFID blocking', 'note' => 'Card protection'] : null,
+            $warranty ? ['icon' => 'badge', 'title' => ucfirst($warranty), 'note' => 'Stitching & hardware'] : null,
+            $this->engraving_available ? ['icon' => 'pen', 'title' => 'Engravable', 'note' => 'Names & logos'] : null,
+        ])->filter()->take(2)->values()->all();
     }
 
     public function thumbUrl(): ?string

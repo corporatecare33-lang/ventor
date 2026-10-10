@@ -13,7 +13,10 @@ Laravel 13 eCommerce (Blade + Livewire 4 storefront, Filament 5 admin). Read `RE
 - Product route key is `slug`; order route key is `order_number`; NFC profile route key is `slug`.
 - Do not add fake integrations: payment/courier/SMS are manual until real credentials exist.
 - Design tokens are in `resources/css/app.css`; use the `ui`, `form` and `product` Blade components instead of
-  ad-hoc markup. Radius: `rounded-xs` (controls) / `rounded-sm` (media). Brass colours only on dark backgrounds.
+  ad-hoc markup. Type: Inter only (bold, tightly tracked headings). Radius: `rounded-xs` (form controls) / `rounded-sm`
+  (small media) / `rounded-card` (product cards, panels) / `rounded-full` (campaign pills). Brass only on dark
+  backgrounds; cognac only for large titles on white. The homepage follows ventro.com.bd's structure with our own facts.
+- Hero slides are Banners (position Hero); a `|` in the title puts the rest on a brass second line.
 - Never invent business facts (contact details, statistics, testimonials). Hide sections when data is missing.
 - Scroll containers that hold `sr-only` text need `relative`, or the hidden text widens the page on mobile.
 

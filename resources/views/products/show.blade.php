@@ -30,7 +30,7 @@
     {{-- Images can be tagged with a colour (media custom property "color"); choosing that colour shows its photo. --}}
     <div class="lg:col-span-7" x-data="{ active: 0, colors: @js($images->map(fn ($m) => $m->getCustomProperty('color'))->values()) }"
          @variant-selected.window="if ($event.detail.productId === {{ $product->id }}) { const i = colors.indexOf($event.detail.color); if (i > -1) active = i }">
-        <div class="relative aspect-[4/5] overflow-hidden rounded-sm bg-paper">
+        <div class="relative aspect-[4/5] overflow-hidden rounded-card bg-paper">
             @forelse ($images as $i => $image)
                 <div x-show="active === {{ $i }}" @if ($i > 0) x-cloak @endif class="size-full">
                     <x-product.media :product="$product" :index="$i" :eager="$i === 0" sizes="(min-width: 1024px) 55vw, 100vw" />
@@ -39,14 +39,14 @@
                 <x-product.media :product="$product" eager />
             @endforelse
             @if ($product->hasDiscount())
-                <span class="absolute top-4 left-4 rounded-xs bg-ink-950 px-2 py-1 text-[11px] font-semibold tracking-wide text-white uppercase">Save {{ $product->discountPercent() }}%</span>
+                <span class="absolute top-4 left-4 rounded-full bg-sale px-2.5 py-1 text-[11px] font-semibold text-white">Save {{ $product->discountPercent() }}%</span>
             @endif
         </div>
         @if ($images->count() > 1)
             <div class="mt-3 flex gap-3" role="group" aria-label="Product images">
                 @foreach ($images as $i => $image)
                     <button type="button" @click="active = {{ $i }}" :aria-pressed="(active === {{ $i }}).toString()"
-                            class="size-20 overflow-hidden rounded-xs ring-offset-2 transition sm:size-24" :class="active === {{ $i }} ? 'ring-2 ring-ink-950' : 'opacity-75 hover:opacity-100'">
+                            class="size-20 overflow-hidden rounded-sm ring-offset-2 transition sm:size-24" :class="active === {{ $i }} ? 'ring-2 ring-ink-950' : 'opacity-75 hover:opacity-100'">
                         <img src="{{ $image->getAvailableUrl(['thumb']) }}" alt="Show image {{ $i + 1 }} of {{ $images->count() }}" class="size-full object-cover" loading="lazy" width="96" height="120">
                     </button>
                 @endforeach

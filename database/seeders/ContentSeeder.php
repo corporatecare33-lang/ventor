@@ -18,40 +18,76 @@ class ContentSeeder extends Seeder
 {
     public function run(): void
     {
-        $hero = Banner::firstOrCreate(['position' => BannerPosition::Hero], [
-            'eyebrow' => 'Wallets · Card holders · Bags · NFC smart wallets',
-            'title' => 'Leather goods for everyday carry, made smarter with LeatherX Tap.',
-            'subtitle' => 'Leather wallets, card holders and bags with RFID-blocking linings — and LeatherX Tap wallets that open your digital contact card on any phone. Engrave a name or logo, and pay cash on delivery anywhere in Bangladesh.',
-            'button_text' => 'Shop the collection',
-            'button_link' => '/shop',
-            'secondary_button_text' => 'How LeatherX Tap works',
-            'secondary_button_link' => '/leatherx-tap',
-            'is_active' => true,
-        ]);
-        $this->attachImage($hero, 'image', 'banners/smart-wallet-warm-light.png', 'Chestnut leather bifold wallet resting on dark leather in warm light', '72% 50%');
-        $this->attachImage($hero, 'mobile_image', 'products/chestnut-leather-smart-bifold-wallet.png', 'Chestnut Smart Bifold Wallet on slate');
+        // Hero slides. In a title, the text after "|" is shown on a second line in brass.
+        $slides = [
+            [
+                'eyebrow' => 'Leather wallets with built-in NFC',
+                'title' => 'Full-grain leather,|made smarter.',
+                'subtitle' => 'Wallets, card holders and bags with RFID-blocking linings — and LeatherX Tap wallets that share your contact card with one tap. Cash on delivery across Bangladesh.',
+                'button_text' => 'Explore collection', 'button_link' => '/shop',
+                'secondary_button_text' => 'What is LeatherX Tap?', 'secondary_button_link' => '/leatherx-tap',
+                'image' => ['banners/smart-wallet-warm-light.png', 'Chestnut leather bifold wallet resting on dark leather in warm light', '72% 50%'],
+                'mobile' => ['products/chestnut-leather-smart-bifold-wallet.png', 'Chestnut Smart Bifold Wallet on slate'],
+            ],
+            [
+                'eyebrow' => 'LeatherX Tap',
+                'title' => 'One tap.|Your contact card, shared.',
+                'subtitle' => 'Hold a LeatherX Tap wallet near a phone and your profile opens in the browser — no app, no battery. Edit your details from your account at any time.',
+                'button_text' => 'Shop Tap wallets', 'button_link' => '/category/smart-wallets',
+                'secondary_button_text' => 'How it works', 'secondary_button_link' => '/leatherx-tap',
+                'image' => ['banners/nfc-wallet-smartphone.png', 'LeatherX Tap wallet next to a smartphone receiving the contact profile', '62% 50%'],
+            ],
+            [
+                'eyebrow' => 'Laser engraving',
+                'title' => 'Your name,|engraved in leather.',
+                'subtitle' => 'Add a name, initials, a short line or a company logo to any piece marked “Engravable”. We check every design with you before it is engraved.',
+                'button_text' => 'Personalise a piece', 'button_link' => '/engraving',
+                'secondary_button_text' => 'Shop the collection', 'secondary_button_link' => '/shop',
+                'image' => ['banners/laser-engraving-wallet.png', 'A laser engraving a monogram onto a tan leather wallet', '60% 55%'],
+            ],
+            [
+                'eyebrow' => 'Corporate gifting',
+                'title' => 'Gifts your team|will actually use.',
+                'subtitle' => 'Boxed leather sets for employees and clients, with optional logo engraving and one quotation for the whole order.',
+                'button_text' => 'Request a quote', 'button_link' => '/corporate',
+                'secondary_button_text' => 'View gift sets', 'secondary_button_link' => '/category/corporate-gifts',
+                'image' => ['banners/executive-gift-set.png', 'Executive gift set of a black leather briefcase, wallet and card holder on an office desk', '65% 60%'],
+            ],
+        ];
+        foreach ($slides as $order => $slide) {
+            $banner = Banner::updateOrCreate(
+                ['position' => BannerPosition::Hero, 'sort_order' => $order],
+                [...collect($slide)->except(['image', 'mobile'])->all(), 'is_active' => true],
+            );
+            $this->attachImage($banner, 'image', ...$slide['image']);
+            if (isset($slide['mobile'])) {
+                $this->attachImage($banner, 'mobile_image', ...$slide['mobile']);
+            }
+        }
 
         $sections = [
-            'categories' => ['Shop by category', 'Wallets, card holders, bags and travel pieces — each with the colours and prices you see at checkout.', []],
-            'featured' => ['Featured pieces', 'A short edit from across the collection to start with.', []],
-            'tap_intro' => ['Your contact card, built into your wallet', 'LeatherX Tap wallets carry a small passive NFC chip. Hold the wallet near a phone and your contact profile opens in the browser — no app and no battery.', [
+            'tap_intro' => ['What is LeatherX Tap™?', 'A small passive NFC chip inside your wallet that opens your digital contact card on any phone — no app and no battery.', [
                 'items' => [
-                    ['title' => 'Order a LeatherX Tap wallet or card', 'text' => 'Every Tap product includes a personal profile at no extra cost.'],
-                    ['title' => 'Set up your profile in your account', 'text' => 'Add your phone, email, company, website and social links. Edit them whenever you like.'],
-                    ['title' => 'Tap to share', 'text' => 'The other person sees your profile and can save you as a contact. A QR code works for phones without NFC.'],
+                    ['title' => 'Tap your wallet', 'icon' => 'signal', 'text' => 'Hold your LeatherX Tap wallet near an NFC-enabled phone — most Android phones and recent iPhones.'],
+                    ['title' => 'Your profile opens', 'icon' => 'phone', 'text' => 'Your name, phone, WhatsApp, email, company and social links open in the browser.'],
+                    ['title' => 'Saved in one tap', 'icon' => 'check', 'text' => 'They save you as a contact straight away. A QR code works for phones without NFC.'],
                 ],
-                'button_text' => 'How LeatherX Tap works',
+                'points' => ['No app needed', 'No battery', 'Edit your profile any time', 'QR code backup'],
+                'button_text' => 'Learn more about LeatherX Tap',
                 'button_link' => '/leatherx-tap',
             ]],
-            'comparison' => ['Compare our most popular wallets', 'Capacity, protection and warranty side by side.', []],
+            // One block per featured category; this title and subtitle head the accessories carousel at the end.
+            'collections' => ['Smart additions', 'Key holders, trackers and desk pieces that work alongside your wallet.', []],
+            'comparison' => ['Smart or classic?', 'Both are leather bifolds with room for your everyday cards. Here is how they differ.', []],
             'engraving' => ['Laser engraving, checked before it is cut', 'Add a name, initials, a short line or your company logo to any piece marked “Engravable”.', [
                 'items' => [
-                    ['title' => 'Choose an engravable piece', 'text' => 'Tick “Add laser engraving” on the product page.'],
-                    ['title' => 'Enter your text and style', 'text' => 'Pick one of four styles and where it should sit. You see a preview before adding it to the cart.'],
-                    ['title' => 'We confirm the details', 'text' => 'Our team checks spelling and placement with you before engraving — personalised items cannot be undone.'],
-                    ['title' => 'Delivered ready to give', 'text' => 'Engraved orders need two to three extra working days.'],
+                    ['title' => 'Choose an engravable piece', 'icon' => 'leather', 'text' => 'Tick “Add laser engraving” on the product page.'],
+                    ['title' => 'Enter your text and style', 'icon' => 'pen', 'text' => 'Pick one of four styles and where it should sit, with a live preview.'],
+                    ['title' => 'We confirm the details', 'icon' => 'check', 'text' => 'We check spelling and placement with you before engraving.'],
+                    ['title' => 'Delivered ready to give', 'icon' => 'gift', 'text' => 'Engraved orders need two to three extra working days.'],
                 ],
-                'button_text' => 'Personalise a product',
+                'points' => ['Names & initials', 'Short messages', 'Company logos', 'Proof before engraving'],
+                'button_text' => 'Start your engraving',
                 'button_link' => '/engraving',
             ]],
             'corporate' => ['Corporate gifts your team will actually use', 'Leather wallets, card holders and gift sets for employees, clients and events — engraved with your logo and invoiced as one order.', [

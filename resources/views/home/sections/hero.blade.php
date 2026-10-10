@@ -1,60 +1,137 @@
 @php
-    $desktop = $hero?->getFirstMedia('image');
-    $mobile = $hero?->getFirstMedia('mobile_image') ?? $desktop;
+    // Slides come from Admin → Banners (position "Hero"). Only banners with a photograph are shown as slides.
+    // In the title, text after a "|" is set on its own line in brass, e.g. "Full-grain leather,|made smarter."
+    $slides = $heroes->filter(fn ($banner) => $banner->hasMedia('image'))->values();
+    $trust = collect(['warranty', 'nfc', 'engraving', 'cod'])->map(fn ($key) => $facts[$key] ?? null)->filter()->take(3)->values();
+    $splitTitle = fn (string $title) => array_map('trim', explode('|', $title, 2));
 @endphp
-@if ($desktop)
-    {{-- Photographic hero: image on top for phones, full-bleed with text over the dark side on large screens --}}
-    <section class="relative isolate bg-ink-950 text-white" aria-labelledby="hero-title">
-        <picture class="block aspect-[4/3] sm:aspect-[16/9] lg:absolute lg:inset-0 lg:-z-10 lg:aspect-auto">
-            <source media="(max-width: 639px)" srcset="{{ $mobile->getUrl('mobile') }} 800w" sizes="100vw">
-            <x-ui.picture :media="$desktop" eager sizes="100vw" :alt="$desktop->getCustomProperty('alt', '')" width="1920" height="720" />
-        </picture>
-        <div class="absolute inset-0 -z-10 hidden bg-[linear-gradient(90deg,var(--color-ink-950)_0%,rgb(22_19_15/0.86)_38%,rgb(22_19_15/0.15)_72%,transparent_100%)] lg:block"></div>
 
-        <div class="container-site grid py-10 sm:py-14 lg:min-h-[min(40rem,78vh)] lg:items-center lg:py-20">
-            <div class="max-w-xl">
-                <p class="eyebrow-inverse">{{ $hero->eyebrow }}</p>
-                <h1 id="hero-title" class="mt-4 text-[clamp(2.125rem,1.6rem+2.2vw,3.5rem)] leading-[1.06] text-white">{{ $hero->title }}</h1>
-                @if ($hero->subtitle)
-                    <p class="mt-5 text-[1.0625rem] leading-relaxed text-white/80">{{ $hero->subtitle }}</p>
-                @endif
-                <div class="mt-8 flex flex-wrap gap-3">
-                    <a href="{{ $hero->button_link ?: route('shop') }}" class="btn-inverse">{{ $hero->button_text ?: 'Shop the collection' }}</a>
-                    @if ($hero->secondary_button_text)
-                        <a href="{{ $hero->secondary_button_link }}" class="btn-ghost-inverse">{{ $hero->secondary_button_text }}</a>
-                    @endif
+@if ($slides->isNotEmpty())
+    <section class="relative isolate overflow-hidden bg-ink-950 text-white" aria-roledescription="carousel" aria-label="Featured collections"
+             x-data="{
+                i: 0,
+                n: {{ $slides->count() }},
+                playing: {{ $slides->count() > 1 ? 'true' : 'false' }},
+                timer: null,
+                start() { this.stop(); if (this.playing && this.n > 1) this.timer = setInterval(() => this.go(this.i + 1), 7000) },
+                stop() { clearInterval(this.timer) },
+                go(k) { this.i = (k + this.n) % this.n },
+                toggle() { this.playing = ! this.playing; this.playing ? this.start() : this.stop() },
+             }"
+             x-init="if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) playing = false; start()"
+             @mouseenter="stop()" @mouseleave="start()" @focusin="stop()" @focusout="if (! $el.contains($event.relatedTarget)) start()"
+             @keydown.arrow-right="go(i + 1)" @keydown.arrow-left="go(i - 1)">
+
+        {{-- All slides share one grid cell, so the section is as tall as the tallest slide --}}
+        <div class="grid">
+            @foreach ($slides as $index => $slide)
+                @php
+                    [$line1, $line2] = array_pad($splitTitle($slide->title), 2, null);
+                    $image = $slide->getFirstMedia('image');
+                    $mobile = $slide->getFirstMedia('mobile_image');
+                @endphp
+                <div class="relative isolate col-start-1 row-start-1 grid min-h-[36rem] transition-opacity duration-700 ease-out-quart sm:min-h-[38rem] lg:min-h-[min(46rem,calc(100svh-9rem))] {{ $index === 0 ? 'opacity-100' : 'pointer-events-none opacity-0' }}"
+                     :class="i === {{ $index }} ? 'opacity-100' : 'pointer-events-none opacity-0'"
+                     :inert="i !== {{ $index }}" :aria-hidden="(i !== {{ $index }}).toString()"
+                     @if ($index > 0) inert aria-hidden="true" @endif
+                     role="group" aria-roledescription="slide" aria-label="{{ $index + 1 }} of {{ $slides->count() }}">
+                    <picture class="absolute inset-0 -z-10">
+                        @if ($mobile)
+                            <source media="(max-width: 639px)" srcset="{{ $mobile->getUrl('mobile') }} 800w" sizes="100vw">
+                        @endif
+                        <x-ui.picture :media="$image" :eager="$index === 0" sizes="100vw" width="1920" height="1080"
+                                      class="size-full scale-[1.02] object-cover transition-transform duration-[7000ms] ease-out"
+                                      ::class="i === {{ $index }} && 'scale-[1.06]'" />
+                    </picture>
+                    {{-- Shade the text side only; keeps the product readable on the right --}}
+                    <div class="absolute inset-0 -z-10 bg-[linear-gradient(to_top,rgb(22_19_15/0.94)_0%,rgb(22_19_15/0.55)_45%,rgb(22_19_15/0.15)_100%)] lg:bg-[linear-gradient(90deg,rgb(22_19_15/0.92)_0%,rgb(22_19_15/0.6)_42%,rgb(22_19_15/0.05)_75%)]"></div>
+
+                    <div class="container-site flex items-end pt-40 pb-24 sm:pt-48 sm:pb-28 lg:items-center lg:py-24">
+                        <div class="max-w-[38rem]">
+                            @if ($slide->eyebrow)
+                                <p class="pill-label"><span class="size-1.5 rounded-full bg-brass-300" aria-hidden="true"></span>{{ $slide->eyebrow }}</p>
+                            @endif
+                            <{{ $index === 0 ? 'h1' : 'h2' }} @if ($index === 0) id="hero-title" @endif
+                                class="mt-5 font-sans text-[clamp(2.375rem,1.5rem+3.6vw,4.5rem)] leading-[1.02] font-bold tracking-[-0.035em] text-white">
+                                {{ $line1 }}
+                                @if ($line2)<span class="block text-brass-300">{{ $line2 }}</span>@endif
+                            </{{ $index === 0 ? 'h1' : 'h2' }}>
+                            @if ($slide->subtitle)
+                                <p class="mt-5 max-w-[34rem] text-[15px] leading-relaxed text-white/75 sm:text-base">{{ $slide->subtitle }}</p>
+                            @endif
+                            <div class="mt-8 flex flex-wrap items-center gap-3">
+                                <a href="{{ $slide->button_link ?: route('shop') }}" class="btn-brass">
+                                    {{ $slide->button_text ?: 'Explore collection' }} <x-lx-icon name="arrow-right" class="size-4" />
+                                </a>
+                                @if ($slide->secondary_button_text && $slide->secondary_button_link)
+                                    <a href="{{ $slide->secondary_button_link }}" class="btn-outline-inverse">{{ $slide->secondary_button_text }}</a>
+                                @endif
+                            </div>
+                            @if ($trust->isNotEmpty())
+                                <ul class="mt-9 flex flex-wrap gap-x-6 gap-y-2.5 text-[11px] font-semibold tracking-[0.12em] text-white/60 uppercase">
+                                    @foreach ($trust as $fact)
+                                        <li class="flex items-center gap-2">
+                                            <x-lx-icon :name="$fact['icon']" class="size-4 text-brass-300" />
+                                            {{ $fact['value'] }}
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        @if ($slides->count() > 1)
+            <div class="absolute inset-x-0 bottom-0 z-10">
+                <div class="container-site flex items-center justify-between gap-4 pb-6 sm:pb-8">
+                    <div class="flex items-center gap-2">
+                        @foreach ($slides as $index => $slide)
+                            <button type="button" @click="go({{ $index }})" class="group flex h-11 items-center"
+                                    :aria-current="(i === {{ $index }}).toString()" aria-label="Show slide {{ $index + 1 }}: {{ str_replace('|', ' ', $slide->title) }}">
+                                <span class="block h-0.5 w-8 overflow-hidden rounded-full bg-white/25 transition-[width] duration-300 sm:w-12" :class="i === {{ $index }} && 'w-14 sm:w-20'">
+                                    <span class="block h-full bg-brass-300 transition-transform duration-300" :class="i === {{ $index }} ? 'translate-x-0' : '-translate-x-full'"></span>
+                                </span>
+                            </button>
+                        @endforeach
+                        <span class="ml-2 text-[11px] font-semibold tracking-[0.14em] text-white/60 tabular-nums" aria-hidden="true">
+                            <span x-text="String(i + 1).padStart(2, '0')">01</span> / {{ str_pad($slides->count(), 2, '0', STR_PAD_LEFT) }}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" @click="toggle()" class="inline-flex size-11 items-center justify-center rounded-full border border-white/25 text-white hover:border-white"
+                                :aria-label="playing ? 'Pause slideshow' : 'Play slideshow'">
+                            <x-lx-icon name="pause" class="size-4" x-show="playing" />
+                            <x-lx-icon name="play" class="size-4" x-show="! playing" x-cloak />
+                        </button>
+                        <button type="button" @click="go(i - 1)" class="hidden size-11 items-center justify-center rounded-full border border-white/25 text-white hover:border-white sm:inline-flex" aria-label="Previous slide">
+                            <x-lx-icon name="chevron-left" class="size-4" />
+                        </button>
+                        <button type="button" @click="go(i + 1)" class="hidden size-11 items-center justify-center rounded-full border border-white/25 text-white hover:border-white sm:inline-flex" aria-label="Next slide">
+                            <x-lx-icon name="chevron-right" class="size-4" />
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+        @endif
     </section>
 @else
     {{-- Typographic hero used until a banner photograph is uploaded --}}
-    <section class="bg-paper" aria-labelledby="hero-title">
-        <div class="container-site py-14 sm:py-20">
-            <div class="max-w-3xl">
-                <p class="eyebrow">{{ $hero->eyebrow ?? 'Wallets · Card holders · Bags · NFC smart wallets' }}</p>
-                <h1 id="hero-title" class="mt-4 text-[clamp(2.125rem,1.6rem+2.2vw,3.5rem)] leading-[1.06] text-ink-950">{{ $hero->title ?? 'Leather goods for everyday carry, made smarter with LeatherX Tap.' }}</h1>
-                @if ($hero?->subtitle)<p class="lead mt-5 max-w-xl">{{ $hero->subtitle }}</p>@endif
+    @php [$line1, $line2] = array_pad($splitTitle($hero->title ?? 'Leather goods for everyday carry,|made smarter.'), 2, null); @endphp
+    <section class="bg-ink-950 text-white" aria-labelledby="hero-title">
+        <div class="container-site py-20 sm:py-28">
+            <div class="max-w-[38rem]">
+                <p class="pill-label"><span class="size-1.5 rounded-full bg-brass-300" aria-hidden="true"></span>{{ $hero->eyebrow ?? 'Wallets · Card holders · Bags' }}</p>
+                <h1 id="hero-title" class="mt-5 font-sans text-[clamp(2.375rem,1.5rem+3.6vw,4.5rem)] leading-[1.02] font-bold tracking-[-0.035em]">
+                    {{ $line1 }} @if ($line2)<span class="block text-brass-300">{{ $line2 }}</span>@endif
+                </h1>
+                @if ($hero?->subtitle)<p class="mt-5 text-base leading-relaxed text-white/75">{{ $hero->subtitle }}</p>@endif
                 <div class="mt-8 flex flex-wrap gap-3">
-                    <a href="{{ $hero->button_link ?? route('shop') }}" class="btn-primary">{{ $hero->button_text ?? 'Shop the collection' }}</a>
-                    @if ($hero?->secondary_button_text)<a href="{{ $hero->secondary_button_link }}" class="btn-secondary">{{ $hero->secondary_button_text }}</a>@endif
+                    <a href="{{ $hero->button_link ?? route('shop') }}" class="btn-brass">{{ $hero->button_text ?? 'Explore collection' }} <x-lx-icon name="arrow-right" class="size-4" /></a>
+                    @if ($hero?->secondary_button_text)<a href="{{ $hero->secondary_button_link }}" class="btn-outline-inverse">{{ $hero->secondary_button_text }}</a>@endif
                 </div>
             </div>
         </div>
-    </section>
-@endif
-
-@if ($facts)
-    {{-- Store facts, all computed from live settings and catalogue data --}}
-    <section aria-label="Delivery, payment, warranty and engraving" class="border-b border-line bg-paper">
-        <dl class="container-site grid grid-cols-2 gap-x-6 gap-y-6 py-7 lg:grid-cols-4">
-            @foreach ($facts as $fact)
-                <div class="lg:border-l lg:border-line-strong lg:pl-6 lg:first:border-l-0 lg:first:pl-0">
-                    <dt class="label-caps text-ink-500">{{ $fact['label'] }}</dt>
-                    <dd class="mt-1.5 text-[15px] font-medium text-ink-950">{{ $fact['value'] }}</dd>
-                    <dd class="mt-0.5 text-[13px] leading-snug text-ink-500">{{ $fact['note'] }}</dd>
-                </div>
-            @endforeach
-        </dl>
     </section>
 @endif

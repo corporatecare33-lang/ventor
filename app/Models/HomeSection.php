@@ -31,10 +31,9 @@ class HomeSection extends Model implements HasMedia
     }
 
     public const KEYS = [
-        'categories' => 'Shop by category',
-        'featured' => 'Featured products',
         'tap_intro' => 'LeatherX Tap explainer',
-        'comparison' => 'Wallet comparison table',
+        'collections' => 'Product collections (one per featured category); title/subtitle head the accessories carousel',
+        'comparison' => 'Collection comparison table (shown after the first collection)',
         'engraving' => 'Laser engraving',
         'corporate' => 'Corporate gifting',
         'reviews' => 'Customer reviews (shown only when approved reviews exist)',

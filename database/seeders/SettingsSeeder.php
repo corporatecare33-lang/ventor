@@ -16,7 +16,10 @@ class SettingsSeeder extends Seeder
             'site_name' => 'LeatherX',
             'site_tagline' => 'Leather goods for everyday carry',
             'footer_about' => 'LeatherX designs leather wallets, card holders, bags and LeatherX Tap NFC wallets, with laser engraving and delivery across Bangladesh.',
-            'announcement_enabled' => false,
+            // Matches the Inside Dhaka free-delivery threshold seeded in StoreSetupSeeder.
+            'announcement_enabled' => true,
+            'announcement_text' => 'Free delivery inside Dhaka on orders over ৳3,000 — cash on delivery across Bangladesh.',
+            'announcement_link' => '/delivery-policy',
             'checkout_note' => 'We call every customer to confirm the order before it is dispatched.',
             'seo_title_suffix' => ' | LeatherX',
             'seo_home_title' => 'LeatherX — Leather Wallets, NFC Smart Wallets & Bags in Bangladesh',
