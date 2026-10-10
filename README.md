@@ -20,6 +20,10 @@ php artisan storage:link
 php artisan serve             # storefront: http://localhost:8000  ·  admin: /admin
 ```
 
+**Windows / XAMPP:** PHP 8.3+ is required (XAMPP 8.2 is too old). Extract the PHP 8.3 zip from
+windows.php.net to `C:\php83`, start MySQL in XAMPP, then double-click `scripts/setup-windows.bat` — it uses
+that PHP, enables the needed extensions and runs every step above.
+
 Run the tests: `php artisan test` (SQLite in-memory, no setup needed).
 
 ## What's inside
