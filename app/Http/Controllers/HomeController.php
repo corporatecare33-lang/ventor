@@ -34,7 +34,7 @@ class HomeController extends Controller
             // Each featured category is a homepage collection: title, feature line and its products.
             $collections = Category::active()->whereNull('parent_id')->where('is_featured', true)
                 ->whereNotIn('slug', [...self::ADDITIONS, self::CORPORATE])->withCount('activeProducts')->orderBy('sort_order')
-                ->get(['id', 'name', 'slug', 'tagline'])
+                ->get(['id', 'name', 'slug', 'tagline', 'description'])
                 ->map(function (Category $category) {
                     $all = Product::visible()->forCard()->where('category_id', $category->id)
                         ->orderByDesc('is_featured')->orderBy('sort_order')->get();

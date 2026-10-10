@@ -97,8 +97,13 @@
                             <p @class([
                                 'mt-2 leading-snug font-bold tracking-tight text-balance',
                                 'text-base' => $fill === 1,
-                                'text-lg lg:text-2xl' => $fill > 1,
+                                'text-lg lg:text-2xl' => $fill === 2,
+                                'text-xl lg:text-3xl' => $fill === 3,
                             ])>{!! $tagline !!}</p>
+                        @endif
+                        {{-- Wide tiles (short collections) carry the category description so they read as an editorial banner, not an empty slab. --}}
+                        @if ($fill > 1 && $category->description)
+                            <p class="mt-3 line-clamp-3 max-w-md text-[15px] leading-relaxed text-white/65">{{ $category->description }}</p>
                         @endif
                         @if ($total)
                             <p class="mt-2 text-sm text-white/60">{{ $total }} {{ str('piece')->plural($total) }}</p>
