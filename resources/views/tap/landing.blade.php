@@ -1,54 +1,70 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-page-header eyebrow="LeatherX Tap" :title="$section->title ?? 'What is LeatherX Tap?'" :subtitle="$section->subtitle ?? null" :crumbs="['LeatherX Tap' => null]">
-        <div class="mt-8 flex flex-wrap gap-3">
-            <a href="#tap-products" class="btn-gold">Shop Tap wallets</a>
-            @auth<a href="{{ route('account.nfc.index') }}" class="btn-outline-light">Manage my profile</a>@endauth
-        </div>
-    </x-page-header>
+<x-ui.page-header eyebrow="LeatherX Tap" title="A contact card built into your wallet"
+    intro="LeatherX Tap wallets carry a small passive NFC chip. Hold the wallet near a phone and your contact profile opens in the browser — no app, no battery."
+    :crumbs="['LeatherX Tap' => null]">
+    <div class="mt-8 flex flex-wrap gap-3">
+        <a href="#tap-products" class="btn-primary">Shop Tap wallets</a>
+        @auth<a href="{{ route('account.nfc.index') }}" class="btn-secondary">Manage my profile</a>@endauth
+    </div>
+</x-ui.page-header>
 
-    <section class="container-lx py-16 sm:py-20">
-        <div class="grid gap-6 md:grid-cols-3">
-            @foreach ($section->content['items'] ?? [] as $item)
-                <div class="card p-7">
-                    <span class="grid size-12 place-items-center rounded-full bg-ink-900 text-gold-400"><x-lx-icon :name="$item['icon'] ?? 'signal'" class="size-6" /></span>
-                    <h2 class="mt-5 font-sans text-base font-semibold">{{ $item['title'] }}</h2>
-                    <p class="mt-2 text-sm leading-6 text-ink-600">{{ $item['text'] ?? '' }}</p>
+<section class="section-y" aria-labelledby="how-title">
+    <div class="container-site grid gap-12 lg:grid-cols-12">
+        <div class="lg:col-span-5">
+            <x-ui.section-heading id="how-title" title="How it works" />
+            <ol class="mt-8 border-t border-line">
+                @foreach ($section->content['items'] ?? [] as $item)
+                    <li class="flex gap-5 border-b border-line py-5">
+                        <span class="font-display text-2xl leading-none text-leather-600" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                        <div>
+                            <h3 class="font-sans text-base font-medium text-ink-950">{{ $item['title'] }}</h3>
+                            @if (! empty($item['text']))<p class="mt-1 text-[15px] leading-relaxed text-ink-600">{{ $item['text'] }}</p>@endif
+                        </div>
+                    </li>
+                @endforeach
+            </ol>
+        </div>
+        @if ($image = $section?->getFirstMedia('image'))
+            <figure class="lg:col-span-6 lg:col-start-7">
+                <div class="aspect-[4/3] overflow-hidden rounded-sm">
+                    <x-ui.picture :media="$image" :conversions="['mobile' => 800, 'desktop' => 1400]" sizes="(min-width: 1024px) 45vw, 100vw" width="1400" height="1050" eager />
+                </div>
+            </figure>
+        @endif
+    </div>
+</section>
+
+<section class="border-y border-line bg-paper" aria-labelledby="know-title">
+    <div class="container-site grid gap-10 py-14 lg:grid-cols-12 lg:py-20">
+        <h2 id="know-title" class="text-h2 text-ink-950 lg:col-span-4">Good to know</h2>
+        <dl class="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:col-span-8">
+            @foreach ([
+                ['Which phones work?', 'NFC-enabled Android phones and recent iPhones read the chip from the lock screen or with the NFC toggle on. Every profile also has a QR code for any phone with a camera.'],
+                ['What is stored on the chip?', 'Only the web address of your profile — no payment or personal data. Your details live in your LeatherX account.'],
+                ['Can I change my details?', 'Yes, at any time from your account. The chip keeps pointing to the same profile, so it never needs re-programming.'],
+                ['Can I turn it off?', 'Pause or delete the profile from your account and the link stops showing your details.'],
+            ] as [$q, $a])
+                <div>
+                    <dt class="font-medium text-ink-950">{{ $q }}</dt>
+                    <dd class="mt-2 text-[15px] leading-relaxed text-ink-600">{{ $a }}</dd>
                 </div>
             @endforeach
-        </div>
+        </dl>
+    </div>
+</section>
 
-        <div class="mt-16 grid items-center gap-10 rounded-3xl bg-cream-50 p-8 sm:p-12 lg:grid-cols-2">
-            <div>
-                <p class="eyebrow">How it works</p>
-                <h2 class="section-title mt-3">From wallet to contact list in one tap</h2>
-                <ol class="mt-8 space-y-5 text-sm text-ink-700">
-                    @foreach (['Order any LeatherX Tap product.', 'Create your digital profile from your account — name, phone, email, company and social links.', 'We link the NFC chip (and a QR code) to your unique profile URL.', 'Tap the wallet on any modern phone: your profile opens and can be saved as a contact.'] as $step)
-                        <li class="flex gap-4"><span class="grid size-8 shrink-0 place-items-center rounded-full bg-ink-900 text-xs font-semibold text-white">{{ $loop->iteration }}</span><span class="pt-1.5">{{ $step }}</span></li>
-                    @endforeach
-                </ol>
-            </div>
-            <div class="rounded-2xl bg-white p-6 text-sm leading-6 text-ink-600">
-                <p class="font-semibold text-ink-950">Good to know</p>
-                <ul class="mt-3 list-disc space-y-1.5 pl-5">
-                    <li>No battery and no app — the chip is passive.</li>
-                    <li>Works with NFC-enabled Android phones and iPhone XS or newer.</li>
-                    <li>Update your details any time; the chip never needs re-programming.</li>
-                    <li>Your profile can be paused from your account.</li>
-                </ul>
+@if ($products->isNotEmpty())
+    <section id="tap-products" class="section-y scroll-mt-24" aria-labelledby="tap-products-title">
+        <div class="container-site">
+            <x-ui.section-heading id="tap-products-title" title="LeatherX Tap wallets" intro="Every Tap product includes a personal contact profile." />
+            <div class="mt-10 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:grid-cols-4">
+                @foreach ($products as $product)
+                    <x-product.card :product="$product" />
+                @endforeach
             </div>
         </div>
     </section>
-
-    @if ($products->isNotEmpty())
-        <section id="tap-products" class="container-lx scroll-mt-24 pb-20">
-            <h2 class="section-title">Shop LeatherX Tap</h2>
-            <div class="mt-8 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-                @foreach ($products as $product)
-                    <x-product-card :product="$product" />
-                @endforeach
-            </div>
-        </section>
-    @endif
+@endif
 @endsection

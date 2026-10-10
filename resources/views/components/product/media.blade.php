@@ -18,6 +18,7 @@
     @endphp
     <img src="{{ $media->getAvailableUrl(['medium', 'thumb']) }}" @if ($srcset) srcset="{{ $srcset }}" sizes="{{ $sizes }}" @endif
          alt="{{ $media->getCustomProperty('alt', $product->name) }}"
+         style="object-position: {{ $media->getCustomProperty('focus', '50% 50%') }}"
          {{ $attributes->merge(['class' => 'size-full object-cover']) }} width="800" height="1000"
          loading="{{ $eager ? 'eager' : 'lazy' }}" decoding="async" @if ($eager) fetchpriority="high" @endif>
 @else

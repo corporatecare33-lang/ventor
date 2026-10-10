@@ -2,29 +2,34 @@
 
 @section('content')
 <article>
-    <header class="container-lx max-w-3xl pt-10 text-center">
-        <x-breadcrumbs :items="['Journal' => route('blog.index'), $post->title => null]" class="flex justify-center" />
-        <p class="eyebrow mt-8">{{ $post->category }}</p>
-        <h1 class="mt-3 font-display text-4xl leading-tight font-semibold sm:text-5xl">{{ $post->title }}</h1>
-        <p class="mt-4 text-xs text-ink-600">{{ $post->published_at->format('d M Y') }} · {{ $post->readingMinutes() }} min read</p>
+    <header class="border-b border-line bg-paper">
+        <div class="container-site pt-6 pb-12 lg:pb-16">
+            <x-ui.breadcrumbs :items="['Journal' => route('blog.index'), $post->title => null]" />
+            <div class="mt-10 max-w-3xl">
+                <p class="eyebrow">{{ $post->category }}</p>
+                <h1 class="mt-3 text-h1 text-ink-950">{{ $post->title }}</h1>
+                @if ($post->excerpt)<p class="lead mt-4">{{ $post->excerpt }}</p>@endif
+                <p class="mt-6 text-[13px] text-ink-500"><time datetime="{{ $post->published_at->toDateString() }}">{{ $post->published_at->format('j F Y') }}</time> · {{ $post->readingMinutes() }} min read</p>
+            </div>
+        </div>
     </header>
     @if ($cover = $post->getFirstMedia('cover'))
-        <div class="container-lx mt-10 max-w-5xl"><img src="{{ $cover->getUrl() }}" alt="{{ $post->title }}" class="aspect-[16/8] w-full rounded-3xl object-cover" fetchpriority="high" width="1600" height="800"></div>
+        <div class="container-site mt-10"><img src="{{ $cover->getUrl() }}" alt="{{ $cover->getCustomProperty('alt', '') }}" class="aspect-[2/1] w-full rounded-sm object-cover" fetchpriority="high" width="1600" height="800"></div>
     @endif
-    <div class="container-lx max-w-3xl py-12"><div class="prose-lx">{!! clean_html($post->body) !!}</div></div>
+    <div class="container-site py-12 lg:py-16"><div class="prose-site">{!! clean_html($post->body) !!}</div></div>
 </article>
 @if ($related->isNotEmpty())
-    <section class="border-t border-ink-900/10 bg-cream-50 py-14">
-        <div class="container-lx">
-            <h2 class="font-display text-3xl font-semibold">More from the journal</h2>
-            <div class="mt-8 grid gap-6 sm:grid-cols-3">
+    <section class="border-t border-line bg-paper" aria-labelledby="more-title">
+        <div class="container-site py-14">
+            <h2 id="more-title" class="text-h2 text-ink-950">More from the journal</h2>
+            <ul class="mt-8 grid gap-8 sm:grid-cols-3">
                 @foreach ($related as $item)
-                    <a href="{{ route('blog.show', $item) }}" class="card block p-6 hover:border-ink-900/30">
-                        <p class="text-xs text-ink-600">{{ $item->published_at->format('d M Y') }}</p>
-                        <h3 class="mt-2 font-display text-xl font-semibold">{{ $item->title }}</h3>
-                    </a>
+                    <li class="border-t border-line-strong pt-5">
+                        <p class="text-[13px] text-ink-500">{{ $item->published_at->format('j F Y') }}</p>
+                        <h3 class="mt-2 font-display text-xl leading-snug text-ink-950"><a href="{{ route('blog.show', $item) }}" class="underline-offset-4 hover:underline">{{ $item->title }}</a></h3>
+                    </li>
                 @endforeach
-            </div>
+            </ul>
         </div>
     </section>
 @endif

@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<x-page-header :title="$page->title" :crumbs="[$page->title => null]" />
-<article class="container-lx max-w-3xl py-14">
-    <div class="prose-lx">{!! clean_html($page->content) !!}</div>
-    <p class="mt-12 text-xs text-ink-600">Last updated {{ $page->updated_at->format('d M Y') }}</p>
+<x-ui.page-header :title="$page->title" :intro="$page->seo_description" :crumbs="[$page->title => null]" />
+<article class="container-site py-12 lg:py-16">
+    <div class="prose-site">{!! clean_html($page->content) !!}</div>
+    <p class="mt-12 text-[13px] text-ink-500">Last updated <time datetime="{{ $page->updated_at->toDateString() }}">{{ $page->updated_at->format('j F Y') }}</time></p>
 </article>
 @endsection

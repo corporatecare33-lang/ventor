@@ -9,6 +9,7 @@ use App\Livewire\AddToCart;
 use App\Livewire\Checkout;
 use App\Models\Cart;
 use App\Models\Order;
+use App\Models\PaymentMethod;
 use App\Models\ShippingZone;
 use App\Services\CartService;
 use App\Services\OrderService;
@@ -80,6 +81,8 @@ class CheckoutTest extends TestCase
 
     public function test_bkash_requires_transaction_id_and_creates_pending_payment(): void
     {
+        // bKash ships inactive until the business adds its own number.
+        PaymentMethod::where('code', 'bkash')->update(['is_active' => true, 'account_number' => '01811000000']);
         $product = $this->product(['stock_quantity' => 5]);
         $item = app(CartService::class)->add($product, null, 1);
 

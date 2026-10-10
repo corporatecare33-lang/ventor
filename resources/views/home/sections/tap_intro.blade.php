@@ -18,24 +18,13 @@
             </div>
         </div>
 
-        {{-- Interface preview of a real Tap profile page (uses the store's own name, not a fictional person) --}}
-        <figure class="lg:col-span-5 lg:col-start-8">
-            <div class="mx-auto w-full max-w-[20rem] rounded-[2rem] border border-white/15 bg-ink-900 p-3" aria-hidden="true">
-                <div class="overflow-hidden rounded-[1.5rem] bg-ink-950 px-5 pt-10 pb-6">
-                    <div class="text-center">
-                        <span class="mx-auto flex size-16 items-center justify-center rounded-full border border-brass-300/50 font-display text-2xl text-brass-300">{{ mb_substr(setting('site_name', 'LeatherX'), 0, 1) }}</span>
-                        <p class="mt-4 font-display text-2xl font-semibold text-white">{{ setting('site_name', 'LeatherX') }}</p>
-                        <p class="mt-1 text-xs text-white/60">Leather goods & NFC wallets</p>
-                        <span class="mt-5 flex min-h-11 items-center justify-center gap-2 rounded-xs bg-paper text-sm font-medium text-ink-950"><x-lx-icon name="download" class="size-4" /> Save contact</span>
-                    </div>
-                    <ul class="mt-4 space-y-2 text-sm">
-                        @foreach ([['phone', 'Call'], ['chat', 'WhatsApp'], ['mail', 'Email'], ['globe', 'Website']] as [$icon, $label])
-                            <li class="flex items-center gap-3 rounded-xs border border-white/10 px-4 py-3 text-white/85"><x-lx-icon :name="$icon" class="size-4 text-brass-300" /> {{ $label }}</li>
-                        @endforeach
-                    </ul>
+        @if ($image = $section->getFirstMedia('image'))
+            <figure class="lg:col-span-6 lg:col-start-7">
+                <div class="aspect-[4/3] overflow-hidden rounded-sm">
+                    <x-ui.picture :media="$image" :conversions="['mobile' => 800, 'desktop' => 1400]" sizes="(min-width: 1024px) 45vw, 100vw" width="1400" height="1050" />
                 </div>
-            </div>
-            <figcaption class="mt-4 text-center text-[13px] text-white/60">What people see when they tap your wallet</figcaption>
-        </figure>
+                <figcaption class="mt-3 text-[13px] text-white/60">No app or battery needed — the chip is read by the phone.</figcaption>
+            </figure>
+        @endif
     </div>
 </section>

@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Page;
+use App\Models\PaymentMethod;
 use App\Models\Post;
 use App\Models\Product;
-use App\Models\PaymentMethod;
 use App\Models\ShippingZone;
 use App\Support\StorefrontCache;
 use Illuminate\Http\JsonResponse;

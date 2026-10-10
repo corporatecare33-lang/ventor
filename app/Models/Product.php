@@ -51,9 +51,9 @@ class Product extends Model implements HasMedia
 
     public function registerMediaConversions(?Media $media = null): void
     {
-        $this->addMediaConversion('thumb')->width(480)->height(600)->format('webp')->nonQueued();
-        $this->addMediaConversion('medium')->width(800)->height(1000)->format('webp')->queued();
-        $this->addMediaConversion('large')->width(1200)->height(1500)->format('webp')->queued();
+        $this->addMediaConversion('thumb')->width(480)->height(600)->format('webp')->quality(78)->nonQueued();
+        $this->addMediaConversion('medium')->width(800)->height(1000)->format('webp')->quality(78)->nonQueued();
+        $this->addMediaConversion('large')->width(1200)->height(1500)->format('webp')->quality(78)->nonQueued();
     }
 
     public function category(): BelongsTo

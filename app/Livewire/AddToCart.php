@@ -95,7 +95,7 @@ class AddToCart extends Component
             $this->sizeId = $match->size_id;
         }
         $this->quantity = 1;
-        $this->dispatch('variant-selected', colorId: $id);
+        $this->dispatch('variant-selected', productId: $this->productId, color: $this->variants->firstWhere('color_id', $id)?->color?->name);
     }
 
     public function updated(string $property): void

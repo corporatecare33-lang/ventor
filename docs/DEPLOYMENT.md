@@ -138,6 +138,14 @@ php artisan db:seed --class=StoreSetupSeeder --force
 php artisan db:seed --class=ContentSeeder --force
 ```
 
+> **Always run `php artisan optimize` after every change to `.env`** (especially `APP_ENV` / `APP_DEBUG`).
+> The route cache stores the Livewire script URL; a cache built under different settings makes
+> `/livewire-…/livewire.min.js` return 404, which silently breaks the cart, filters and checkout.
+
+The catalogue seeder copies the product photos from `public/images/products` into the media library and
+creates WebP versions (480 / 800 / 1200 px). It takes around 30–60 seconds and needs the PHP `gd` extension
+with WebP support.
+
 Then sign in at **https://yourdomain.com/admin**, change the password from the profile menu, and fill in
 **Settings → Website settings** (logo, phone, WhatsApp, address, social links) and **Settings → SEO**.
 
@@ -191,8 +199,9 @@ Already built in:
   admins edit products, categories, banners, settings, etc. (`App\Support\StorefrontCache`).
 - Settings load from a single cached array.
 - Product lists use selected columns, eager loading and pagination (no N+1 queries).
-- Images: Media Library creates WebP thumbnails (480px) and large (1200px) versions; cards use `loading="lazy"`,
-  the first image uses `fetchpriority="high"`.
+- Images: every upload is converted to WebP (products 480 / 800 / 1200 px, banners 800 / 1280 / 1920 px,
+  quality 78) and served with `srcset`, explicit width/height (no layout shift), `loading="lazy"` below the fold
+  and `fetchpriority="high"` for the hero. The original PNG/JPG is kept but never sent to visitors.
 - Fonts are self-hosted (no Google/Bunny requests). CSS ≈17 KB gzip; no extra JS beyond Livewire/Alpine.
 - `public/.htaccess` enables gzip and long-term caching for hashed assets.
 

@@ -8,15 +8,15 @@
     @vite(['resources/css/app.css'])
     <style>@media print { .no-print { display: none !important; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }</style>
 </head>
-<body class="bg-cream-100 py-8 print:bg-white print:py-0">
+<body class="bg-paper py-8 print:bg-white print:py-0">
     <div class="mx-auto max-w-3xl bg-white p-8 shadow-sm sm:p-12 print:shadow-none">
         <div class="flex items-start justify-between gap-6 border-b border-ink-900/10 pb-8">
             <div>
-                <p class="font-display text-3xl font-semibold tracking-[0.18em]">LEATHER<span class="text-gold-600">X</span></p>
+                <x-logo height="h-12" />
                 <p class="mt-2 text-xs leading-5 text-ink-600">{{ setting('contact_address') }}<br>{{ setting('contact_phone') }} · {{ setting('contact_email') }}</p>
             </div>
             <div class="text-right">
-                <p class="font-display text-2xl font-semibold">Invoice</p>
+                <h1 class="font-display text-2xl font-semibold">Invoice</h1>
                 <p class="mt-1 text-sm">{{ $order->order_number }}</p>
                 <p class="text-xs text-ink-600">{{ $order->created_at->format('d M Y') }}</p>
             </div>
@@ -55,7 +55,7 @@
             <div class="flex justify-between border-t border-ink-900/10 pt-3 text-base font-semibold"><dt>Total</dt><dd>{{ money($order->total) }}</dd></div>
         </dl>
         <p class="mt-12 text-center text-xs text-ink-600">Thank you for choosing LeatherX. Keep this invoice for warranty claims.</p>
-        <div class="no-print mt-8 text-center"><button onclick="window.print()" class="btn-dark">Print / Save as PDF</button></div>
+        <div class="no-print mt-8 text-center"><button type="button" onclick="window.print()" class="btn-primary">Print or save as PDF</button></div>
     </div>
 </body>
 </html>

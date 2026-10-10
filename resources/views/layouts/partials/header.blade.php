@@ -30,11 +30,7 @@
             </button>
 
             <a href="{{ route('home') }}" class="shrink-0 max-lg:absolute max-lg:left-1/2 max-lg:-translate-x-1/2" @if (request()->routeIs('home')) aria-current="page" @endif>
-                @if ($logo = setting('site_logo'))
-                    <img src="{{ Storage::disk('public')->url($logo) }}" alt="{{ setting('site_name', 'LeatherX') }}" class="h-7 w-auto" width="132" height="28">
-                @else
-                    <x-logo class="text-[1.375rem] sm:text-2xl" />
-                @endif
+                <x-logo height="h-10 lg:h-11" />
             </a>
 
             <nav class="ml-10 hidden h-full items-stretch gap-8 text-sm lg:flex" aria-label="Primary">
@@ -96,7 +92,7 @@
              x-transition:enter="transition duration-300 ease-out-quart" x-transition:enter-start="-translate-x-full"
              x-transition:leave="transition duration-200 ease-out-quart" x-transition:leave-end="-translate-x-full">
             <div class="flex h-16 items-center justify-between border-b border-line px-5">
-                <x-logo class="text-[1.375rem]" />
+                <x-logo height="h-8" />
                 <button type="button" @click="menu = false" class="-mr-2 inline-flex size-11 items-center justify-center" aria-label="Close menu">
                     <x-lx-icon name="x" class="size-6" />
                 </button>

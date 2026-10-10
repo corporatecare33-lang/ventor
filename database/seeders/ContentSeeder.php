@@ -18,7 +18,7 @@ class ContentSeeder extends Seeder
 {
     public function run(): void
     {
-        Banner::firstOrCreate(['position' => BannerPosition::Hero], [
+        $hero = Banner::firstOrCreate(['position' => BannerPosition::Hero], [
             'eyebrow' => 'Wallets · Card holders · Bags · NFC smart wallets',
             'title' => 'Leather goods for everyday carry, made smarter with LeatherX Tap.',
             'subtitle' => 'Leather wallets, card holders and bags with RFID-blocking linings — and LeatherX Tap wallets that open your digital contact card on any phone. Engrave a name or logo, and pay cash on delivery anywhere in Bangladesh.',
@@ -28,6 +28,8 @@ class ContentSeeder extends Seeder
             'secondary_button_link' => '/leatherx-tap',
             'is_active' => true,
         ]);
+        $this->attachImage($hero, 'image', 'banners/smart-wallet-warm-light.png', 'Chestnut leather bifold wallet resting on dark leather in warm light', '72% 50%');
+        $this->attachImage($hero, 'mobile_image', 'products/chestnut-leather-smart-bifold-wallet.png', 'Chestnut Smart Bifold Wallet on slate');
 
         $sections = [
             'categories' => ['Shop by category', 'Wallets, card holders, bags and travel pieces — each with the colours and prices you see at checkout.', []],
@@ -65,9 +67,17 @@ class ContentSeeder extends Seeder
             'reviews' => ['What customers say', 'Reviews are published after moderation and marked when the reviewer bought the product.', []],
             'faq' => ['Questions before you order', null, []],
         ];
+        $images = [
+            'tap_intro' => ['banners/nfc-wallet-smartphone.png', 'LeatherX Tap wallet next to a smartphone receiving the contact profile', '45% 50%'],
+            'engraving' => ['banners/laser-engraving-wallet.png', 'A laser engraving a monogram onto a tan leather wallet', '45% 60%'],
+            'corporate' => ['banners/executive-gift-set.png', 'Executive gift set of a black leather briefcase, wallet and card holder on an office desk', '58% 60%'],
+        ];
         $i = 0;
         foreach ($sections as $key => [$title, $subtitle, $content]) {
-            HomeSection::firstOrCreate(['key' => $key], ['title' => $title, 'subtitle' => $subtitle, 'content' => $content, 'is_active' => true, 'sort_order' => $i++]);
+            $section = HomeSection::firstOrCreate(['key' => $key], ['title' => $title, 'subtitle' => $subtitle, 'content' => $content, 'is_active' => true, 'sort_order' => $i++]);
+            if (isset($images[$key])) {
+                $this->attachImage($section, 'image', ...$images[$key]);
+            }
         }
 
         $faqs = [
@@ -106,5 +116,21 @@ class ContentSeeder extends Seeder
                 'is_published' => true, 'published_at' => now()->subDays(($i + 1) * 5),
             ]);
         }
+    }
+
+    /** Copy a photo from public/images into the media library (WebP sizes are generated). */
+    private function attachImage($model, string $collection, string $path, string $alt, ?string $focus = null): void
+    {
+        $file = public_path('images/'.$path);
+
+        if (app()->runningUnitTests() || ! is_file($file) || $model->hasMedia($collection)) {
+            return;
+        }
+
+        $model->addMedia($file)
+            ->preservingOriginal()
+            ->usingName($alt)
+            ->withCustomProperties(array_filter(['alt' => $alt, 'focus' => $focus]))
+            ->toMediaCollection($collection);
     }
 }

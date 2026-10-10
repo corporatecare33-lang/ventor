@@ -46,6 +46,6 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('checkout', fn (Request $request) => Limit::perMinute(10)->by($request->user()?->id ?: $request->ip()));
         RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
 
-        View::composer('layouts.app', LayoutComposer::class);
+        View::composer(['layouts.app', 'errors.404', 'errors::404'], LayoutComposer::class);
     }
 }

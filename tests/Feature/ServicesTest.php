@@ -73,7 +73,7 @@ class ServicesTest extends TestCase
             ->set('order_item_id', $item->id)
             ->call('submit')
             ->assertHasNoErrors()
-            ->assertSee('Submitted successfully');
+            ->assertSee('Warranty registered');
 
         $record = WarrantyRegistration::sole();
         $this->assertSame($order->id, $record->order_id);

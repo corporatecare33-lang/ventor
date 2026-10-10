@@ -25,7 +25,7 @@ class Post extends Model implements HasMedia
 
     public function registerMediaConversions(?Media $media = null): void
     {
-        $this->addMediaConversion('card')->width(800)->height(500)->format('webp')->nonQueued();
+        $this->addMediaConversion('card')->width(800)->height(500)->format('webp')->quality(78)->nonQueued();
     }
 
     public function author(): BelongsTo

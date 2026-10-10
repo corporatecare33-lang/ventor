@@ -133,7 +133,7 @@ class Seo
 
         $default = setting('seo_og_image');
 
-        return $default ? Storage::disk('public')->url($default) : asset('images/og-default.png');
+        return $default ? Storage::disk('public')->url($default) : asset('images/og-default.jpg');
     }
 
     /**

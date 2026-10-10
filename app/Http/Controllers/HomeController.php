@@ -24,14 +24,11 @@ class HomeController extends Controller
             $featured = Product::visible()->forCard()->where('is_featured', true)
                 ->orderBy('sort_order')->limit(8)->get();
 
-            $flagship = $featured->firstWhere('nfc_enabled', true) ?? $featured->first();
-
             $zones = ShippingZone::active()->get();
             $visible = Product::visible();
 
             return [
                 'hero' => Banner::live(BannerPosition::Hero)->with('media')->first(),
-                'flagship' => $flagship,
                 // Every fact in the hero is computed from live store data.
                 'facts' => array_filter([
                     'delivery' => $zones->isNotEmpty() ? [
@@ -55,8 +52,8 @@ class HomeController extends Controller
                         'note' => 'Names, initials or logos',
                     ] : null,
                 ]),
-                'sections' => HomeSection::where('is_active', true)->orderBy('sort_order')->get()->keyBy('key'),
-                'categories' => Category::active()->whereNull('parent_id')->withCount('activeProducts')
+                'sections' => HomeSection::where('is_active', true)->with('media')->orderBy('sort_order')->get()->keyBy('key'),
+                'categories' => Category::active()->whereNull('parent_id')->withCount('activeProducts')->with('media')
                     ->orderBy('sort_order')->get(['id', 'name', 'slug', 'tagline'])
                     ->filter(fn (Category $c) => $c->active_products_count > 0)->values(),
                 'featured' => $featured,
@@ -73,7 +70,7 @@ class HomeController extends Controller
         $seo = Seo::make(null, setting('seo_default_description'))
             ->home()
             ->canonical(route('home'))
-            ->image($data['hero']?->getFirstMediaUrl('image') ?: null);
+            ->image($data['hero']?->getFirstMediaUrl('image', 'desktop') ?: null);
 
         return view('home.index', [...$data, 'seo' => $seo]);
     }

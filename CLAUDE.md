@@ -12,3 +12,8 @@ Laravel 13 eCommerce (Blade + Livewire 4 storefront, Filament 5 admin). Read `RE
 - Order status changes must go through `App\Services\OrderService` (restocks on cancel/return).
 - Product route key is `slug`; order route key is `order_number`; NFC profile route key is `slug`.
 - Do not add fake integrations: payment/courier/SMS are manual until real credentials exist.
+- Design tokens are in `resources/css/app.css`; use the `ui`, `form` and `product` Blade components instead of
+  ad-hoc markup. Radius: `rounded-xs` (controls) / `rounded-sm` (media). Brass colours only on dark backgrounds.
+- Never invent business facts (contact details, statistics, testimonials). Hide sections when data is missing.
+- Scroll containers that hold `sr-only` text need `relative`, or the hidden text widens the page on mobile.
+

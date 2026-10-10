@@ -4,198 +4,233 @@
 @php
     $images = $product->getMedia('images');
     $specs = array_filter([
-        'SKU' => $product->sku,
-        'Leather' => $product->leather_type,
-        'Material' => $product->material !== $product->leather_type ? $product->material : null,
-        'Card capacity' => $product->card_capacity ? $product->card_capacity.' cards' : null,
-        'Cash capacity' => $product->cash_capacity ? $product->cash_capacity.' notes' : null,
-        'RFID protection' => $product->rfid_protection ? 'Yes' : 'No',
-        'NFC (LeatherX Tap)' => $product->nfc_enabled ? 'Yes — digital profile included' : null,
+        'Material' => $product->material ?: $product->leather_type,
+        'Card capacity' => $product->card_capacity ? 'Up to '.$product->card_capacity.' cards' : null,
+        'Cash capacity' => $product->cash_capacity ? 'Up to '.$product->cash_capacity.' notes' : null,
+        'RFID-blocking lining' => $product->rfid_protection ? 'Yes' : null,
+        'NFC contact profile' => $product->nfc_enabled ? 'Yes — LeatherX Tap' : null,
+        'Laser engraving' => $product->engraving_available ? 'Available, '.money($product->engraving_price).' per item' : null,
         'Warranty' => $product->warranty_months ? $product->warranty_months.' months' : null,
-        'Engraving' => $product->engraving_available ? 'Available (+'.money($product->engraving_price).')' : null,
         ...($product->specifications ?? []),
+        'SKU' => $product->sku,
     ]);
+    $cheapestZone = $zones->sortBy('charge')->first();
 @endphp
 
-<div class="container-lx pt-6">
-    <x-breadcrumbs :items="array_filter([
+<div class="container-site pt-6">
+    <x-ui.breadcrumbs :items="array_filter([
         'Shop' => route('shop'),
-        $product->category?->name ?? '' => $product->category ? route('categories.show', $product->category) : null,
+        ($product->category?->name ?? '') => $product->category ? route('categories.show', $product->category) : null,
         $product->name => null,
     ], fn ($v, $k) => $k !== '', ARRAY_FILTER_USE_BOTH)" />
 </div>
 
-<section class="container-lx grid gap-10 py-8 lg:grid-cols-2 lg:gap-16">
+<section class="container-site grid gap-10 pt-6 pb-16 lg:grid-cols-12 lg:gap-12 lg:pt-8" aria-label="Product">
     {{-- Gallery --}}
-    <div x-data="{ active: 0 }" class="lg:sticky lg:top-24 lg:self-start">
-        <div class="relative aspect-square overflow-hidden rounded-3xl bg-cream-100">
+    {{-- Images can be tagged with a colour (media custom property "color"); choosing that colour shows its photo. --}}
+    <div class="lg:col-span-7" x-data="{ active: 0, colors: @js($images->map(fn ($m) => $m->getCustomProperty('color'))->values()) }"
+         @variant-selected.window="if ($event.detail.productId === {{ $product->id }}) { const i = colors.indexOf($event.detail.color); if (i > -1) active = i }">
+        <div class="relative aspect-[4/5] overflow-hidden rounded-sm bg-paper">
             @forelse ($images as $i => $image)
-                <img x-show="active === {{ $i }}" @if ($i > 0) x-cloak @endif src="{{ $image->getAvailableUrl(['large']) }}" alt="{{ $image->getCustomProperty('alt', $product->name) }}"
-                     class="size-full object-cover" width="1200" height="1200" @if ($i === 0) fetchpriority="high" @else loading="lazy" @endif decoding="async">
+                <div x-show="active === {{ $i }}" @if ($i > 0) x-cloak @endif class="size-full">
+                    <x-product.media :product="$product" :index="$i" :eager="$i === 0" sizes="(min-width: 1024px) 55vw, 100vw" />
+                </div>
             @empty
-                <x-product-image :product="$product" eager />
+                <x-product.media :product="$product" eager />
             @endforelse
             @if ($product->hasDiscount())
-                <span class="absolute top-4 left-4 rounded-full bg-gold-500 px-3 py-1.5 text-xs font-bold text-ink-950">-{{ $product->discountPercent() }}%</span>
+                <span class="absolute top-4 left-4 rounded-xs bg-ink-950 px-2 py-1 text-[11px] font-semibold tracking-wide text-white uppercase">Save {{ $product->discountPercent() }}%</span>
             @endif
         </div>
         @if ($images->count() > 1)
-            <div class="scrollbar-none mt-3 flex gap-3 overflow-x-auto">
+            <div class="mt-3 flex gap-3" role="group" aria-label="Product images">
                 @foreach ($images as $i => $image)
-                    <button type="button" @click="active = {{ $i }}" class="size-20 shrink-0 overflow-hidden rounded-xl ring-offset-2 transition" :class="active === {{ $i }} ? 'ring-2 ring-ink-900' : 'opacity-70 hover:opacity-100'" aria-label="Image {{ $i + 1 }}">
-                        <img src="{{ $image->getAvailableUrl(['thumb']) }}" alt="" class="size-full object-cover" loading="lazy" width="80" height="80">
+                    <button type="button" @click="active = {{ $i }}" :aria-pressed="(active === {{ $i }}).toString()"
+                            class="size-20 overflow-hidden rounded-xs ring-offset-2 transition sm:size-24" :class="active === {{ $i }} ? 'ring-2 ring-ink-950' : 'opacity-75 hover:opacity-100'">
+                        <img src="{{ $image->getAvailableUrl(['thumb']) }}" alt="Show image {{ $i + 1 }} of {{ $images->count() }}" class="size-full object-cover" loading="lazy" width="96" height="120">
                     </button>
                 @endforeach
             </div>
         @endif
     </div>
 
-    {{-- Summary --}}
-    <div>
-        @if ($product->category)<a href="{{ route('categories.show', $product->category) }}" class="eyebrow">{{ $product->category->name }}</a>@endif
-        <h1 class="mt-3 font-display text-4xl leading-tight font-semibold text-ink-950 sm:text-5xl">{{ $product->name }}</h1>
-        <a href="#reviews" class="mt-3 inline-flex items-center gap-2 text-sm text-ink-600">
-            <x-stars :rating="$product->rating_avg" size="size-4" />
-            {{ $product->reviews_count ? number_format((float) $product->rating_avg, 1).' · '.$product->reviews_count.' reviews' : 'No reviews yet' }}
-        </a>
-        @if ($product->short_description)
-            <p class="mt-5 text-[15px] leading-7 text-ink-600">{{ $product->short_description }}</p>
-        @endif
-
-        <div class="mt-5 flex flex-wrap gap-2">
-            @if ($product->rfid_protection)<span class="inline-flex items-center gap-1.5 rounded-full bg-cream-100 px-3 py-1.5 text-xs font-medium text-leather-800"><x-lx-icon name="shield" class="size-3.5" /> RFID protection</span>@endif
-            @if ($product->nfc_enabled)<span class="inline-flex items-center gap-1.5 rounded-full bg-ink-900 px-3 py-1.5 text-xs font-medium text-gold-300"><x-lx-icon name="signal" class="size-3.5" /> NFC enabled</span>@endif
-            @if ($product->warranty_months)<span class="inline-flex items-center gap-1.5 rounded-full bg-cream-100 px-3 py-1.5 text-xs font-medium text-leather-800"><x-lx-icon name="badge" class="size-3.5" /> {{ $product->warranty_months }}-month warranty</span>@endif
-            @if ($product->engraving_available)<span class="inline-flex items-center gap-1.5 rounded-full bg-cream-100 px-3 py-1.5 text-xs font-medium text-leather-800"><x-lx-icon name="sparkles" class="size-3.5" /> Engraving</span>@endif
-        </div>
-
-        <div class="mt-8 border-t border-ink-900/10 pt-8">
-            @if ($product->status === \App\Enums\ProductStatus::Draft)
-                <p class="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">Preview: this product is a draft and not visible to customers.</p>
+    {{-- Purchase panel --}}
+    <div class="lg:col-span-5">
+        <div class="lg:sticky lg:top-28">
+            @if ($product->category)
+                <a href="{{ route('categories.show', $product->category) }}" class="text-[13px] text-ink-500 underline-offset-4 hover:text-ink-950 hover:underline">{{ $product->category->name }}</a>
             @endif
-            <livewire:add-to-cart :product="$product" />
-        </div>
+            <h1 class="mt-2 text-[clamp(2rem,1.7rem+1.2vw,2.75rem)] leading-[1.08] text-ink-950">{{ $product->name }}</h1>
+            @if ($product->reviews_count)
+                <a href="#reviews" class="mt-3 inline-flex items-center gap-2 text-sm text-ink-600 hover:text-ink-950">
+                    <x-ui.rating :rating="$product->rating_avg" size="size-4" /> {{ number_format((float) $product->rating_avg, 1) }} · {{ $product->reviews_count }} {{ Str::plural('review', $product->reviews_count) }}
+                </a>
+            @endif
+            @if ($product->short_description)
+                <p class="mt-4 text-[15px] leading-relaxed text-ink-600">{{ $product->short_description }}</p>
+            @endif
 
-        <div class="mt-8 grid gap-3 sm:grid-cols-2">
-            <div class="flex gap-3 rounded-2xl border border-ink-900/10 p-4">
-                <x-lx-icon name="truck" class="size-6 shrink-0 text-gold-600" />
-                <div class="text-xs leading-5">
-                    <p class="text-sm font-semibold text-ink-950">Delivery estimate</p>
-                    @foreach ($zones as $zone)
-                        <p class="text-ink-600">{{ $zone->name }}: {{ $zone->estimate() }} · {{ money($zone->charge) }}</p>
-                    @endforeach
-                </div>
+            @if ($product->status === \App\Enums\ProductStatus::Draft)
+                <x-ui.alert type="warning" class="mt-6">Preview only — this product is a draft and hidden from customers.</x-ui.alert>
+            @endif
+
+            <div id="purchase" class="mt-6 border-t border-line pt-6">
+                <livewire:add-to-cart :product="$product" />
             </div>
-            <div class="flex gap-3 rounded-2xl border border-ink-900/10 p-4">
-                <x-lx-icon name="badge" class="size-6 shrink-0 text-gold-600" />
-                <div class="text-xs leading-5">
-                    <p class="text-sm font-semibold text-ink-950">Warranty</p>
-                    <p class="text-ink-600">{{ $product->warranty_months ? $product->warranty_months.' months on stitching, edges and hardware.' : 'Covered by our 7-day exchange policy.' }}</p>
-                    <a href="{{ route('warranty') }}" class="text-leather-700 underline">Register warranty</a>
-                </div>
-            </div>
+
+            <ul class="mt-8 space-y-3 border-t border-line pt-6 text-sm text-ink-600">
+                @if ($cheapestZone)
+                    <li class="flex gap-3"><x-lx-icon name="truck" class="mt-0.5 size-5 shrink-0 text-leather-600" />
+                        <span>Delivery from {{ money($cheapestZone->charge) }} · {{ $zones->sortBy('min_days')->first()->name }} {{ $zones->sortBy('min_days')->first()->estimate() }}. <a href="#delivery" class="text-leather-700 underline underline-offset-4">All areas</a></span></li>
+                @endif
+                <li class="flex gap-3"><x-lx-icon name="cash" class="mt-0.5 size-5 shrink-0 text-leather-600" /><span>Cash on delivery — we call to confirm before dispatch.</span></li>
+                @if ($product->warranty_months)
+                    <li class="flex gap-3"><x-lx-icon name="badge" class="mt-0.5 size-5 shrink-0 text-leather-600" />
+                        <span>{{ $product->warranty_months }}-month warranty. <a href="{{ route('warranty') }}" class="text-leather-700 underline underline-offset-4">How to register</a></span></li>
+                @endif
+            </ul>
         </div>
     </div>
 </section>
 
-{{-- Tabs --}}
-<section class="container-lx py-12" x-data="{ tab: 'description' }">
-    <div class="scrollbar-none flex gap-8 overflow-x-auto border-b border-ink-900/10" role="tablist">
-        @foreach (['description' => 'Description', 'specifications' => 'Specifications', 'delivery' => 'Delivery & returns'] as $key => $label)
-            <button type="button" role="tab" @click="tab = '{{ $key }}'" :aria-selected="tab === '{{ $key }}'"
-                    class="-mb-px border-b-2 py-4 text-sm font-medium whitespace-nowrap transition" :class="tab === '{{ $key }}' ? 'border-ink-900 text-ink-950' : 'border-transparent text-ink-600 hover:text-ink-900'">{{ $label }}</button>
-        @endforeach
-    </div>
-    <div class="max-w-3xl py-8">
-        <div x-show="tab === 'description'" class="prose-lx">{!! clean_html($product->description ?: '<p>'.e($product->short_description).'</p>') !!}</div>
-        <div x-cloak x-show="tab === 'specifications'">
-            <dl class="divide-y divide-ink-900/8 rounded-2xl border border-ink-900/10">
+{{-- Details --}}
+<section class="border-t border-line" aria-labelledby="details-title">
+    <div class="container-site grid gap-12 py-14 lg:grid-cols-12 lg:gap-12 lg:py-20">
+        <div class="lg:col-span-6">
+            <h2 id="details-title" class="text-h2 text-ink-950">About this piece</h2>
+            <div class="prose-site mt-6">{!! clean_html($product->description ?: '<p>'.e($product->short_description).'</p>') !!}</div>
+        </div>
+        <div class="lg:col-span-5 lg:col-start-8">
+            <h2 class="font-display text-2xl text-ink-950">Specifications</h2>
+            <dl class="mt-5 border-t border-line text-[15px]">
                 @foreach ($specs as $label => $value)
-                    <div class="grid grid-cols-2 gap-4 px-5 py-3.5 text-sm"><dt class="text-ink-600">{{ $label }}</dt><dd class="text-ink-950">{{ $value }}</dd></div>
+                    <div class="grid grid-cols-[minmax(0,10rem)_1fr] gap-4 border-b border-line py-3">
+                        <dt class="text-ink-500">{{ $label }}</dt>
+                        <dd class="text-ink-950">{{ $value }}</dd>
+                    </div>
                 @endforeach
             </dl>
-        </div>
-        <div x-cloak x-show="tab === 'delivery'" class="prose-lx">
-            <ul>
+
+            <h2 id="delivery" class="mt-12 scroll-mt-28 font-display text-2xl text-ink-950">Delivery & returns</h2>
+            <dl class="mt-5 border-t border-line text-[15px]">
                 @foreach ($zones as $zone)
-                    <li><strong>{{ $zone->name }}</strong>: {{ $zone->estimate() }}, {{ money($zone->charge) }}@if ($zone->free_shipping_threshold) (free over {{ money($zone->free_shipping_threshold) }})@endif</li>
+                    <div class="flex justify-between gap-4 border-b border-line py-3">
+                        <dt class="text-ink-600">{{ $zone->name }} <span class="text-ink-500">· {{ $zone->estimate() }}</span></dt>
+                        <dd class="text-ink-950">{{ money($zone->charge) }}@if ($zone->free_shipping_threshold)<span class="block text-right text-[13px] text-ink-500">Free over {{ money($zone->free_shipping_threshold) }}</span>@endif</dd>
+                    </div>
                 @endforeach
-            </ul>
-            <p>Cash on delivery available nationwide. Unused, non-engraved items can be exchanged within 7 days. <a href="{{ route('pages.return-policy') }}">Read the return policy</a>.</p>
+            </dl>
+            <p class="mt-4 text-sm text-ink-600">
+                @if ($product->engraving_available)Engraved items need two to three extra working days. @endif
+                Read the <a href="{{ route('pages.return-policy') }}" class="text-leather-700 underline underline-offset-4">return & exchange policy</a>.
+            </p>
         </div>
     </div>
 </section>
 
 {{-- Reviews --}}
-<section id="reviews" class="scroll-mt-24 bg-cream-50 py-16">
-    <div class="container-lx grid gap-12 lg:grid-cols-[320px_1fr]">
-        <div>
-            <h2 class="font-display text-3xl font-semibold">Customer reviews</h2>
-            <div class="mt-4 flex items-center gap-3">
-                <span class="font-display text-5xl font-semibold">{{ number_format((float) $product->rating_avg, 1) }}</span>
-                <div><x-stars :rating="$product->rating_avg" size="size-4" /><p class="mt-1 text-xs text-ink-600">{{ $product->reviews_count }} reviews</p></div>
-            </div>
-            <div class="mt-5 space-y-1.5">
-                @for ($star = 5; $star >= 1; $star--)
-                    @php $count = (int) ($ratingBreakdown[$star] ?? 0); $pct = $product->reviews_count ? round($count / $product->reviews_count * 100) : 0; @endphp
-                    <div class="flex items-center gap-3 text-xs text-ink-600">
-                        <span class="w-3">{{ $star }}</span>
-                        <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-900/10"><div class="h-full rounded-full bg-gold-500" style="width: {{ $pct }}%"></div></div>
-                        <span class="w-6 text-right">{{ $count }}</span>
-                    </div>
-                @endfor
-            </div>
+<section id="reviews" class="scroll-mt-24 bg-paper" aria-labelledby="reviews-title">
+    <div class="container-site grid gap-12 py-14 lg:grid-cols-12 lg:py-20">
+        <div class="lg:col-span-4">
+            <h2 id="reviews-title" class="text-h2 text-ink-950">Reviews</h2>
+            @if ($product->reviews_count)
+                <div class="mt-5 flex items-center gap-4">
+                    <span class="font-display text-5xl font-semibold text-ink-950">{{ number_format((float) $product->rating_avg, 1) }}</span>
+                    <div><x-ui.rating :rating="$product->rating_avg" size="size-4" /><p class="mt-1 text-[13px] text-ink-500">{{ $product->reviews_count }} {{ Str::plural('review', $product->reviews_count) }}</p></div>
+                </div>
+                <dl class="mt-5 space-y-1.5">
+                    @for ($star = 5; $star >= 1; $star--)
+                        @php $count = (int) ($ratingBreakdown[$star] ?? 0); $pct = $product->reviews_count ? round($count / $product->reviews_count * 100) : 0; @endphp
+                        <div class="flex items-center gap-3 text-[13px] text-ink-600">
+                            <dt class="w-12">{{ $star }} star</dt>
+                            <dd class="h-1.5 flex-1 overflow-hidden rounded-full bg-paper-300"><span class="block h-full bg-brass-500" style="width: {{ $pct }}%"></span></dd>
+                            <dd class="w-6 text-right">{{ $count }}</dd>
+                        </div>
+                    @endfor
+                </dl>
+            @else
+                <p class="mt-4 text-[15px] text-ink-600">No reviews yet. Customers who buy this piece can review it from this page after signing in.</p>
+            @endif
 
             @auth
-                <form method="POST" action="{{ route('reviews.store', $product) }}" class="mt-8 space-y-3 rounded-2xl bg-white p-5" x-data="{ rating: {{ old('rating', 5) }} }">
+                <form method="POST" action="{{ route('reviews.store', $product) }}" class="mt-8 space-y-4 border-t border-line-strong pt-6" x-data="{ rating: {{ (int) old('rating', 5) }}, busy: false }" @submit="busy = true">
                     @csrf
-                    <p class="text-sm font-semibold">Write a review</p>
-                    <div class="flex gap-1" role="radiogroup" aria-label="Rating">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <button type="button" @click="rating = {{ $i }}" class="text-gold-500" aria-label="{{ $i }} star"><x-lx-icon name="star-solid" class="size-6" ::class="rating >= {{ $i }} ? 'opacity-100' : 'opacity-25'" /></button>
-                        @endfor
-                        <input type="hidden" name="rating" :value="rating">
-                    </div>
-                    <input type="text" name="title" value="{{ old('title') }}" maxlength="150" class="field" placeholder="Title (optional)">
-                    <textarea name="body" rows="3" required minlength="10" maxlength="2000" class="field" placeholder="How do you like it?">{{ old('body') }}</textarea>
+                    <h3 class="font-sans text-base font-medium text-ink-950">Write a review</h3>
+                    <fieldset>
+                        <legend class="label">Your rating</legend>
+                        <div class="flex gap-1">
+                            @for ($i = 1; $i <= 5; $i++)
+                                <label class="cursor-pointer text-brass-500">
+                                    <input type="radio" name="rating" value="{{ $i }}" x-model.number="rating" class="peer sr-only">
+                                    <x-lx-icon name="star-solid" class="size-7 peer-focus-visible:outline-2 peer-focus-visible:outline-brass-500" ::class="rating >= {{ $i }} ? '' : 'opacity-25'" />
+                                    <span class="sr-only">{{ $i }} {{ Str::plural('star', $i) }}</span>
+                                </label>
+                            @endfor
+                        </div>
+                    </fieldset>
+                    <x-form.input name="title" label="Title (optional)" maxlength="150" />
+                    <x-form.textarea name="body" label="Your review" required minlength="10" maxlength="2000" rows="4" />
                     @error('body', 'review')<p class="error">{{ $message }}</p>@enderror
-                    @error('body')<p class="error">{{ $message }}</p>@enderror
-                    <button class="btn-dark w-full">Submit review</button>
+                    <x-form.submit label="Submit review" loading="Submitting…" class="w-full" />
+                    <p class="text-[13px] text-ink-500">Reviews are published after moderation.</p>
                 </form>
             @else
-                <a href="{{ route('login') }}" class="btn-outline mt-8">Sign in to write a review</a>
+                <a href="{{ route('login') }}" class="btn-secondary mt-8">Sign in to write a review</a>
             @endauth
         </div>
 
-        <div class="space-y-4">
-            @forelse ($reviews as $review)
-                <article class="rounded-2xl bg-white p-6">
-                    <div class="flex items-center justify-between gap-3">
-                        <x-stars :rating="$review->rating" />
-                        <time class="text-xs text-ink-600" datetime="{{ $review->created_at->toDateString() }}">{{ $review->created_at->format('d M Y') }}</time>
-                    </div>
-                    @if ($review->title)<h3 class="mt-3 font-sans text-sm font-semibold">{{ $review->title }}</h3>@endif
-                    <p class="mt-2 text-sm leading-6 text-ink-700">{{ $review->body }}</p>
-                    <p class="mt-3 text-xs font-medium text-ink-950">{{ $review->name }} @if ($review->is_verified_purchase)<span class="text-emerald-700">· Verified purchase</span>@endif</p>
-                    @if ($review->admin_reply)
-                        <div class="mt-4 rounded-xl bg-cream-50 p-4 text-xs leading-5 text-ink-700"><span class="font-semibold">LeatherX:</span> {{ $review->admin_reply }}</div>
-                    @endif
-                </article>
-            @empty
-                <div class="rounded-2xl border border-dashed border-ink-900/15 p-10 text-center text-sm text-ink-600">No reviews yet — be the first to share your experience.</div>
-            @endforelse
+        <div class="lg:col-span-7 lg:col-start-6">
+            @if ($reviews->isNotEmpty())
+                <ul class="border-t border-line-strong">
+                    @foreach ($reviews as $review)
+                        <li class="border-b border-line-strong py-6">
+                            <article>
+                                <div class="flex flex-wrap items-center justify-between gap-3">
+                                    <x-ui.rating :rating="$review->rating" />
+                                    <time class="text-[13px] text-ink-500" datetime="{{ $review->created_at->toDateString() }}">{{ $review->created_at->format('j M Y') }}</time>
+                                </div>
+                                @if ($review->title)<h3 class="mt-3 font-sans text-base font-medium text-ink-950">{{ $review->title }}</h3>@endif
+                                <p class="mt-2 text-[15px] leading-relaxed text-ink-700">{{ $review->body }}</p>
+                                <p class="mt-3 text-[13px] text-ink-600"><span class="font-medium text-ink-950">{{ $review->name }}</span>@if ($review->is_verified_purchase) · Verified purchase @endif</p>
+                                @if ($review->admin_reply)
+                                    <p class="mt-4 border-l-2 border-brass-500 pl-4 text-sm text-ink-600"><span class="font-medium text-ink-950">Reply from {{ setting('site_name', 'LeatherX') }}:</span> {{ $review->admin_reply }}</p>
+                                @endif
+                            </article>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
         </div>
     </div>
 </section>
 
 @if ($related->isNotEmpty())
-    <section class="container-lx py-16">
-        <h2 class="font-display text-3xl font-semibold">You may also like</h2>
-        <div class="mt-8 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-            @foreach ($related as $item)
-                <x-product-card :product="$item" />
-            @endforeach
+    <section class="section-y" aria-labelledby="related-title">
+        <div class="container-site">
+            <div class="flex flex-wrap items-end justify-between gap-6">
+                <x-ui.section-heading id="related-title" title="You may also like" />
+                @if ($product->category)
+                    <a href="{{ route('categories.show', $product->category) }}" class="link-arrow">More {{ $product->category->name }} <x-lx-icon name="arrow-right" class="size-4" /></a>
+                @endif
+            </div>
+            <div class="mt-10 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:grid-cols-4">
+                @foreach ($related as $item)
+                    <x-product.card :product="$item" />
+                @endforeach
+            </div>
         </div>
     </section>
 @endif
+
+{{-- Mobile purchase bar: appears once the buy buttons scroll out of view --}}
+<div x-data="{ show: false }" x-init="new IntersectionObserver(([entry]) => show = ! entry.isIntersecting && entry.boundingClientRect.top < 0).observe(document.getElementById('purchase'))"
+     x-cloak x-show="show" x-transition.opacity class="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 backdrop-blur lg:hidden">
+    <div class="container-site flex items-center justify-between gap-4 py-3">
+        <div class="min-w-0">
+            <p class="truncate text-sm font-medium text-ink-950">{{ $product->name }}</p>
+            <p class="text-sm text-ink-600">{{ money($product->currentPrice()) }}</p>
+        </div>
+        <a href="#purchase" class="btn-primary btn-sm shrink-0">Choose & add to cart</a>
+    </div>
+</div>
 @endsection

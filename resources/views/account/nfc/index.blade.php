@@ -3,41 +3,40 @@
 @section('content')
 <x-account-layout title="LeatherX Tap profile">
     @if ($canCreate)
-        <a href="{{ route('account.nfc.create') }}" class="btn-dark mb-6"><x-lx-icon name="plus" class="size-4" /> Create profile</a>
+        <a href="{{ route('account.nfc.create') }}" class="btn-primary"><x-lx-icon name="plus" class="size-4" /> Create a profile</a>
     @elseif ($profiles->isEmpty())
-        <div class="card p-8 text-center">
-            <x-lx-icon name="signal" class="mx-auto size-10 text-gold-600" />
-            <p class="mt-4 font-display text-2xl font-semibold">No Tap product yet</p>
-            <p class="mx-auto mt-2 max-w-sm text-sm text-ink-600">Order any LeatherX Tap wallet or card to create your digital profile.</p>
-            <a href="{{ route('tap') }}" class="btn-gold mt-6">Explore LeatherX Tap</a>
-        </div>
+        <x-ui.empty-state icon="signal" title="No LeatherX Tap product yet" text="Order any LeatherX Tap wallet or card holder to create your contact profile.">
+            <a href="{{ route('tap') }}" class="btn-secondary">How LeatherX Tap works</a>
+        </x-ui.empty-state>
     @endif
 
-    <div class="space-y-4">
-        @foreach ($profiles as $profile)
-            <div class="card flex flex-wrap items-center gap-5 p-6">
-                @if ($profile->status === \App\Enums\NfcProfileStatus::Active)
-                    <a href="{{ route('nfc.qr', $profile) }}" download="{{ $profile->slug }}-qr.svg" class="block size-24 shrink-0 rounded-xl border border-ink-900/10 bg-white p-1" title="Download QR code">
-                        <img src="{{ route('nfc.qr', $profile) }}" alt="QR code for {{ $profile->name }}" class="size-full" width="96" height="96" loading="lazy">
-                    </a>
-                @else
-                    <span class="grid size-14 place-items-center rounded-full bg-ink-900 font-display text-2xl text-gold-400">{{ mb_strtoupper(mb_substr($profile->name, 0, 1)) }}</span>
-                @endif
-                <div class="min-w-0 flex-1">
-                    <p class="font-semibold">{{ $profile->name }} <x-status-badge :status="$profile->status" /></p>
-                    <p class="text-xs text-ink-600">{{ collect([$profile->designation, $profile->company])->filter()->implode(' · ') }}</p>
-                    <div class="mt-2 flex items-center gap-2" x-data="{ copied: false }">
-                        <code class="truncate rounded bg-cream-100 px-2 py-1 text-xs">{{ $profile->publicUrl() }}</code>
-                        <button type="button" class="text-xs text-leather-700 underline" @click="navigator.clipboard.writeText(@js($profile->publicUrl())); copied = true; setTimeout(() => copied = false, 1500)" x-text="copied ? 'Copied' : 'Copy'"></button>
+    @if ($profiles->isNotEmpty())
+        <ul class="mt-8 space-y-4">
+            @foreach ($profiles as $profile)
+                <li class="flex flex-wrap items-center gap-6 rounded-sm border border-line p-5">
+                    @if ($profile->status === \App\Enums\NfcProfileStatus::Active)
+                        <a href="{{ route('nfc.qr', $profile) }}" download="{{ $profile->slug }}-qr.svg" class="block size-24 shrink-0 rounded-xs border border-line bg-white p-1">
+                            <img src="{{ route('nfc.qr', $profile) }}" alt="QR code for {{ $profile->name }}'s profile — select to download" class="size-full" width="96" height="96" loading="lazy">
+                        </a>
+                    @endif
+                    <div class="min-w-0 flex-1">
+                        <p class="flex flex-wrap items-center gap-2 font-medium text-ink-950">{{ $profile->name }} <x-ui.status :status="$profile->status" /></p>
+                        @if ($profile->designation || $profile->company)<p class="text-[13px] text-ink-500">{{ collect([$profile->designation, $profile->company])->filter()->implode(' · ') }}</p>@endif
+                        <div class="mt-3 flex flex-wrap items-center gap-2" x-data="{ copied: false }">
+                            <code class="max-w-full truncate rounded-xs bg-paper px-2 py-1 text-[13px]">{{ $profile->publicUrl() }}</code>
+                            <button type="button" class="text-[13px] text-leather-700 underline underline-offset-4" @click="navigator.clipboard.writeText(@js($profile->publicUrl())); copied = true; setTimeout(() => copied = false, 2000)">
+                                <span x-text="copied ? 'Link copied' : 'Copy link'">Copy link</span>
+                            </button>
+                        </div>
+                        <p class="mt-2 text-[13px] text-ink-500">Opened {{ $profile->views_count }} {{ Str::plural('time', $profile->views_count) }}</p>
                     </div>
-                    <p class="mt-1 text-xs text-ink-600">{{ $profile->views_count }} taps / views · Click the QR code to download it for printing.</p>
-                </div>
-                <div class="flex gap-2">
-                    <a href="{{ $profile->publicUrl() }}" target="_blank" class="btn-outline px-4 py-2 text-xs">Preview</a>
-                    <a href="{{ route('account.nfc.edit', $profile) }}" class="btn-dark px-4 py-2 text-xs">Edit</a>
-                </div>
-            </div>
-        @endforeach
-    </div>
+                    <div class="flex gap-2">
+                        <a href="{{ $profile->publicUrl() }}" target="_blank" class="btn-secondary btn-sm">Preview<span class="sr-only"> (opens in a new tab)</span></a>
+                        <a href="{{ route('account.nfc.edit', $profile) }}" class="btn-primary btn-sm">Edit</a>
+                    </div>
+                </li>
+            @endforeach
+        </ul>
+    @endif
 </x-account-layout>
 @endsection

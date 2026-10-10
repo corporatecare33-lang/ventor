@@ -14,7 +14,7 @@
     <section class="section-y" aria-labelledby="compare-title">
         <div class="container-site">
             <x-ui.section-heading id="compare-title" :title="$section->title" :intro="$section->subtitle" />
-            <div class="mt-10 overflow-x-auto border-y border-line-strong" role="region" aria-labelledby="compare-title" tabindex="0">
+            <div class="relative mt-10 overflow-x-auto border-y border-line-strong" role="region" aria-label="Wallet comparison table, scrolls horizontally on small screens" tabindex="0">
                 <table class="w-full min-w-[40rem] text-left text-[15px]">
                     <caption class="sr-only">Comparison of {{ $compare->pluck('name')->implode(', ') }}</caption>
                     <thead>

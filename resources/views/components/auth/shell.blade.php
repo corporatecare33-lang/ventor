@@ -1,13 +1,16 @@
-{{-- Shared two-column shell for auth pages --}}
-<section class="grid min-h-[calc(100vh-120px)] lg:grid-cols-2">
+@props(['title', 'intro' => null])
+<section class="grid min-h-[calc(100dvh-4.5rem)] lg:grid-cols-2">
     <div class="relative hidden overflow-hidden bg-ink-950 lg:block">
-        <div class="absolute inset-0 placeholder-leather opacity-90"></div>
+        <img src="{{ asset('images/og-default.jpg') }}" alt="" class="absolute inset-0 size-full object-cover object-right opacity-70" width="1200" height="630" loading="lazy">
         <div class="relative flex h-full flex-col justify-end p-12 text-white">
-            <p class="eyebrow text-gold-400">LeatherX account</p>
-            <p class="mt-4 max-w-md font-display text-4xl leading-tight font-semibold">Track orders, manage your Tap profile and register warranty — all in one place.</p>
+            <p class="max-w-md font-display text-[2rem] leading-tight">Track orders, manage your LeatherX Tap profile and register warranty in one place.</p>
         </div>
     </div>
-    <div class="flex items-center justify-center px-4 py-14">
-        <div class="w-full max-w-md">{{ $slot }}</div>
+    <div class="flex items-center justify-center px-5 py-12 sm:py-16">
+        <div class="w-full max-w-md">
+            <h1 class="text-h1 text-ink-950">{{ $title }}</h1>
+            @if ($intro)<p class="mt-3 text-[15px] text-ink-600">{{ $intro }}</p>@endif
+            {{ $slot }}
+        </div>
     </div>
 </section>

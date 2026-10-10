@@ -16,16 +16,13 @@
             <a href="{{ $section->content['button_link'] ?? route('engraving') }}" class="btn-primary mt-10">{{ $section->content['button_text'] ?? 'Personalise a product' }}</a>
         </div>
 
-        <figure class="lg:col-span-5 lg:col-start-8">
-            <div class="material-tile aspect-[5/4] w-full rounded-sm" style="--tile: #5b3a24">
-                <ul class="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center text-[clamp(1.25rem,1rem+1vw,1.75rem)]" aria-hidden="true">
-                    @foreach ($fonts as $font)
-                        <li class="tracking-[0.08em] text-transparent [text-shadow:-1px_-1px_0_rgb(0_0_0/0.4),1px_1px_0_rgb(255_255_255/0.18)]
-                            {{ ['Classic Serif' => 'font-display font-semibold', 'Modern Sans' => 'font-sans font-medium', 'Script' => 'font-display italic', 'Block Capitals' => 'font-sans font-bold uppercase tracking-[0.18em] text-[0.8em]'][$font] ?? '' }}">{{ $font }}</li>
-                    @endforeach
-                </ul>
-            </div>
-            <figcaption class="mt-3 text-[13px] text-ink-500">The four engraving styles available at checkout, shown debossed on leather.</figcaption>
-        </figure>
+        @if ($image = $section->getFirstMedia('image'))
+            <figure class="lg:col-span-6 lg:col-start-7">
+                <div class="aspect-[4/3] overflow-hidden rounded-sm">
+                    <x-ui.picture :media="$image" :conversions="['mobile' => 800, 'desktop' => 1400]" sizes="(min-width: 1024px) 45vw, 100vw" width="1400" height="1050" />
+                </div>
+                <figcaption class="mt-3 text-[13px] text-ink-500">Engraving styles: {{ implode(', ', $fonts) }}.</figcaption>
+            </figure>
+        @endif
     </div>
 </section>

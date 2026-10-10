@@ -1,0 +1,1 @@
+@include('errors._simple', ['code' => 419, 'title' => 'This page has expired', 'message' => 'For your security, forms expire after a while. Go back, refresh the page and try again — nothing was submitted.', 'action' => url()->previous(), 'actionLabel' => 'Go back'])

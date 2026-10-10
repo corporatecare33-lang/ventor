@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Banner extends Model implements HasMedia
 {
@@ -29,6 +30,13 @@ class Banner extends Model implements HasMedia
     {
         $this->addMediaCollection('image')->singleFile();
         $this->addMediaCollection('mobile_image')->singleFile();
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('mobile')->width(800)->format('webp')->quality(78)->nonQueued();
+        $this->addMediaConversion('tablet')->width(1280)->format('webp')->quality(78)->nonQueued();
+        $this->addMediaConversion('desktop')->width(1920)->format('webp')->quality(78)->nonQueued();
     }
 
     public function scopeLive(Builder $query, BannerPosition $position): Builder

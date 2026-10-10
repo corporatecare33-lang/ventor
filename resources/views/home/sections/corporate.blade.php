@@ -9,12 +9,22 @@
                     @endforeach
                 </ul>
             @endif
-            <a href="{{ $section->content['button_link'] ?? route('corporate') }}" class="btn-primary mt-10">{{ $section->content['button_text'] ?? 'Request a quotation' }}</a>
-        </div>
-        @if ($corporateProduct)
-            <div class="lg:col-span-4 lg:col-start-9">
-                <x-product.card :product="$corporateProduct" />
+            <div class="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
+                <a href="{{ $section->content['button_link'] ?? route('corporate') }}" class="btn-primary">{{ $section->content['button_text'] ?? 'Request a quotation' }}</a>
+                <a href="{{ route('categories.show', 'corporate-gifts') }}" class="link-arrow">See gift sets <x-lx-icon name="arrow-right" class="size-4" /></a>
             </div>
+        </div>
+        @if ($image = $section->getFirstMedia('image'))
+            <figure class="lg:col-span-6 lg:col-start-7">
+                <div class="aspect-[4/3] overflow-hidden rounded-sm">
+                    <x-ui.picture :media="$image" :conversions="['mobile' => 800, 'desktop' => 1400]" sizes="(min-width: 1024px) 45vw, 100vw" width="1400" height="1050" />
+                </div>
+                @if ($corporateProduct)
+                    <figcaption class="mt-3 text-[13px] text-ink-500">
+                        Pictured: <a href="{{ route('products.show', $corporateProduct) }}" class="text-leather-700 underline underline-offset-4">{{ $corporateProduct->category?->name }}</a>
+                    </figcaption>
+                @endif
+            </figure>
         @endif
     </div>
 </section>

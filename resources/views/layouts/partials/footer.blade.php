@@ -50,7 +50,7 @@
 <footer class="bg-ink-950 text-white/75">
     <div class="container-site grid gap-12 py-14 lg:grid-cols-12 lg:gap-8 lg:py-16">
         <div class="lg:col-span-4">
-            <x-logo class="text-2xl !text-white" />
+            <x-logo inverse height="h-12" />
             @if ($about = setting('footer_about'))
                 <p class="mt-5 max-w-sm text-sm leading-relaxed">{{ $about }}</p>
             @endif
@@ -122,7 +122,7 @@
 
 @if ($wa = setting('contact_whatsapp'))
     <a href="https://wa.me/{{ preg_replace('/\D/', '', $wa) }}" target="_blank" rel="noopener"
-       class="fixed right-4 bottom-4 z-30 inline-flex size-12 items-center justify-center rounded-full bg-[#1d7a46] text-white shadow-pop transition-transform hover:scale-105">
+       class="fixed right-4 bottom-20 z-30 inline-flex size-12 lg:bottom-6 items-center justify-center rounded-full bg-[#1d7a46] text-white shadow-pop transition-transform hover:scale-105">
         <x-lx-icon name="chat" class="size-6" /><span class="sr-only">Chat with us on WhatsApp (opens in a new tab)</span>
     </a>
 @endif

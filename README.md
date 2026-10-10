@@ -39,6 +39,26 @@ Run the tests: `php artisan test` (SQLite in-memory, no setup needed).
 | Tests | `tests/Feature` |
 | Deployment guide (cPanel / shared hosting) | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) |
 
+## Images & brand assets
+
+| What | Where |
+| --- | --- |
+| Product, banner and section photos (originals, used by the seeders) | `public/images/products`, `public/images/banners` |
+| Logo (light background / dark background) | `public/images/brand/leatherx-logo.svg`, `leatherx-logo-inverse.svg` |
+| Favicons, app icons, default social share image | `public/favicon.*`, `public/icon-*.png`, `public/images/og-default.jpg` |
+
+New photos are uploaded in the admin (Products, Banners, Homepage sections, Categories) and converted to WebP
+automatically. A product photo can be linked to a colour by setting the media custom property `color`
+(e.g. `Whiskey Brown`) — choosing that colour on the product page then shows its photo.
+
+Prices, stock and capacities in the starter catalogue are sample values: review them in **Catalog → Products**.
+
+## Design system
+
+Tokens live in `resources/css/app.css` (`@theme`): warm neutrals, one brown (`leather-*`) and one brass accent
+(`brass-*`, dark backgrounds only), Cormorant Garamond for display type and Inter for text, 2px radius for
+controls and 4px for media. Reusable Blade components are in `resources/views/components/{ui,form,product}`.
+
 ## Admin roles
 
 | Role | Access |
@@ -62,3 +82,5 @@ code are added:
 - **Courier (Steadfast, Pathao, RedX)** — courier name + tracking number are entered by admin.
 - **SMS** — not connected; email confirmation is sent via the queue.
 - **NFC** — software only: each profile has a public URL (`/tap/{slug}`) that the chip / QR code points to.
+- **Contact details, social links, bKash/Nagad numbers** — intentionally empty after seeding. Add the real values
+  in **Settings → Website settings** and **Settings → Payment methods**; the storefront hides anything not configured.

@@ -1,34 +1,41 @@
 @extends('layouts.app')
 
 @section('content')
-<x-page-header eyebrow="Journal" title="Stories, care guides & news" :crumbs="['Journal' => null]" />
-<section class="container-lx py-14">
+<x-ui.page-header title="Journal" intro="Leather care, LeatherX Tap guides and news from the workshop." :crumbs="['Journal' => null]">
     @if ($categories->isNotEmpty())
-        <div class="mb-10 flex flex-wrap gap-2">
-            <a href="{{ route('blog.index') }}" class="rounded-full px-4 py-2 text-xs font-medium {{ ! $activeCategory ? 'bg-ink-900 text-white' : 'border border-ink-900/15' }}">All</a>
+        <nav class="mt-8 flex flex-wrap gap-2" aria-label="Journal topics">
+            <a href="{{ route('blog.index') }}" @if (! $activeCategory) aria-current="page" @endif class="inline-flex min-h-9 items-center rounded-xs border px-3.5 text-sm {{ ! $activeCategory ? 'border-ink-950 bg-ink-950 text-white' : 'border-line-strong hover:border-ink-950' }}">All</a>
             @foreach ($categories as $cat)
-                <a href="{{ route('blog.index', ['category' => $cat]) }}" class="rounded-full px-4 py-2 text-xs font-medium {{ $activeCategory === $cat ? 'bg-ink-900 text-white' : 'border border-ink-900/15' }}">{{ $cat }}</a>
+                <a href="{{ route('blog.index', ['category' => $cat]) }}" @if ($activeCategory === $cat) aria-current="page" @endif class="inline-flex min-h-9 items-center rounded-xs border px-3.5 text-sm {{ $activeCategory === $cat ? 'border-ink-950 bg-ink-950 text-white' : 'border-line-strong hover:border-ink-950' }}">{{ $cat }}</a>
             @endforeach
-        </div>
+        </nav>
     @endif
-    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        @forelse ($posts as $post)
-            <article class="group">
-                <a href="{{ route('blog.show', $post) }}" class="block aspect-[16/10] overflow-hidden rounded-2xl bg-cream-100">
-                    @if ($cover = $post->getFirstMedia('cover'))
-                        <img src="{{ $cover->getAvailableUrl(['card']) }}" alt="{{ $post->title }}" class="size-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" width="800" height="500">
-                    @else
-                        <div class="placeholder-leather grid size-full place-items-center"><x-lx-icon name="document" class="size-10 text-tan-300/50" /></div>
-                    @endif
-                </a>
-                <p class="mt-4 text-xs text-ink-600">{{ $post->category }} · {{ $post->published_at->format('d M Y') }} · {{ $post->readingMinutes() }} min read</p>
-                <h2 class="mt-2 font-display text-2xl leading-snug font-semibold"><a href="{{ route('blog.show', $post) }}" class="hover:text-leather-700">{{ $post->title }}</a></h2>
-                @if ($post->excerpt)<p class="mt-2 text-sm leading-6 text-ink-600">{{ $post->excerpt }}</p>@endif
-            </article>
-        @empty
-            <p class="text-sm text-ink-600">No posts yet.</p>
-        @endforelse
-    </div>
-    <div class="mt-12">{{ $posts->links('components.pagination') }}</div>
+</x-ui.page-header>
+<section class="container-site py-12 lg:py-16">
+    <h2 class="sr-only">Articles</h2>
+    @if ($posts->isEmpty())
+        <x-ui.empty-state title="No articles yet" text="New guides are published here regularly." />
+    @else
+        <ul class="divide-y divide-line border-y border-line">
+            @foreach ($posts as $post)
+                <li>
+                    <article class="grid gap-6 py-8 sm:grid-cols-[minmax(0,1fr)_14rem] lg:grid-cols-[12rem_minmax(0,1fr)_16rem] lg:gap-10">
+                        <p class="text-[13px] text-ink-500 lg:pt-2"><time datetime="{{ $post->published_at->toDateString() }}">{{ $post->published_at->format('j F Y') }}</time><span class="block">{{ $post->category }} · {{ $post->readingMinutes() }} min read</span></p>
+                        <div>
+                            <h3 class="font-display text-[1.75rem] leading-tight text-ink-950"><a href="{{ route('blog.show', $post) }}" class="underline-offset-4 hover:underline">{{ $post->title }}</a></h3>
+                            @if ($post->excerpt)<p class="mt-3 max-w-xl text-[15px] leading-relaxed text-ink-600">{{ $post->excerpt }}</p>@endif
+                            <a href="{{ route('blog.show', $post) }}" class="link-arrow mt-4">Read article<span class="sr-only">: {{ $post->title }}</span> <x-lx-icon name="arrow-right" class="size-4" /></a>
+                        </div>
+                        @if ($cover = $post->getFirstMedia('cover'))
+                            <a href="{{ route('blog.show', $post) }}" class="block aspect-[4/3] overflow-hidden rounded-xs bg-paper max-sm:order-first" tabindex="-1" aria-hidden="true">
+                                <img src="{{ $cover->getAvailableUrl(['card']) }}" alt="" class="size-full object-cover" loading="lazy" width="800" height="600">
+                            </a>
+                        @endif
+                    </article>
+                </li>
+            @endforeach
+        </ul>
+        <div class="mt-12">{{ $posts->links('components.pagination') }}</div>
+    @endif
 </section>
 @endsection

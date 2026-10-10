@@ -21,7 +21,9 @@ class BlogController extends Controller
             'posts' => $posts,
             'categories' => Post::published()->whereNotNull('category')->distinct()->pluck('category'),
             'activeCategory' => $category,
-            'seo' => Seo::make('Journal — leather care, guides & news', 'Leather care tips, NFC smart wallet guides and LeatherX news.')->canonical(route('blog.index')),
+            'seo' => $category
+                ? Seo::make($category.' — Journal', $category.' articles from the LeatherX journal.')->canonical(route('blog.index', ['category' => $category]))->pageType('CollectionPage')
+                : Seo::make('Journal — leather care, guides & news', 'Leather care tips, LeatherX Tap guides and news.')->canonical(route('blog.index'))->pageType('CollectionPage'),
         ]);
     }
 

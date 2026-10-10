@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\PaymentMethod;
 use App\Models\Review;
 use Database\Seeders\ContentSeeder;
 use Database\Seeders\SettingsSeeder;
@@ -65,6 +66,8 @@ class StorefrontPagesTest extends TestCase
             ->assertSee('৳1,500')
             ->assertSee('"@type":"Product"', false)
             ->assertSee('"@type":"BreadcrumbList"', false)
+            ->assertSee('"@type":"Organization"', false)
+            ->assertSee('twitter:card', false)
             ->assertSee('Beautiful stitching')
             ->assertDontSee('Pending moderation review');
 
@@ -85,6 +88,33 @@ class StorefrontPagesTest extends TestCase
             '/return-policy', '/privacy-policy', '/terms-and-conditions', '/delivery-policy', '/track-order', '/cart'] as $url) {
             $this->get($url)->assertOk();
         }
+    }
+
+    public function test_payment_methods_without_a_number_are_not_offered(): void
+    {
+        $this->product();
+        $this->assertFalse(PaymentMethod::where('code', 'bkash')->value('is_active'));
+        $this->assertTrue(PaymentMethod::where('code', 'cod')->value('is_active'));
+    }
+
+    public function test_llms_txt_and_manifest(): void
+    {
+        $category = $this->product()->category;
+
+        $this->get('/llms.txt')->assertOk()->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
+            ->assertSee('# LeatherX')->assertSee(route('categories.show', $category), false);
+        $this->get('/site.webmanifest')->assertOk()->assertJsonPath('name', 'LeatherX');
+    }
+
+    public function test_fixed_cms_pages_have_a_single_url(): void
+    {
+        $this->get('/page/about')->assertRedirect('/about')->assertStatus(301);
+        $this->get('/about')->assertOk()->assertSee('<link rel="canonical" href="'.url('/about').'">', false);
+    }
+
+    public function test_custom_404_page(): void
+    {
+        $this->get('/this-page-does-not-exist')->assertNotFound()->assertSee('We could not find that page')->assertSee('noindex');
     }
 
     public function test_sitemap_and_robots(): void

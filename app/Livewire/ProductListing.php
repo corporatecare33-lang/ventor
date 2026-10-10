@@ -74,6 +74,20 @@ class ProductListing extends Component
         }
     }
 
+    /** Remove a single active filter (used by the filter chips). */
+    public function removeFilter(string $filter, string $value = ''): void
+    {
+        match ($filter) {
+            'categories', 'colors', 'features' => $this->{$filter} = array_values(array_filter($this->{$filter}, fn ($v) => (string) $v !== $value)),
+            'minPrice', 'maxPrice' => $this->{$filter} = null,
+            'inStock' => $this->inStock = false,
+            'q' => $this->q = '',
+            default => null,
+        };
+
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
         $this->reset('q', 'categories', 'colors', 'features', 'minPrice', 'maxPrice', 'inStock');

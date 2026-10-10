@@ -9,6 +9,7 @@ use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -60,6 +61,9 @@ class HomeSectionResource extends Resource
                 TextInput::make('content.button_text')->maxLength(40),
                 TextInput::make('content.button_link')->maxLength(255),
             ]),
+            SpatieMediaLibraryFileUpload::make('image')->collection('image')->image()->maxSize(5120)
+                ->columnSpanFull()->helperText('Section photograph (landscape, at least 1600px wide). Converted to WebP automatically.')
+                ->customProperties(fn ($get) => ['alt' => $get('title')]),
             TextInput::make('sort_order')->numeric()->default(0),
         ]);
     }
