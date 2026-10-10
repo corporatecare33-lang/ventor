@@ -20,7 +20,7 @@ class AddressesRelationManager extends RelationManager
     {
         return $table->columns([
             TextColumn::make('label')->badge(),
-            TextColumn::make('name')->description(fn ($r) => $r->phone),
+            TextColumn::make('name')->description(fn ($record) => $record->phone),
             TextColumn::make('full_address')->label('Address')->wrap(),
             IconColumn::make('is_default')->boolean(),
         ]);

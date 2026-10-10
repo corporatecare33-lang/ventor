@@ -72,7 +72,7 @@ class PageResource extends Resource
                 TextColumn::make('updated_at')->since(),
             ])
             ->recordActions([
-                Action::make('view')->icon(Heroicon::OutlinedEye)->color('gray')->url(fn (Page $r) => route('pages.show', $r), shouldOpenInNewTab: true),
+                Action::make('view')->icon(Heroicon::OutlinedEye)->color('gray')->url(fn (Page $record) => route('pages.show', $record), shouldOpenInNewTab: true),
                 EditAction::make(),
                 DeleteAction::make(),
             ]);

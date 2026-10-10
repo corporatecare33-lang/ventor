@@ -1,58 +1,64 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# LeatherX
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Premium eCommerce for leather wallets, LeatherX Tap NFC smart wallets, bags, card holders,
+passport and key holders — with laser engraving, warranty and corporate gifting.
 
-## About Laravel
+**Stack:** Laravel 13 · PHP 8.3+ · MySQL 8 · Blade + Livewire 4 (Alpine.js bundled) · Tailwind CSS 4 · Vite ·
+Filament 5 admin · Spatie Permission · Spatie Media Library.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+> Filament 5 requires Livewire 4, so the project uses Livewire 4 (the API used here is the same as Livewire 3).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Quick start (local)
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+npm install && npm run build
+cp .env.example .env          # set DB_* (MySQL) or DB_CONNECTION=sqlite
+php artisan key:generate
+php artisan migrate --seed    # prints the super-admin password if ADMIN_PASSWORD is empty
+php artisan storage:link
+php artisan serve             # storefront: http://localhost:8000  ·  admin: /admin
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Run the tests: `php artisan test` (SQLite in-memory, no setup needed).
 
-## Contributing
+## What's inside
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Area | Where |
+| --- | --- |
+| Database schema | `database/migrations/2026_10_10_12*` |
+| Models & relationships | `app/Models` |
+| Business logic (cart, checkout, stock, order status) | `app/Services` |
+| Admin panel (26 modules, dashboard, reports, settings, roles) | `app/Filament` |
+| Storefront controllers | `app/Http/Controllers` |
+| Livewire components (cart, checkout, filters, quick view, warranty) | `app/Livewire`, `resources/views/livewire` |
+| Blade pages & UI components | `resources/views` |
+| SEO (meta, Open Graph, JSON-LD, sitemap, robots) | `app/Support/Seo.php`, `SeoController` |
+| Caching | `app/Support/StorefrontCache.php` (versioned, auto-flushed on admin changes) |
+| Seed data (sample catalogue, no images) | `database/seeders` |
+| Tests | `tests/Feature` |
+| Deployment guide (cPanel / shared hosting) | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) |
 
-## Code of Conduct
+## Admin roles
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Role | Access |
+| --- | --- |
+| `super_admin` | Everything (bypasses all checks) |
+| `admin` | Everything except managing admin users |
+| `manager` | Catalog, orders, marketing, services, content; view customers & reports |
+| `support` | View catalog/orders/customers; manage engraving, NFC, warranty, inquiries |
+| `customer` | Storefront account only — no admin access |
 
-## Security Vulnerabilities
+Permissions are `view {area}` / `manage {area}` (see `app/Support/Permissions.php`) and can be edited
+in **Admin → Access → Roles & permissions**.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Integrations status (honest list)
 
-## License
+Nothing below is faked. These run as manual, admin-controlled flows until real credentials and integration
+code are added:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- **bKash / Nagad** — customer sends money and enters the TrxID; admin verifies it in **Sales → Payments**.
+- **Online gateways (SSLCommerz, bKash PGW)** — not connected.
+- **Courier (Steadfast, Pathao, RedX)** — courier name + tracking number are entered by admin.
+- **SMS** — not connected; email confirmation is sent via the queue.
+- **NFC** — software only: each profile has a public URL (`/tap/{slug}`) that the chip / QR code points to.

@@ -28,11 +28,11 @@ class LowStockProducts extends TableWidget
             ->defaultPaginationPageOption(5)
             ->emptyStateHeading('All products are well stocked')
             ->columns([
-                TextColumn::make('name')->description(fn (Product $r) => $r->sku),
+                TextColumn::make('name')->description(fn (Product $record) => $record->sku),
                 TextColumn::make('stock_quantity')->label('Stock')->badge()->color(fn (int $state) => $state <= 0 ? 'danger' : 'warning'),
             ])
             ->recordActions([
-                Action::make('open')->url(fn (Product $r) => ProductResource::getUrl('edit', ['record' => $r])),
+                Action::make('open')->url(fn (Product $record) => ProductResource::getUrl('edit', ['record' => $record])),
             ]);
     }
 }

@@ -69,13 +69,13 @@ class EngravingRequestResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('order.order_number')->label('Order')->placeholder('Pre-order inquiry')->searchable()
-                    ->url(fn (EngravingRequest $r) => $r->order ? OrderResource::getUrl('view', ['record' => $r->order]) : null),
+                    ->url(fn (EngravingRequest $record) => $record->order ? OrderResource::getUrl('view', ['record' => $record->order]) : null),
                 TextColumn::make('product.name')->limit(25)->placeholder('—'),
-                TextColumn::make('customer_name')->searchable()->description(fn (EngravingRequest $r) => $r->phone),
+                TextColumn::make('customer_name')->searchable()->description(fn (EngravingRequest $record) => $record->phone),
                 TextColumn::make('type')->badge(),
                 TextColumn::make('text')->label('Text / instruction')->wrap()->limit(40)
-                    ->state(fn (EngravingRequest $r) => $r->text ?: $r->logo_instruction)
-                    ->description(fn (EngravingRequest $r) => collect([$r->font, $r->position])->filter()->implode(' · ')),
+                    ->state(fn (EngravingRequest $record) => $record->text ?: $record->logo_instruction)
+                    ->description(fn (EngravingRequest $record) => collect([$record->font, $record->position])->filter()->implode(' · ')),
                 TextColumn::make('quantity')->label('Qty'),
                 TextColumn::make('status')->badge(),
                 TextColumn::make('created_at')->since()->sortable(),
@@ -90,10 +90,10 @@ class EngravingRequestResource extends Resource
                         ->label('Mark '.strtolower($status->getLabel()))
                         ->color($status->getColor())
                         ->authorize(fn () => static::can('update'))
-                        ->visible(fn (EngravingRequest $r) => $r->status !== $status)
+                        ->visible(fn (EngravingRequest $record) => $record->status !== $status)
                         ->schema([Textarea::make('admin_note')->rows(2)])
-                        ->fillForm(fn (EngravingRequest $r) => ['admin_note' => $r->admin_note])
-                        ->action(fn (EngravingRequest $r, array $data) => $r->update(['status' => $status, 'admin_note' => $data['admin_note']])))
+                        ->fillForm(fn (EngravingRequest $record) => ['admin_note' => $record->admin_note])
+                        ->action(fn (EngravingRequest $record, array $data) => $record->update(['status' => $status, 'admin_note' => $data['admin_note']])))
                         ->all(),
                 ])->label('Status')->icon(Heroicon::OutlinedArrowPath)->button()->size('sm'),
                 EditAction::make(),

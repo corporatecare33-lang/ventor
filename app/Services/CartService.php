@@ -8,6 +8,7 @@ use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ShippingZone;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -149,7 +150,7 @@ class CartService
         $this->current()?->update(['coupon_code' => null]);
     }
 
-    /** @return \Illuminate\Support\Collection<int, CartItem> */
+    /** @return Collection<int, CartItem> */
     public function items()
     {
         $cart = $this->current();
@@ -179,7 +180,7 @@ class CartService
     /**
      * Full price breakdown for the cart and checkout pages.
      *
-     * @return array{items: \Illuminate\Support\Collection, subtotal: float, engraving: float, discount: float, shipping: float, total: float, coupon: ?Coupon, coupon_error: ?string}
+     * @return array{items: Collection, subtotal: float, engraving: float, discount: float, shipping: float, total: float, coupon: ?Coupon, coupon_error: ?string}
      */
     public function totals(?ShippingZone $zone = null): array
     {

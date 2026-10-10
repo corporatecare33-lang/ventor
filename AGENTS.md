@@ -1,47 +1,14 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# LeatherX — notes for AI agents
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+Laravel 13 eCommerce (Blade + Livewire 4 storefront, Filament 5 admin). Read `README.md` first.
 
-## Prerequisites
-
-Verify that PHP and Composer are available:
-
-```sh
-php -v
-composer -V
-```
-
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
-
-macOS:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
-
-Windows PowerShell:
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+- Run `php artisan test` and `vendor/bin/pint` before committing.
+- Filament 5 injects closure parameters **by name**: use `$query`, `$record`, `$state`, `$get`, `$set`, `$data` —
+  never short names like `$q` or `$r` (they arrive as `null`).
+- Blade icons: use `<x-lx-icon name="..." />` (`<x-icon>` belongs to blade-icons used by Filament).
+- Cache stores only allow-listed classes (`config/cache.php` → `serializable_classes`). Add a model there before
+  caching it through `StorefrontCache`.
+- Stock changes must go through `App\Services\InventoryService` so they are logged in `stock_movements`.
+- Order status changes must go through `App\Services\OrderService` (restocks on cancel/return).
+- Product route key is `slug`; order route key is `order_number`; NFC profile route key is `slug`.
+- Do not add fake integrations: payment/courier/SMS are manual until real credentials exist.

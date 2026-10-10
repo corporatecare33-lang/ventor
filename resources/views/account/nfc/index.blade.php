@@ -16,7 +16,13 @@
     <div class="space-y-4">
         @foreach ($profiles as $profile)
             <div class="card flex flex-wrap items-center gap-5 p-6">
-                <span class="grid size-14 place-items-center rounded-full bg-ink-900 font-display text-2xl text-gold-400">{{ mb_strtoupper(mb_substr($profile->name, 0, 1)) }}</span>
+                @if ($profile->status === \App\Enums\NfcProfileStatus::Active)
+                    <a href="{{ route('nfc.qr', $profile) }}" download="{{ $profile->slug }}-qr.svg" class="block size-24 shrink-0 rounded-xl border border-ink-900/10 bg-white p-1" title="Download QR code">
+                        <img src="{{ route('nfc.qr', $profile) }}" alt="QR code for {{ $profile->name }}" class="size-full" width="96" height="96" loading="lazy">
+                    </a>
+                @else
+                    <span class="grid size-14 place-items-center rounded-full bg-ink-900 font-display text-2xl text-gold-400">{{ mb_strtoupper(mb_substr($profile->name, 0, 1)) }}</span>
+                @endif
                 <div class="min-w-0 flex-1">
                     <p class="font-semibold">{{ $profile->name }} <x-status-badge :status="$profile->status" /></p>
                     <p class="text-xs text-ink-600">{{ collect([$profile->designation, $profile->company])->filter()->implode(' · ') }}</p>
@@ -24,7 +30,7 @@
                         <code class="truncate rounded bg-cream-100 px-2 py-1 text-xs">{{ $profile->publicUrl() }}</code>
                         <button type="button" class="text-xs text-leather-700 underline" @click="navigator.clipboard.writeText(@js($profile->publicUrl())); copied = true; setTimeout(() => copied = false, 1500)" x-text="copied ? 'Copied' : 'Copy'"></button>
                     </div>
-                    <p class="mt-1 text-xs text-ink-600">{{ $profile->views_count }} taps / views</p>
+                    <p class="mt-1 text-xs text-ink-600">{{ $profile->views_count }} taps / views · Click the QR code to download it for printing.</p>
                 </div>
                 <div class="flex gap-2">
                     <a href="{{ $profile->publicUrl() }}" target="_blank" class="btn-outline px-4 py-2 text-xs">Preview</a>

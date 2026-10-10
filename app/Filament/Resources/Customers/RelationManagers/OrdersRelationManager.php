@@ -30,7 +30,7 @@ class OrdersRelationManager extends RelationManager
                 TextColumn::make('created_at')->dateTime('d M Y'),
             ])
             ->recordActions([
-                Action::make('open')->url(fn (Order $r) => OrderResource::getUrl('view', ['record' => $r])),
+                Action::make('open')->url(fn (Order $record) => OrderResource::getUrl('view', ['record' => $record])),
             ]);
     }
 }

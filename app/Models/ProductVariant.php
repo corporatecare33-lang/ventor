@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\InventoryService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -21,7 +22,7 @@ class ProductVariant extends Model
     protected static function booted(): void
     {
         $sync = function (ProductVariant $variant) {
-            $service = app(\App\Services\InventoryService::class);
+            $service = app(InventoryService::class);
             $service->syncProductStockFromVariants($variant->product);
             $service->syncStatus($variant->product->fresh());
         };

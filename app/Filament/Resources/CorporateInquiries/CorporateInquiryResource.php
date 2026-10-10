@@ -18,8 +18,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use UnitEnum;
@@ -67,7 +67,7 @@ class CorporateInquiryResource extends Resource
         return $table
             ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('company_name')->searchable()->weight('medium')->description(fn (CorporateInquiry $r) => $r->contact_person.' · '.$r->phone),
+                TextColumn::make('company_name')->searchable()->weight('medium')->description(fn (CorporateInquiry $record) => $record->contact_person.' · '.$record->phone),
                 TextColumn::make('quantity')->sortable(),
                 TextColumn::make('product_interest')->limit(30)->placeholder('—'),
                 TextColumn::make('deadline')->date('d M Y')->placeholder('—'),

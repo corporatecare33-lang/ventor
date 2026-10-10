@@ -7,6 +7,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\StockMovementType;
 use App\Enums\TransactionStatus;
+use App\Jobs\SendOrderPlacedNotification;
 use App\Models\CartItem;
 use App\Models\Coupon;
 use App\Models\Order;
@@ -14,6 +15,7 @@ use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ShippingZone;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -28,7 +30,7 @@ class CheckoutService
      * Turn the current cart into an order. Everything runs in one transaction with
      * row locks, so stock and coupon usage can't be oversold by parallel checkouts.
      *
-     * @param array{customer_name: string, phone: string, email?: ?string, address: string, area?: ?string, city: string, district?: ?string, postal_code?: ?string, shipping_zone_id: int, payment_method: string, transaction_id?: ?string, sender_number?: ?string, customer_note?: ?string} $data
+     * @param  array{customer_name: string, phone: string, email?: ?string, address: string, area?: ?string, city: string, district?: ?string, postal_code?: ?string, shipping_zone_id: int, payment_method: string, transaction_id?: ?string, sender_number?: ?string, customer_note?: ?string}  $data
      */
     public function placeOrder(array $data): Order
     {
@@ -47,7 +49,7 @@ class CheckoutService
         $order = DB::transaction(function () use ($cart, $zone, $method, $data) {
             $totals = $this->cart->totals($zone);
 
-            /** @var \Illuminate\Support\Collection<int, CartItem> $items */
+            /** @var Collection<int, CartItem> $items */
             $items = $totals['items'];
 
             foreach ($items as $item) {
@@ -146,7 +148,7 @@ class CheckoutService
 
         $this->cart->forget();
 
-        \App\Jobs\SendOrderPlacedNotification::dispatch($order->id)->afterCommit();
+        SendOrderPlacedNotification::dispatch($order->id)->afterCommit();
 
         return $order;
     }

@@ -67,12 +67,12 @@ class BannerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($q) => $q->with('media'))
+            ->modifyQueryUsing(fn ($query) => $query->with('media'))
             ->defaultSort('sort_order')
             ->reorderable('sort_order')
             ->columns([
                 SpatieMediaLibraryImageColumn::make('image')->collection('image')->label(''),
-                TextColumn::make('title')->searchable()->limit(50)->description(fn (Banner $r) => $r->subtitle ? str($r->subtitle)->limit(60) : null),
+                TextColumn::make('title')->searchable()->limit(50)->description(fn (Banner $record) => $record->subtitle ? str($record->subtitle)->limit(60) : null),
                 TextColumn::make('position')->badge(),
                 TextColumn::make('ends_at')->label('Ends')->dateTime('d M Y')->placeholder('—'),
                 IconColumn::make('is_active')->boolean(),

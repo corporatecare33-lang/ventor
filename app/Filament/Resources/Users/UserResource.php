@@ -65,7 +65,7 @@ class UserResource extends Resource
                 ->required(fn (string $operation) => $operation === 'create')
                 ->dehydrated(fn (?string $state) => filled($state))
                 ->helperText(fn (string $operation) => $operation === 'edit' ? 'Leave empty to keep the current password.' : null),
-            Select::make('roles')->relationship('roles', 'name', fn ($q) => $q->whereIn('name', User::ADMIN_ROLES))
+            Select::make('roles')->relationship('roles', 'name', fn ($query) => $query->whereIn('name', User::ADMIN_ROLES))
                 ->multiple()->preload()->required()
                 ->disabled(fn (?User $record) => $record?->is(auth()->user())),
             Toggle::make('is_active')->default(true)->inline(false)
@@ -76,9 +76,9 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($q) => $q->with('roles'))
+            ->modifyQueryUsing(fn ($query) => $query->with('roles'))
             ->columns([
-                TextColumn::make('name')->searchable()->description(fn (User $r) => $r->email),
+                TextColumn::make('name')->searchable()->description(fn (User $record) => $record->email),
                 TextColumn::make('roles.name')->badge(),
                 IconColumn::make('is_active')->boolean(),
                 TextColumn::make('last_login_at')->since()->placeholder('Never'),

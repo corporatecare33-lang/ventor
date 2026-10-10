@@ -65,12 +65,12 @@ class CouponResource extends Resource
         return $table
             ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('code')->searchable()->weight('bold')->copyable()->description(fn (Coupon $r) => $r->description),
-                TextColumn::make('value')->formatStateUsing(fn (Coupon $r) => $r->type === CouponType::Percent ? rtrim(rtrim((string) $r->value, '0'), '.').'%' : money($r->value)),
+                TextColumn::make('code')->searchable()->weight('bold')->copyable()->description(fn (Coupon $record) => $record->description),
+                TextColumn::make('value')->formatStateUsing(fn (Coupon $record) => $record->type === CouponType::Percent ? rtrim(rtrim((string) $record->value, '0'), '.').'%' : money($record->value)),
                 TextColumn::make('min_order_amount')->label('Min order')->money('BDT')->placeholder('—'),
-                TextColumn::make('used_count')->label('Used')->formatStateUsing(fn (Coupon $r) => $r->used_count.($r->usage_limit ? ' / '.$r->usage_limit : '')),
+                TextColumn::make('used_count')->label('Used')->formatStateUsing(fn (Coupon $record) => $record->used_count.($record->usage_limit ? ' / '.$record->usage_limit : '')),
                 IconColumn::make('free_shipping')->boolean(),
-                TextColumn::make('expires_at')->dateTime('d M Y')->placeholder('Never')->color(fn (Coupon $r) => $r->expires_at?->isPast() ? 'danger' : null),
+                TextColumn::make('expires_at')->dateTime('d M Y')->placeholder('Never')->color(fn (Coupon $record) => $record->expires_at?->isPast() ? 'danger' : null),
                 IconColumn::make('is_active')->boolean(),
             ])
             ->filters([TernaryFilter::make('is_active')])

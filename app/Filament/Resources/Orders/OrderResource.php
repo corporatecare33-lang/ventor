@@ -99,7 +99,7 @@ class OrderResource extends Resource
                 Section::make('Items')->schema([
                     RepeatableEntry::make('items')->hiddenLabel()->columns(5)->schema([
                         TextEntry::make('product_name')->label('Product')->columnSpan(2)
-                            ->description(fn ($record) => trim(($record->variant_name ? $record->variant_name.' · ' : '').$record->sku)),
+                            ->helperText(fn ($record) => trim(($record->variant_name ? $record->variant_name.' · ' : '').$record->sku)),
                         TextEntry::make('unit_price')->money('BDT'),
                         TextEntry::make('quantity')->label('Qty'),
                         TextEntry::make('line_total')->money('BDT')->weight('bold')
@@ -146,7 +146,7 @@ class OrderResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('order_number')->label('Order')->searchable()->weight('bold')->copyable(),
-                TextColumn::make('customer_name')->label('Customer')->searchable()->description(fn (Order $r) => $r->phone),
+                TextColumn::make('customer_name')->label('Customer')->searchable()->description(fn (Order $record) => $record->phone),
                 TextColumn::make('phone')->searchable()->hidden(),
                 TextColumn::make('items_count')->label('Items'),
                 TextColumn::make('total')->money('BDT')->sortable(),
@@ -161,7 +161,7 @@ class OrderResource extends Resource
                 SelectFilter::make('payment_status')->options(PaymentStatus::class),
                 SelectFilter::make('payment_method')->relationship('paymentMethodModel', 'name'),
                 Filter::make('created_at')->schema([DatePicker::make('from'), DatePicker::make('until')])
-                    ->query(fn (Builder $q, array $data) => $q
+                    ->query(fn (Builder $query, array $data) => $query
                         ->when($data['from'], fn ($q, $d) => $q->whereDate('created_at', '>=', $d))
                         ->when($data['until'], fn ($q, $d) => $q->whereDate('created_at', '<=', $d))),
             ])

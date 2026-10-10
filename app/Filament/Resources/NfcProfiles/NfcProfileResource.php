@@ -51,7 +51,7 @@ class NfcProfileResource extends Resource
                 Select::make('status')->options(NfcProfileStatus::class)->required()->default(NfcProfileStatus::Active),
                 TextInput::make('slug')->label('Public URL slug')->required()->alphaDash()->unique(ignoreRecord: true)
                     ->prefix(url('/tap').'/')->helperText('Changing this breaks already-programmed NFC chips and printed QR codes.'),
-                Select::make('product_id')->relationship('product', 'name', fn ($q) => $q->where('nfc_enabled', true))->searchable()->preload(),
+                Select::make('product_id')->relationship('product', 'name', fn ($query) => $query->where('nfc_enabled', true))->searchable()->preload(),
             ]),
             TextInput::make('name')->required()->maxLength(100),
             TextInput::make('designation')->maxLength(100),
@@ -73,23 +73,26 @@ class NfcProfileResource extends Resource
             ->modifyQueryUsing(fn ($query) => $query->with('user:id,name,email'))
             ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('name')->searchable()->weight('medium')->description(fn (NfcProfile $r) => collect([$r->designation, $r->company])->filter()->implode(', ')),
+                TextColumn::make('name')->searchable()->weight('medium')->description(fn (NfcProfile $record) => collect([$record->designation, $record->company])->filter()->implode(', ')),
                 TextColumn::make('user.email')->label('Account')->searchable(),
-                TextColumn::make('slug')->label('Public link')->copyable()->copyableState(fn (NfcProfile $r) => $r->publicUrl())->limit(30),
+                TextColumn::make('slug')->label('Public link')->copyable()->copyableState(fn (NfcProfile $record) => $record->publicUrl())->limit(30),
                 TextColumn::make('views_count')->label('Taps / views')->sortable(),
                 TextColumn::make('status')->badge(),
                 TextColumn::make('updated_at')->since()->sortable(),
             ])
             ->filters([SelectFilter::make('status')->options(NfcProfileStatus::class)])
             ->recordActions([
+                Action::make('qr')->label('QR')->icon(Heroicon::OutlinedQrCode)->color('gray')
+                    ->visible(fn (NfcProfile $record) => $record->status === NfcProfileStatus::Active)
+                    ->url(fn (NfcProfile $record) => route('nfc.qr', $record), shouldOpenInNewTab: true),
                 Action::make('open')->icon(Heroicon::OutlinedArrowTopRightOnSquare)->color('gray')
-                    ->url(fn (NfcProfile $r) => $r->publicUrl(), shouldOpenInNewTab: true),
+                    ->url(fn (NfcProfile $record) => $record->publicUrl(), shouldOpenInNewTab: true),
                 Action::make('toggle')
-                    ->label(fn (NfcProfile $r) => $r->status === NfcProfileStatus::Active ? 'Suspend' : 'Activate')
-                    ->color(fn (NfcProfile $r) => $r->status === NfcProfileStatus::Active ? 'danger' : 'success')
+                    ->label(fn (NfcProfile $record) => $record->status === NfcProfileStatus::Active ? 'Suspend' : 'Activate')
+                    ->color(fn (NfcProfile $record) => $record->status === NfcProfileStatus::Active ? 'danger' : 'success')
                     ->authorize(fn () => static::can('update'))
                     ->requiresConfirmation()
-                    ->action(fn (NfcProfile $r) => $r->update(['status' => $r->status === NfcProfileStatus::Active ? NfcProfileStatus::Suspended : NfcProfileStatus::Active])),
+                    ->action(fn (NfcProfile $record) => $record->update(['status' => $record->status === NfcProfileStatus::Active ? NfcProfileStatus::Suspended : NfcProfileStatus::Active])),
                 EditAction::make(),
                 DeleteAction::make(),
             ]);

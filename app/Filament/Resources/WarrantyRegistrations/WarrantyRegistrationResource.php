@@ -70,12 +70,12 @@ class WarrantyRegistrationResource extends Resource
             ->columns([
                 TextColumn::make('reference')->searchable()->weight('bold')->copyable(),
                 TextColumn::make('type')->badge(),
-                TextColumn::make('customer_name')->searchable()->description(fn (WarrantyRegistration $r) => $r->phone),
+                TextColumn::make('customer_name')->searchable()->description(fn (WarrantyRegistration $record) => $record->phone),
                 TextColumn::make('order_number')->searchable()
-                    ->url(fn (WarrantyRegistration $r) => $r->order ? OrderResource::getUrl('view', ['record' => $r->order]) : null),
+                    ->url(fn (WarrantyRegistration $record) => $record->order ? OrderResource::getUrl('view', ['record' => $record->order]) : null),
                 TextColumn::make('product_name')->limit(25),
                 TextColumn::make('expires_at')->label('Valid until')->date('d M Y')->placeholder('—')
-                    ->color(fn (WarrantyRegistration $r) => $r->expires_at && ! $r->isActive() ? 'danger' : 'success'),
+                    ->color(fn (WarrantyRegistration $record) => $record->expires_at && ! $record->isActive() ? 'danger' : 'success'),
                 TextColumn::make('status')->badge(),
                 TextColumn::make('created_at')->since()->sortable(),
             ])
@@ -86,14 +86,14 @@ class WarrantyRegistrationResource extends Resource
             ->recordActions([
                 Action::make('approve')->icon(Heroicon::OutlinedCheck)->color('success')
                     ->authorize(fn () => static::can('update'))
-                    ->visible(fn (WarrantyRegistration $r) => $r->status === WarrantyStatus::Pending)
+                    ->visible(fn (WarrantyRegistration $record) => $record->status === WarrantyStatus::Pending)
                     ->schema([Textarea::make('admin_note')->rows(2)])
-                    ->action(fn (WarrantyRegistration $r, array $data) => $r->update(['status' => WarrantyStatus::Approved, 'admin_note' => $data['admin_note']])),
+                    ->action(fn (WarrantyRegistration $record, array $data) => $record->update(['status' => WarrantyStatus::Approved, 'admin_note' => $data['admin_note']])),
                 Action::make('reject')->icon(Heroicon::OutlinedXMark)->color('danger')
                     ->authorize(fn () => static::can('update'))
-                    ->visible(fn (WarrantyRegistration $r) => $r->status === WarrantyStatus::Pending)
+                    ->visible(fn (WarrantyRegistration $record) => $record->status === WarrantyStatus::Pending)
                     ->schema([Textarea::make('admin_note')->label('Reason')->required()->rows(2)])
-                    ->action(fn (WarrantyRegistration $r, array $data) => $r->update(['status' => WarrantyStatus::Rejected, 'admin_note' => $data['admin_note']])),
+                    ->action(fn (WarrantyRegistration $record, array $data) => $record->update(['status' => WarrantyStatus::Rejected, 'admin_note' => $data['admin_note']])),
                 EditAction::make(),
             ]);
     }

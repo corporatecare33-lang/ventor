@@ -27,14 +27,14 @@ class LatestOrders extends TableWidget
             ->paginated(false)
             ->columns([
                 TextColumn::make('order_number')->weight('bold'),
-                TextColumn::make('customer_name')->description(fn (Order $r) => $r->phone),
+                TextColumn::make('customer_name')->description(fn (Order $record) => $record->phone),
                 TextColumn::make('total')->money('BDT'),
                 TextColumn::make('payment_method')->badge()->color('gray'),
                 TextColumn::make('status')->badge(),
                 TextColumn::make('created_at')->since(),
             ])
             ->recordActions([
-                Action::make('open')->url(fn (Order $r) => OrderResource::getUrl('view', ['record' => $r])),
+                Action::make('open')->url(fn (Order $record) => OrderResource::getUrl('view', ['record' => $record])),
             ]);
     }
 }

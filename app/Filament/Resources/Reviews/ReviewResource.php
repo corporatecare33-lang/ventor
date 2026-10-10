@@ -16,6 +16,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -48,7 +49,7 @@ class ReviewResource extends Resource
     {
         return $schema->columns(2)->components([
             Select::make('product_id')->relationship('product', 'name')->searchable()->preload()->required()
-                ->hidden(fn ($livewire) => $livewire instanceof \Filament\Resources\RelationManagers\RelationManager),
+                ->hidden(fn ($livewire) => $livewire instanceof RelationManager),
             TextInput::make('name')->required()->maxLength(100),
             Select::make('rating')->options([5 => '★★★★★ 5', 4 => '★★★★ 4', 3 => '★★★ 3', 2 => '★★ 2', 1 => '★ 1'])->required()->default(5),
             TextInput::make('title')->maxLength(150),
@@ -68,7 +69,7 @@ class ReviewResource extends Resource
                 TextColumn::make('product.name')->searchable()->limit(30),
                 TextColumn::make('name')->label('Customer')->searchable(),
                 TextColumn::make('rating')->formatStateUsing(fn (int $state) => str_repeat('★', $state).str_repeat('☆', 5 - $state))->color('warning')->sortable(),
-                TextColumn::make('body')->limit(60)->wrap()->description(fn (Review $r) => $r->title),
+                TextColumn::make('body')->limit(60)->wrap()->description(fn (Review $record) => $record->title),
                 IconColumn::make('is_verified_purchase')->label('Verified')->boolean(),
                 IconColumn::make('is_approved')->label('Approved')->boolean(),
                 TextColumn::make('created_at')->since()->sortable(),

@@ -63,8 +63,8 @@ class PaymentResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('order.order_number')->label('Order')->searchable()
-                    ->url(fn (Payment $r) => $r->order ? OrderResource::getUrl('view', ['record' => $r->order]) : null)
-                    ->description(fn (Payment $r) => $r->order?->customer_name),
+                    ->url(fn (Payment $record) => $record->order ? OrderResource::getUrl('view', ['record' => $record->order]) : null)
+                    ->description(fn (Payment $record) => $record->order?->customer_name),
                 TextColumn::make('method')->badge()->color('gray'),
                 TextColumn::make('amount')->money('BDT'),
                 TextColumn::make('transaction_id')->label('TrxID')->searchable()->copyable(),
@@ -81,17 +81,17 @@ class PaymentResource extends Resource
                 Action::make('verify')->icon(Heroicon::OutlinedCheckBadge)->color('success')->requiresConfirmation()
                     ->modalDescription('Confirm you have received this amount in the merchant account. The order will be marked as paid.')
                     ->authorize(fn () => static::can('update'))
-                    ->visible(fn (Payment $r) => $r->status === TransactionStatus::Pending)
-                    ->action(fn (Payment $r) => DB::transaction(function () use ($r) {
-                        $r->update(['status' => TransactionStatus::Verified, 'verified_by' => auth()->id(), 'verified_at' => now()]);
-                        $r->order?->update(['payment_status' => PaymentStatus::Paid]);
+                    ->visible(fn (Payment $record) => $record->status === TransactionStatus::Pending)
+                    ->action(fn (Payment $record) => DB::transaction(function () use ($record) {
+                        $record->update(['status' => TransactionStatus::Verified, 'verified_by' => auth()->id(), 'verified_at' => now()]);
+                        $record->order?->update(['payment_status' => PaymentStatus::Paid]);
                     })),
                 Action::make('reject')->icon(Heroicon::OutlinedXCircle)->color('danger')->requiresConfirmation()
                     ->authorize(fn () => static::can('update'))
-                    ->visible(fn (Payment $r) => $r->status === TransactionStatus::Pending)
-                    ->action(fn (Payment $r) => DB::transaction(function () use ($r) {
-                        $r->update(['status' => TransactionStatus::Failed, 'verified_by' => auth()->id(), 'verified_at' => now()]);
-                        $r->order?->update(['payment_status' => PaymentStatus::Failed]);
+                    ->visible(fn (Payment $record) => $record->status === TransactionStatus::Pending)
+                    ->action(fn (Payment $record) => DB::transaction(function () use ($record) {
+                        $record->update(['status' => TransactionStatus::Failed, 'verified_by' => auth()->id(), 'verified_at' => now()]);
+                        $record->order?->update(['payment_status' => PaymentStatus::Failed]);
                     })),
                 EditAction::make(),
             ]);

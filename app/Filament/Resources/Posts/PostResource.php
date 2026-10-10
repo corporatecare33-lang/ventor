@@ -7,6 +7,7 @@ use App\Filament\Resources\Posts\Pages\CreatePost;
 use App\Filament\Resources\Posts\Pages\EditPost;
 use App\Filament\Resources\Posts\Pages\ListPosts;
 use App\Models\Post;
+use App\Models\User;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -68,7 +69,7 @@ class PostResource extends Resource
                     Select::make('category')->options(fn () => Post::query()->whereNotNull('category')->distinct()->pluck('category', 'category'))
                         ->searchable()->createOptionForm([TextInput::make('category')->required()])
                         ->createOptionUsing(fn (array $data) => $data['category']),
-                    Select::make('author_id')->relationship('author', 'name', fn ($q) => $q->role(\App\Models\User::ADMIN_ROLES))
+                    Select::make('author_id')->relationship('author', 'name', fn ($query) => $query->role(User::ADMIN_ROLES))
                         ->default(fn () => auth()->id()),
                     SpatieMediaLibraryFileUpload::make('cover')->collection('cover')->image()->maxSize(3072),
                 ]),

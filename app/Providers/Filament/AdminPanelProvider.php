@@ -7,6 +7,7 @@ use App\Filament\Widgets\LatestOrders;
 use App\Filament\Widgets\LowStockProducts;
 use App\Filament\Widgets\SalesChart;
 use App\Filament\Widgets\StatsOverview;
+use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -41,7 +42,7 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::hex('#a8742f'),
                 'gray' => Color::Stone,
             ])
-            ->font('Inter', provider: \Filament\FontProviders\LocalFontProvider::class)
+            ->font('Inter', provider: LocalFontProvider::class)
             ->sidebarCollapsibleOnDesktop()
             ->databaseNotifications(false)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])

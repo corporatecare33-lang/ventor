@@ -63,7 +63,7 @@ class ContactMessageResource extends Resource
             ->columns([
                 IconColumn::make('is_read')->label('')->boolean()->trueIcon(Heroicon::OutlinedEnvelopeOpen)->falseIcon(Heroicon::OutlinedEnvelope)
                     ->falseColor('warning')->trueColor('gray'),
-                TextColumn::make('name')->searchable()->description(fn (ContactMessage $r) => $r->email),
+                TextColumn::make('name')->searchable()->description(fn (ContactMessage $record) => $record->email),
                 TextColumn::make('subject')->limit(40)->placeholder('—'),
                 TextColumn::make('message')->limit(60),
                 TextColumn::make('created_at')->since()->sortable(),

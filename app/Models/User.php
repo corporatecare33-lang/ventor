@@ -23,6 +23,8 @@ class User extends Authenticatable implements FilamentUser
     /** Roles that may sign in to the admin panel. */
     public const ADMIN_ROLES = ['super_admin', 'admin', 'manager', 'support'];
 
+    protected $attributes = ['is_active' => true];
+
     protected function casts(): array
     {
         return [

@@ -7,13 +7,13 @@ use App\Filament\Concerns\ChecksPermission;
 use App\Filament\Resources\StockMovements\Pages\ListStockMovements;
 use App\Models\StockMovement;
 use BackedEnum;
+use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
@@ -48,7 +48,7 @@ class StockMovementResource extends Resource
             ->defaultSort('id', 'desc')
             ->columns([
                 TextColumn::make('created_at')->dateTime('d M Y, h:i A')->sortable(),
-                TextColumn::make('product.name')->searchable()->description(fn (StockMovement $r) => $r->variant?->sku ?? $r->product?->sku),
+                TextColumn::make('product.name')->searchable()->description(fn (StockMovement $record) => $record->variant?->sku ?? $record->product?->sku),
                 TextColumn::make('type')->badge(),
                 TextColumn::make('quantity')->formatStateUsing(fn (int $state) => $state > 0 ? "+{$state}" : (string) $state)
                     ->color(fn (int $state) => $state > 0 ? 'success' : 'danger')->weight('bold'),
@@ -59,7 +59,7 @@ class StockMovementResource extends Resource
             ->filters([
                 SelectFilter::make('type')->options(StockMovementType::class),
                 Filter::make('created_at')->schema([DatePicker::make('from'), DatePicker::make('until')])
-                    ->query(fn (Builder $q, array $data) => $q
+                    ->query(fn (Builder $query, array $data) => $query
                         ->when($data['from'], fn ($q, $d) => $q->whereDate('created_at', '>=', $d))
                         ->when($data['until'], fn ($q, $d) => $q->whereDate('created_at', '<=', $d))),
             ]);

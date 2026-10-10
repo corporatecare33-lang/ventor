@@ -35,6 +35,7 @@ Route::post('/product/{product:slug}/reviews', [ReviewController::class, 'store'
 Route::get('/leatherx-tap', [TapController::class, 'landing'])->name('tap');
 Route::get('/tap/{profile:slug}', [TapController::class, 'show'])->name('nfc.show');
 Route::get('/tap/{profile:slug}/contact.vcf', [TapController::class, 'vcard'])->name('nfc.vcard');
+Route::get('/tap/{profile:slug}/qr.svg', [TapController::class, 'qr'])->name('nfc.qr');
 
 // Cart & checkout
 Route::get('/cart', [CartController::class, 'cart'])->name('cart');

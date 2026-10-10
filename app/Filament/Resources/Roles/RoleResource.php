@@ -67,11 +67,11 @@ class RoleResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($q) => $q->withCount(['permissions', 'users']))
+            ->modifyQueryUsing(fn ($query) => $query->withCount(['permissions', 'users']))
             ->columns([
                 TextColumn::make('name')->badge(),
                 TextColumn::make('permissions_count')->label('Permissions')
-                    ->formatStateUsing(fn (Role $r, $state) => $r->name === 'super_admin' ? 'All (bypass)' : $state),
+                    ->formatStateUsing(fn (Role $record, $state) => $record->name === 'super_admin' ? 'All (bypass)' : $state),
                 TextColumn::make('users_count')->label('Users'),
             ])
             ->recordActions([EditAction::make(), DeleteAction::make()]);

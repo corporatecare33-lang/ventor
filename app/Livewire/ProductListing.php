@@ -6,6 +6,7 @@ use App\Enums\OptionType;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductOption;
+use App\Models\ProductVariant;
 use App\Support\StorefrontCache;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
@@ -116,7 +117,7 @@ class ProductListing extends Component
     {
         $filters = StorefrontCache::remember('shop-filters', fn () => [
             'categories' => Category::active()->whereNull('parent_id')->withCount(['activeProducts'])->orderBy('sort_order')->get(['id', 'name', 'slug']),
-            'colors' => ProductOption::ofType(OptionType::Color)->whereIn('id', \App\Models\ProductVariant::where('is_active', true)->select('color_id'))->get(['id', 'name', 'value']),
+            'colors' => ProductOption::ofType(OptionType::Color)->whereIn('id', ProductVariant::where('is_active', true)->select('color_id'))->get(['id', 'name', 'value']),
         ], 1800);
 
         return view('livewire.product-listing', [

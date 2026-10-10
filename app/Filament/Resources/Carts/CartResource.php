@@ -62,11 +62,11 @@ class CartResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $q) => $q->with('user:id,name,phone')->withCount('items')->withSum('items', 'quantity'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('user:id,name,phone')->withCount('items')->withSum('items', 'quantity'))
             ->defaultSort('updated_at', 'desc')
             ->columns([
                 TextColumn::make('id')->label('#'),
-                TextColumn::make('user.name')->label('Customer')->placeholder('Guest')->description(fn (Cart $r) => $r->user?->phone),
+                TextColumn::make('user.name')->label('Customer')->placeholder('Guest')->description(fn (Cart $record) => $record->user?->phone),
                 TextColumn::make('items_sum_quantity')->label('Units')->default(0),
                 TextColumn::make('coupon_code')->placeholder('—'),
                 TextColumn::make('converted_at')->label('Ordered')->since()->placeholder('Not ordered'),
@@ -74,7 +74,7 @@ class CartResource extends Resource
             ])
             ->filters([
                 TernaryFilter::make('converted')->label('Converted to order')
-                    ->queries(true: fn ($q) => $q->whereNotNull('converted_at'), false: fn ($q) => $q->whereNull('converted_at')),
+                    ->queries(true: fn ($query) => $query->whereNotNull('converted_at'), false: fn ($query) => $query->whereNull('converted_at')),
             ])
             ->recordActions([ViewAction::make()])
             ->toolbarActions([BulkActionGroup::make([DeleteBulkAction::make()])]);

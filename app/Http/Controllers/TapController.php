@@ -7,6 +7,9 @@ use App\Models\HomeSection;
 use App\Models\NfcProfile;
 use App\Models\Product;
 use App\Support\Seo;
+use chillerlan\QRCode\Output\QROutputInterface;
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\QROptions;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
@@ -57,6 +60,24 @@ class TapController extends Controller
         return response(implode("\r\n", $lines)."\r\n", 200, [
             'Content-Type' => 'text/vcard; charset=utf-8',
             'Content-Disposition' => 'attachment; filename="'.str($profile->name)->slug().'.vcf"',
+        ]);
+    }
+
+    /** QR code (SVG) of the public profile URL — a backup for phones without NFC. */
+    public function qr(NfcProfile $profile): Response
+    {
+        abort_unless($profile->status === NfcProfileStatus::Active, 404);
+
+        $svg = (new QRCode(new QROptions([
+            'outputType' => QROutputInterface::MARKUP_SVG,
+            'outputBase64' => false,
+            'addQuietzone' => true,
+            'svgUseFillAttributes' => true,
+        ])))->render($profile->publicUrl());
+
+        return response($svg, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Cache-Control' => 'public, max-age=86400',
         ]);
     }
 }

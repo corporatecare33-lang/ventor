@@ -68,10 +68,10 @@ class CustomerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $q) => $q->withCount('orders')->withSum('orders', 'total'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->withCount('orders')->withSum('orders', 'total'))
             ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('name')->searchable()->weight('medium')->description(fn (User $r) => $r->email),
+                TextColumn::make('name')->searchable()->weight('medium')->description(fn (User $record) => $record->email),
                 TextColumn::make('phone')->searchable()->placeholder('—'),
                 TextColumn::make('orders_count')->label('Orders')->sortable(),
                 TextColumn::make('orders_sum_total')->label('Lifetime value')->money('BDT')->sortable()->default(0),

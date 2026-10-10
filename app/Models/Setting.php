@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\StorefrontCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
@@ -44,6 +45,6 @@ class Setting extends Model
         }
 
         Cache::forget(self::CACHE_KEY);
-        \App\Support\StorefrontCache::flush();
+        StorefrontCache::flush();
     }
 }

@@ -1,6 +1,18 @@
 <?php
 
+use App\Models\Banner;
+use App\Models\Category;
+use App\Models\Faq;
+use App\Models\HomeSection;
+use App\Models\Product;
+use App\Models\ProductOption;
+use App\Models\ProductVariant;
+use App\Models\Review;
+use App\Models\ShippingZone;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 return [
 
@@ -136,18 +148,18 @@ return [
 
     'serializable_classes' => [
         Illuminate\Database\Eloquent\Collection::class,
-        Illuminate\Support\Collection::class,
-        App\Models\Banner::class,
-        App\Models\Category::class,
-        App\Models\Faq::class,
-        App\Models\HomeSection::class,
-        App\Models\Product::class,
-        App\Models\ProductOption::class,
-        App\Models\ProductVariant::class,
-        App\Models\Review::class,
-        App\Models\ShippingZone::class,
-        Spatie\MediaLibrary\MediaCollections\Models\Media::class,
-        Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection::class,
+        Collection::class,
+        Banner::class,
+        Category::class,
+        Faq::class,
+        HomeSection::class,
+        Product::class,
+        ProductOption::class,
+        ProductVariant::class,
+        Review::class,
+        ShippingZone::class,
+        Media::class,
+        MediaCollection::class,
     ],
 
 ];

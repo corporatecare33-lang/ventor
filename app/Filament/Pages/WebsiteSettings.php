@@ -11,6 +11,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Text;
 use Filament\Support\Icons\Heroicon;
 
 class WebsiteSettings extends SettingsPage
@@ -57,7 +58,7 @@ class WebsiteSettings extends SettingsPage
                     TextInput::make('trusted_customers')->label('Trust counter text')->placeholder('25,000+ happy customers'),
                     Textarea::make('checkout_note')->label('Checkout notice')->rows(2)->columnSpanFull(),
                     Section::make('Integrations (not connected yet)')->columnSpanFull()->schema([
-                        \Filament\Schemas\Components\Text::make('Courier APIs (Steadfast, Pathao, RedX), SMS gateways and online payment gateways are not connected. Add their API credentials to the .env file when available; see docs/DEPLOYMENT.md → "Third-party integrations".'),
+                        Text::make('Courier APIs (Steadfast, Pathao, RedX), SMS gateways and online payment gateways are not connected. Add their API credentials to the .env file when available; see docs/DEPLOYMENT.md → "Third-party integrations".'),
                     ]),
                 ]),
             ])->columnSpanFull(),

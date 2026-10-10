@@ -57,7 +57,7 @@ class PaymentMethodResource extends Resource
             ->reorderable('sort_order')
             ->description('Manual payment methods. Online gateways (bKash PGW, Nagad, SSLCommerz) need merchant API credentials — see docs/DEPLOYMENT.md.')
             ->columns([
-                TextColumn::make('name')->weight('medium')->description(fn (PaymentMethod $r) => $r->code),
+                TextColumn::make('name')->weight('medium')->description(fn (PaymentMethod $record) => $record->code),
                 TextColumn::make('account_number')->placeholder('—'),
                 IconColumn::make('requires_transaction_id')->label('TrxID required')->boolean(),
                 IconColumn::make('is_active')->boolean(),

@@ -57,10 +57,10 @@ class ShippingZoneResource extends Resource
             ->defaultSort('sort_order')
             ->reorderable('sort_order')
             ->columns([
-                TextColumn::make('name')->weight('medium')->description(fn (ShippingZone $r) => $r->description),
+                TextColumn::make('name')->weight('medium')->description(fn (ShippingZone $record) => $record->description),
                 TextColumn::make('charge')->money('BDT'),
                 TextColumn::make('free_shipping_threshold')->label('Free over')->money('BDT')->placeholder('—'),
-                TextColumn::make('min_days')->label('Delivery time')->formatStateUsing(fn (ShippingZone $r) => $r->estimate()),
+                TextColumn::make('min_days')->label('Delivery time')->formatStateUsing(fn (ShippingZone $record) => $record->estimate()),
                 IconColumn::make('is_active')->boolean(),
             ])
             ->recordActions([EditAction::make(), DeleteAction::make()]);
