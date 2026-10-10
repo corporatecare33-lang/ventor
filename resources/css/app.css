@@ -111,9 +111,13 @@
         display: none !important;
     }
 
+    /* Dark focus ring on light surfaces; brass ring inside dark sections (both ≥ 3:1) */
     :focus-visible {
-        outline: 2px solid var(--color-brass-500);
+        outline: 2px solid var(--color-leather-700);
         outline-offset: 3px;
+    }
+    :where(.bg-ink-950, .bg-ink-900) :focus-visible {
+        outline-color: var(--color-brass-300);
     }
 
     ::selection {
@@ -159,9 +163,11 @@
 }
 
 /* Outline display text (decorative marquee) */
+/* Painting the stroke under a white fill hides Inter's overlapping contours. White backgrounds only. */
 @utility text-outline {
-    color: transparent;
-    -webkit-text-stroke: 1.25px var(--color-ink-950);
+    color: #fff;
+    -webkit-text-stroke: 2.5px var(--color-ink-950);
+    paint-order: stroke fill;
 }
 
 @utility label-caps {

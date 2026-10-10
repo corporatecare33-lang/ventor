@@ -20,7 +20,7 @@
     $shopActive = request()->routeIs('shop', 'products.show') || (request()->routeIs('categories.show') && ! collect($nav)->contains(fn ($item) => $item[2]));
 @endphp
 @if ($announcementText)
-    <div class="bg-ink-950 text-white/85">
+    <aside class="bg-ink-950 text-white/85" aria-label="Store announcement">
         <p class="container-site py-2.5 text-center text-[12.5px] leading-snug italic">
             @if ($announcementLink)
                 <a href="{{ $announcementLink }}" class="underline-offset-4 hover:text-white hover:underline">{{ $announcementText }}</a>
@@ -28,7 +28,7 @@
                 {{ $announcementText }}
             @endif
         </p>
-    </div>
+    </aside>
 @endif
 <header class="sticky top-0 z-40 {{ $announcementText ? 'bg-ink-950' : 'bg-white' }}"
         x-data="{ menu: false, search: false, scrolled: false }" @scroll.window.throttle.100ms="scrolled = window.scrollY > 40"

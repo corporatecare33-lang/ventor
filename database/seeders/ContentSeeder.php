@@ -86,7 +86,7 @@ class ContentSeeder extends Seeder
                     ['title' => 'We confirm the details', 'icon' => 'check', 'text' => 'We check spelling and placement with you before engraving.'],
                     ['title' => 'Delivered ready to give', 'icon' => 'gift', 'text' => 'Engraved orders need two to three extra working days.'],
                 ],
-                'points' => ['Names & initials', 'Short messages', 'Company logos', 'Proof before engraving'],
+                'points' => ['Names & initials', 'Short messages', 'Company logos', 'Checked before engraving'],
                 'button_text' => 'Start your engraving',
                 'button_link' => '/engraving',
             ]],

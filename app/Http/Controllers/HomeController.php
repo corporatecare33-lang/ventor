@@ -113,7 +113,8 @@ class HomeController extends Controller
                     'styles' => count(EngravingRequest::FONTS),
                 ],
                 'corporateProduct' => Product::visible()->forCard()->whereHas('category', fn ($q) => $q->where('slug', 'corporate-gifts'))->orderBy('sort_order')->first(),
-                'reviews' => Review::approved()->where('rating', '>=', 4)->with('product:id,name,slug')->latest()->limit(8)->get(),
+                'reviews' => Review::approved()->where('rating', '>=', 4)->whereHas('product', fn ($query) => $query->visible()->withoutTrashed())
+                    ->with('product:id,name,slug')->latest()->limit(8)->get(),
                 'reviewStats' => ['average' => round((float) Review::approved()->avg('rating'), 1), 'count' => Review::approved()->count()],
                 'faqs' => Faq::active()->where('show_on_home', true)->limit(6)->get(),
                 'fonts' => EngravingRequest::FONTS,

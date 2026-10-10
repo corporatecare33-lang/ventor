@@ -23,7 +23,7 @@ class CollectionSummary
             return [];
         }
 
-        $leathers = $products->pluck('leather_type')->filter()->unique()->values();
+        $leathers = $products->map(fn (Product $p) => $p->namedLeather())->filter()->unique()->values();
         $cards = (int) $products->max('card_capacity');
         $notes = (int) $products->max('cash_capacity');
 
@@ -48,7 +48,7 @@ class CollectionSummary
     public static function compare(Category $first, Collection $a, Category $second, Collection $b): array
     {
         $rows = [
-            'Leather' => fn (Collection $p) => $p->pluck('leather_type')->filter()->unique()->take(2)->implode(', ') ?: '—',
+            'Leather' => fn (Collection $p) => $p->map(fn (Product $product) => $product->namedLeather())->filter()->unique()->take(2)->implode(', ') ?: '—',
             'LeatherX Tap™ NFC' => fn (Collection $p) => self::share($p, 'nfc_enabled'),
             'RFID protection' => fn (Collection $p) => self::share($p, 'rfid_protection'),
             'Card capacity' => fn (Collection $p) => $p->max('card_capacity') ? 'Up to '.$p->max('card_capacity').' cards' : '—',
@@ -62,7 +62,7 @@ class CollectionSummary
             $result[] = ['label' => $label, 'values' => [$value($a), $value($b)]];
         }
         if ($first->tagline || $second->tagline) {
-            $result[] = ['label' => 'Best for', 'values' => [$first->tagline ?: '—', $second->tagline ?: '—']];
+            $result[] = ['label' => 'In short', 'values' => [$first->tagline ?: '—', $second->tagline ?: '—']];
         }
 
         return $result;

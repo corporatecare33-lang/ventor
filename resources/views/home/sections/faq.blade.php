@@ -1,11 +1,24 @@
+{{--
+    Homepage FAQ: centred plain title (the swoosh is kept for the corporate and reviews titles
+    above, so it is not overused), the accordion and a pointer to contact and the full FAQ.
+--}}
 @if ($faqs->isNotEmpty())
-    <section class="section-y border-t border-line" aria-labelledby="faq-title">
-        <div class="container-site grid gap-10 lg:grid-cols-12 lg:gap-8">
-            <div class="lg:col-span-4">
-                <x-ui.section-heading id="faq-title" :title="$section->title" :intro="$section->subtitle" />
-                <p class="mt-6 text-[15px] text-ink-600">Can't find an answer? <a href="{{ route('contact') }}" class="text-leather-700 underline underline-offset-4">Contact our team</a> or browse the <a href="{{ route('faq') }}" class="text-leather-700 underline underline-offset-4">full FAQ</a>.</p>
-            </div>
-            <x-ui.faq :faqs="$faqs" class="lg:col-span-7 lg:col-start-6" />
+    <section class="py-14 sm:py-16 lg:py-20" aria-labelledby="faq-title">
+        <div class="container-site">
+            <header class="reveal text-center">
+                <h2 id="faq-title" class="font-display text-[clamp(1.875rem,1.3rem+2.2vw,3rem)] leading-[1.05] font-bold tracking-[-0.04em] text-balance text-ink-950">{{ $section->title }}</h2>
+                @if ($section->subtitle)
+                    <p class="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-pretty text-ink-600">{{ $section->subtitle }}</p>
+                @endif
+            </header>
+
+            <x-ui.faq :faqs="$faqs" class="mx-auto mt-10 max-w-3xl" />
+
+            <p class="mx-auto mt-8 max-w-3xl text-center text-[15px] leading-relaxed text-ink-600">
+                Can't find your answer?
+                <a href="{{ route('contact') }}" class="text-leather-700 underline underline-offset-4 transition-colors hover:text-ink-950">Contact our team</a>
+                or read the <a href="{{ route('faq') }}" class="text-leather-700 underline underline-offset-4 transition-colors hover:text-ink-950">full FAQ</a>.
+            </p>
         </div>
     </section>
 @endif

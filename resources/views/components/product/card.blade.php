@@ -23,7 +23,7 @@
 
         @if ($product->reviews_count)
             <span class="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[11px] font-semibold text-ink-950">
-                <x-lx-icon name="star-solid" class="size-3 text-brass-500" />{{ number_format((float) $product->rating_avg, 1) }}
+                <x-lx-icon name="star-solid" class="size-3 text-brass-600" />{{ number_format((float) $product->rating_avg, 1) }}
                 <span class="sr-only">out of 5</span>
             </span>
         @endif

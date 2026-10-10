@@ -31,12 +31,12 @@ class CatalogSeeder extends Seeder
         foreach (array_keys(self::COLORS) as $i => $name) {
             ProductOption::updateOrCreate(['type' => OptionType::Color, 'name' => $name], ['value' => self::COLORS[$name], 'sort_order' => $i]);
         }
-        foreach (['Full-grain cowhide', 'Crazy horse leather', 'Saffiano leather', 'Microfiber leather'] as $i => $name) {
+        foreach (['Full-grain cowhide', 'Crazy horse leather', 'Saffiano leather', 'Microfibre leather'] as $i => $name) {
             ProductOption::updateOrCreate(['type' => OptionType::Material, 'name' => $name], ['sort_order' => $i]);
         }
 
         $categories = [
-            'smart-wallets' => ['LeatherX Tap Smart Wallets', 'NFC contact profile · RFID-blocking · Engravable', 'Leather wallets and card holders with a built-in NFC chip. Tap one on a phone and your LeatherX Tap contact profile opens in the browser — no app needed.', 'chestnut-leather-smart-bifold-wallet.png'],
+            'smart-wallets' => ['LeatherX Tap Wallets', 'NFC contact profile · RFID-blocking · Engravable', 'Leather wallets and card holders with a built-in NFC chip. Tap one on a phone and your LeatherX Tap contact profile opens in the browser — no app needed.', 'chestnut-leather-smart-bifold-wallet.png'],
             'classic-wallets' => ['Classic Wallets', 'Bifold wallets in full-grain and crazy-horse leather', 'Bifold wallets with RFID-blocking linings, in smooth full-grain and waxy crazy-horse leather.', 'bifold-wallets-four-colours.png'],
             'card-holders' => ['Card Holders', 'Slim holders for a lighter pocket', 'Slim card holders for the cards you use every day.', 'black-saffiano-card-holder.png'],
             'bags' => ['Bags', 'Totes, office bags, crossbody bags and backpacks', 'Structured bags for work, travel and every day.', 'ivory-black-tan-work-tote.png'],
@@ -145,8 +145,8 @@ class CatalogSeeder extends Seeder
                 'colors' => ['Chestnut Brown', 'Midnight Black'],
                 'summary' => 'A full-grain chestnut bifold with an RFID-blocking lining and a built-in NFC chip that shares your contact profile with one tap.',
                 'images' => [['chestnut-leather-smart-bifold-wallet.png', 'Chestnut Smart Bifold Wallet in chestnut brown full-grain leather']]],
-            ['category' => 'smart-wallets', 'name' => 'Tap Pop-up Card Wallet', 'price' => 3490, 'sale' => 2990, 'leather' => 'Microfiber leather',
-                'material' => 'Microfiber leather with an aluminium card case', 'rfid' => true, 'nfc' => true, 'warranty' => 12, 'cards' => 6, 'cash' => 5, 'engraving' => true, 'featured' => true,
+            ['category' => 'smart-wallets', 'name' => 'Tap Pop-up Card Wallet', 'price' => 3490, 'sale' => 2990, 'leather' => 'Microfibre leather',
+                'material' => 'Microfibre leather with an aluminium card case', 'rfid' => true, 'nfc' => true, 'warranty' => 12, 'cards' => 6, 'cash' => 5, 'engraving' => true, 'featured' => true,
                 'colors' => ['Cognac Tan', 'Midnight Black', 'Espresso Brown', 'Navy Blue', 'Slate Grey'],
                 'summary' => 'A compact wallet with a pop-up aluminium card case, a cash and card fold, and an NFC chip for your LeatherX Tap profile.',
                 'images' => [['pop-up-wallet-colours.png', 'Tap Pop-up Card Wallet in brown, black, tan and grey with cards fanned out'], ['pop-up-wallet-collection.png', 'Tap Pop-up Card Wallet collection in five colours on a wooden desk']]],

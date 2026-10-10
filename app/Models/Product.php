@@ -211,12 +211,20 @@ class Product extends Model implements HasMedia
             : null;
 
         return collect([
-            $this->leather_type ? ['icon' => 'leather', 'title' => $this->leather_type, 'note' => 'Leather'] : null,
+            $this->namedLeather() ? ['icon' => 'leather', 'title' => $this->leather_type, 'note' => 'Leather'] : null,
             $this->nfc_enabled ? ['icon' => 'signal', 'title' => 'LeatherX Tap™', 'note' => 'Tap to share'] : null,
             $this->rfid_protection ? ['icon' => 'shield', 'title' => 'RFID blocking', 'note' => 'Card protection'] : null,
             $warranty ? ['icon' => 'badge', 'title' => ucfirst($warranty), 'note' => 'Stitching & hardware'] : null,
             $this->engraving_available ? ['icon' => 'pen', 'title' => 'Engravable', 'note' => 'Names & logos'] : null,
         ])->filter()->take(2)->values()->all();
+    }
+
+    /** The leather type when it says more than just "Leather". */
+    public function namedLeather(): ?string
+    {
+        $type = trim((string) $this->leather_type);
+
+        return $type !== '' && strcasecmp($type, 'leather') !== 0 ? $type : null;
     }
 
     public function thumbUrl(): ?string
