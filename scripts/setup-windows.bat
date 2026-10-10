@@ -14,11 +14,16 @@ echo.
 
 rem 1. Find PHP 8.3 or newer ----------------------------------------
 set "PHPDIR="
-for %%D in ("C:\php83" "C:\php" "C:\xampp\php") do (
+for %%D in ("C:\php83" "%USERPROFILE%\php83" "C:\php" "C:\xampp\php") do (
     if not defined PHPDIR if exist "%%~D\php.exe" call :checkphp "%%~D"
 )
 if not defined PHPDIR for /d %%D in ("C:\php-8.*" "%USERPROFILE%\Downloads\php-8.*" "%USERPROFILE%\Desktop\php-8.*") do (
     if not defined PHPDIR if exist "%%~D\php.exe" call :checkphp "%%~D"
+)
+if not defined PHPDIR (
+    echo PHP 8.3 not found - downloading it to %USERPROFILE%\php83 ...
+    call :downloadphp
+    if exist "%USERPROFILE%\php83\php.exe" call :checkphp "%USERPROFILE%\php83"
 )
 if not defined PHPDIR (
     echo [ERROR] PHP 8.3 or newer was not found.
@@ -118,6 +123,10 @@ echo ==============================================================
 echo.
 php artisan serve
 goto :eof
+
+:downloadphp
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol='Tls12'; $base='https://windows.php.net/downloads/releases/'; $r=Invoke-RestMethod ($base+'releases.json'); $v=$r.'8.3'; if(-not $v){$v=$r.'8.4'}; $k=@($v.PSObject.Properties.Name | Where-Object {$_ -like 'ts-vs*-x64'})[0]; $z=$v.$k.zip.path; Write-Host ('Downloading '+$z); $f=Join-Path $env:TEMP 'php83.zip'; Invoke-WebRequest ($base+$z) -OutFile $f -UseBasicParsing; Expand-Archive $f (Join-Path $env:USERPROFILE 'php83') -Force; Remove-Item $f"
+exit /b 0
 
 :checkphp
 "%~1\php.exe" -r "exit(PHP_VERSION_ID >= 80300 ? 0 : 1);" >nul 2>&1
