@@ -17,14 +17,13 @@ class HomeSection extends Model
     protected $casts = ['content' => 'array', 'is_active' => 'boolean'];
 
     public const KEYS = [
-        'trust_badges' => 'Trust Badges',
-        'tap_intro' => 'What is LeatherX Tap?',
-        'series' => 'Featured Product Series',
-        'comparison' => 'Product Comparison Table',
-        'engraving' => 'Laser Engraving Workflow',
-        'corporate' => 'Corporate Gifting',
-        'reviews' => 'Customer Reviews',
-        'delivery_payment' => 'Delivery & Payment Trust',
+        'categories' => 'Shop by category',
+        'featured' => 'Featured products',
+        'tap_intro' => 'LeatherX Tap explainer',
+        'comparison' => 'Wallet comparison table',
+        'engraving' => 'Laser engraving',
+        'corporate' => 'Corporate gifting',
+        'reviews' => 'Customer reviews (shown only when approved reviews exist)',
         'faq' => 'FAQ',
     ];
 }

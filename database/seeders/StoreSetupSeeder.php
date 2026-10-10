@@ -21,13 +21,14 @@ class StoreSetupSeeder extends Seeder
             ShippingZone::updateOrCreate(['name' => $zone['name']], [...$zone, 'sort_order' => $i]);
         }
 
+        // bKash / Nagad stay inactive until the business enters its own merchant number in the admin.
         $methods = [
-            ['code' => 'cod', 'name' => 'Cash on Delivery', 'instructions' => 'Pay in cash when you receive your order.', 'requires_transaction_id' => false],
-            ['code' => 'bkash', 'name' => 'bKash (Send Money)', 'instructions' => 'Send the total amount to our bKash number, then enter the Transaction ID below. Your order is confirmed after we verify the payment.', 'account_number' => '01XXXXXXXXX', 'requires_transaction_id' => true],
-            ['code' => 'nagad', 'name' => 'Nagad (Send Money)', 'instructions' => 'Send the total amount to our Nagad number, then enter the Transaction ID below.', 'account_number' => '01XXXXXXXXX', 'requires_transaction_id' => true],
+            ['code' => 'cod', 'name' => 'Cash on Delivery', 'instructions' => 'Pay the courier in cash when your order arrives.', 'requires_transaction_id' => false, 'is_active' => true],
+            ['code' => 'bkash', 'name' => 'bKash (Send Money)', 'instructions' => 'Send the order total to our bKash number, then enter the Transaction ID (TrxID) from the confirmation SMS. Your order is confirmed once we verify the payment.', 'requires_transaction_id' => true, 'is_active' => false],
+            ['code' => 'nagad', 'name' => 'Nagad (Send Money)', 'instructions' => 'Send the order total to our Nagad number, then enter the Transaction ID from the confirmation SMS. Your order is confirmed once we verify the payment.', 'requires_transaction_id' => true, 'is_active' => false],
         ];
         foreach ($methods as $i => $method) {
-            PaymentMethod::updateOrCreate(['code' => $method['code']], [...$method, 'sort_order' => $i, 'is_active' => true]);
+            PaymentMethod::firstOrCreate(['code' => $method['code']], [...$method, 'sort_order' => $i]);
         }
 
         Coupon::updateOrCreate(['code' => 'WELCOME10'], [

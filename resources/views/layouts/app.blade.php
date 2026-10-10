@@ -1,43 +1,50 @@
 @php
     $seo ??= \App\Support\Seo::make();
     $siteName = setting('site_name', 'LeatherX');
+    $canonical = $seo->canonical ?? url()->current();
 @endphp
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-BD">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>document.documentElement.classList.add('js')</script>
     <title>{{ $seo->fullTitle() }}</title>
     <meta name="description" content="{{ $seo->metaDescription() }}">
     <meta name="robots" content="{{ $seo->robots() }}">
-    @if ($keywords = setting('seo_keywords'))<meta name="keywords" content="{{ $keywords }}">@endif
-    <link rel="canonical" href="{{ $seo->canonical ?? url()->current() }}">
-    <meta name="theme-color" content="#0d0b0a">
+    <link rel="canonical" href="{{ $canonical }}">
 
     <meta property="og:site_name" content="{{ $siteName }}">
     <meta property="og:type" content="{{ $seo->type }}">
-    <meta property="og:title" content="{{ $seo->title ?? $seo->fullTitle() }}">
+    <meta property="og:title" content="{{ $seo->shareTitle() }}">
     <meta property="og:description" content="{{ $seo->metaDescription() }}">
-    <meta property="og:url" content="{{ $seo->canonical ?? url()->current() }}">
+    <meta property="og:url" content="{{ $canonical }}">
     <meta property="og:locale" content="en_BD">
-    @if ($image = $seo->imageUrl())
-        <meta property="og:image" content="{{ $image }}">
-        <meta name="twitter:image" content="{{ $image }}">
-    @endif
+    <meta property="og:image" content="{{ $seo->imageUrl() }}">
+    <meta property="og:image:alt" content="{{ $seo->shareTitle() }}">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seo->shareTitle() }}">
+    <meta name="twitter:description" content="{{ $seo->metaDescription() }}">
+    <meta name="twitter:image" content="{{ $seo->imageUrl() }}">
     @if ($verification = setting('google_site_verification'))<meta name="google-site-verification" content="{{ $verification }}">@endif
 
+    <meta name="theme-color" content="#16130f">
+    <meta name="application-name" content="{{ $siteName }}">
+    <meta name="apple-mobile-web-app-title" content="{{ $siteName }}">
     @if ($favicon = setting('site_favicon'))
         <link rel="icon" href="{{ Storage::disk('public')->url($favicon) }}">
     @else
-        <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d0b0a'/%3E%3Ctext x='16' y='22' font-family='Georgia' font-size='17' text-anchor='middle' fill='%23c08a3e'%3EX%3C/text%3E%3C/svg%3E">
+        <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="32x32">
+        <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     @endif
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ route('manifest') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
-    @foreach ($seo->schemas as $schema)
+    @foreach ($seo->allSchemas() as $schema)
         <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
     @endforeach
 
@@ -50,16 +57,14 @@
     @endif
     @stack('head')
 </head>
-<body class="flex min-h-screen flex-col">
-    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-full focus:bg-white focus:px-4 focus:py-2">Skip to content</a>
+<body class="flex min-h-dvh flex-col">
+    <a href="#main" class="sr-only z-[100] rounded-xs bg-ink-950 px-4 py-3 text-sm text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3">Skip to main content</a>
 
     @include('layouts.partials.header')
 
-    <main id="main" class="flex-1">
+    <main id="main" tabindex="-1" class="flex-1 focus:outline-none">
         @if (session('success') || session('error'))
-            <div class="container-lx pt-6">
-                <x-flash />
-            </div>
+            <div class="container-site pt-6"><x-ui.flash /></div>
         @endif
         @yield('content')
     </main>

@@ -66,6 +66,8 @@ foreach (['about' => 'about', 'return-policy' => 'return-policy', 'privacy-polic
 // SEO
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
+Route::get('/llms.txt', [SeoController::class, 'llms'])->name('llms');
+Route::get('/site.webmanifest', [SeoController::class, 'manifest'])->name('manifest');
 
 // Customer authentication
 Route::middleware('guest')->group(function () {

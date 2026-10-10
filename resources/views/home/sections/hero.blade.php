@@ -1,52 +1,64 @@
-@php $banner = $hero->first(); @endphp
-<section class="relative isolate overflow-hidden bg-ink-950 text-white">
-    @if ($banner && $banner->hasMedia('image'))
-        <picture class="absolute inset-0 -z-10">
-            @if ($banner->hasMedia('mobile_image'))
-                <source media="(max-width: 767px)" srcset="{{ $banner->getFirstMediaUrl('mobile_image') }}">
-            @endif
-            <img src="{{ $banner->getFirstMediaUrl('image') }}" alt="" class="size-full object-cover opacity-55" fetchpriority="high" decoding="async" width="1920" height="900">
-        </picture>
-    @else
-        <div class="absolute inset-0 -z-10 placeholder-leather opacity-80"></div>
-    @endif
-    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-ink-950 via-ink-950/80 to-transparent"></div>
-
-    <div class="container-lx grid items-center gap-10 py-16 sm:py-24 lg:grid-cols-2 lg:py-28">
-        <div>
-            <p class="eyebrow text-gold-400">{{ $banner->eyebrow ?? 'Handcrafted · NFC enabled' }}</p>
-            <h1 class="mt-5 font-display text-[42px] leading-[1.05] font-semibold sm:text-6xl lg:text-7xl">
-                {{ $banner->title ?? 'Leather, crafted for the way you carry today' }}
+<section class="bg-paper" aria-labelledby="hero-title">
+    <div class="container-site grid items-center gap-12 py-12 sm:py-16 lg:grid-cols-12 lg:gap-8 lg:py-20">
+        <div class="lg:col-span-7 xl:col-span-6">
+            <p class="eyebrow">{{ $hero->eyebrow ?? 'Wallets · Card holders · Bags · NFC smart wallets' }}</p>
+            <h1 id="hero-title" class="mt-4 text-[clamp(2.25rem,1.7rem+2.2vw,3.75rem)] leading-[1.06] text-ink-950">
+                {{ $hero->title ?? 'Leather goods for everyday carry, made smarter with LeatherX Tap.' }}
             </h1>
-            <p class="mt-6 max-w-xl text-[15px] leading-7 text-white/70">
-                {{ $banner->subtitle ?? 'Full-grain leather wallets and bags with RFID protection and a built-in NFC digital profile.' }}
-            </p>
-            <div class="mt-9 flex flex-wrap gap-3">
-                <a href="{{ $banner->button_link ?? route('shop') }}" class="btn-gold">{{ $banner->button_text ?? 'Shop the collection' }} <x-lx-icon name="arrow-right" class="size-4" /></a>
-                @if ($banner?->secondary_button_text)
-                    <a href="{{ $banner->secondary_button_link }}" class="btn-outline-light">{{ $banner->secondary_button_text }}</a>
+            @if ($hero?->subtitle)
+                <p class="lead mt-6 max-w-xl">{{ $hero->subtitle }}</p>
+            @endif
+            <div class="mt-8 flex flex-wrap gap-3">
+                <a href="{{ $hero->button_link ?? route('shop') }}" class="btn-primary">{{ $hero->button_text ?? 'Shop the collection' }}</a>
+                @if ($hero?->secondary_button_text)
+                    <a href="{{ $hero->secondary_button_link }}" class="btn-secondary">{{ $hero->secondary_button_text }}</a>
                 @endif
             </div>
-            @if ($trusted = setting('trusted_customers'))
-                <p class="mt-10 flex items-center gap-3 text-xs text-white/55">
-                    <x-stars :rating="5" /> {{ $trusted }}
-                </p>
+
+            @if ($facts)
+                <dl class="mt-12 grid grid-cols-2 gap-x-6 gap-y-6 border-t border-line-strong pt-6 sm:grid-cols-4">
+                    @foreach ($facts as $fact)
+                        <div>
+                            <dt class="label-caps text-ink-500">{{ $fact['label'] }}</dt>
+                            <dd class="mt-2 text-[15px] font-medium text-ink-950">{{ $fact['value'] }}</dd>
+                            <dd class="mt-0.5 text-[13px] leading-snug text-ink-500">{{ $fact['note'] }}</dd>
+                        </div>
+                    @endforeach
+                </dl>
             @endif
         </div>
 
-        {{-- Decorative product stage (replaced by the banner photo once uploaded) --}}
-        @unless ($banner && $banner->hasMedia('image'))
-            <div class="relative mx-auto hidden aspect-square w-full max-w-md lg:block" aria-hidden="true">
-                <div class="absolute inset-8 rounded-full bg-gold-500/10 blur-3xl"></div>
-                <div class="absolute top-[18%] left-[12%] h-[58%] w-[70%] -rotate-6 rounded-[28px] border border-tan-300/20 bg-gradient-to-br from-leather-700 via-leather-800 to-leather-900 shadow-2xl shadow-black/60">
-                    <div class="absolute inset-3 rounded-[22px] border border-dashed border-tan-300/25"></div>
-                    <div class="absolute right-6 bottom-6 font-display text-lg tracking-[0.3em] text-gold-400/80">LX</div>
-                </div>
-                <div class="absolute top-[30%] left-[30%] h-[52%] w-[60%] rotate-6 rounded-[26px] border border-white/10 bg-gradient-to-br from-ink-700 to-ink-950 shadow-2xl shadow-black/70">
-                    <div class="absolute inset-3 rounded-[20px] border border-dashed border-white/10"></div>
-                    <div class="absolute top-6 left-6 flex items-center gap-2 text-[10px] tracking-[0.2em] text-gold-300/80 uppercase"><x-lx-icon name="signal" class="size-4" /> Tap</div>
-                </div>
-            </div>
-        @endunless
+        <div class="lg:col-span-5 lg:col-start-8">
+            @if ($hero && $hero->hasMedia('image'))
+                <picture class="block aspect-[4/5] overflow-hidden rounded-sm bg-paper-200">
+                    @if ($hero->hasMedia('mobile_image'))
+                        <source media="(max-width: 767px)" srcset="{{ $hero->getFirstMediaUrl('mobile_image') }}">
+                    @endif
+                    <img src="{{ $hero->getFirstMediaUrl('image') }}" alt="{{ $hero->getFirstMedia('image')->getCustomProperty('alt', $hero->title) }}"
+                         class="size-full object-cover" width="900" height="1125" fetchpriority="high" decoding="async">
+                </picture>
+            @elseif ($flagship)
+                @php $heroColor = $flagship->primaryColor(); @endphp
+                <figure>
+                    <a href="{{ route('products.show', $flagship) }}" class="group relative block aspect-[4/5] overflow-hidden rounded-sm max-lg:aspect-[5/4]" tabindex="-1" aria-hidden="true">
+                        <x-product.media :product="$flagship" eager sizes="(min-width: 1024px) 40vw, 90vw" class="transition-transform duration-700 group-hover:scale-[1.02]" />
+                        @if ($heroColor && ! $flagship->getFirstMedia('images'))
+                            <span class="absolute top-5 left-5 rounded-xs bg-paper/95 px-3 py-2 text-xs text-ink-700">
+                                Shown in <span class="font-medium text-ink-950">{{ $heroColor->name }}</span>
+                                @if ($flagship->leather_type)<span class="block text-ink-500">{{ $flagship->leather_type }}</span>@endif
+                            </span>
+                        @endif
+                    </a>
+                    <figcaption class="mt-4 flex items-start justify-between gap-4 border-t border-line-strong pt-4">
+                        <div>
+                            <p class="text-[13px] text-ink-500">{{ $flagship->category?->name }}</p>
+                            <a href="{{ route('products.show', $flagship) }}" class="mt-0.5 block font-medium text-ink-950 underline-offset-4 hover:underline">{{ $flagship->name }}</a>
+                            <x-product.swatches :swatches="$flagship->colorSwatches()" class="mt-2" />
+                        </div>
+                        <x-product.price :current="$flagship->currentPrice()" :regular="$flagship->hasDiscount() ? $flagship->regular_price : null" class="shrink-0 flex-col items-end" />
+                    </figcaption>
+                </figure>
+            @endif
+        </div>
     </div>
 </section>

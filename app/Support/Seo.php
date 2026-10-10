@@ -22,6 +22,11 @@ class Seo
 
     public bool $noindex = false;
 
+    /** schema.org WebPage subtype for this page (WebPage, CollectionPage, ItemPage, AboutPage, ContactPage, FAQPage…). */
+    public string $pageType = 'WebPage';
+
+    public bool $isHome = false;
+
     /** @var array<int, array<string, mixed>> */
     public array $schemas = [];
 
@@ -51,6 +56,20 @@ class Seo
     public function canonical(?string $url): self
     {
         $this->canonical = $url;
+
+        return $this;
+    }
+
+    public function pageType(string $type): self
+    {
+        $this->pageType = $type;
+
+        return $this;
+    }
+
+    public function home(): self
+    {
+        $this->isHome = true;
 
         return $this;
     }
@@ -95,6 +114,12 @@ class Seo
         return $this->title.setting('seo_title_suffix', " | {$site}");
     }
 
+    /** Title used for social cards (without the site suffix). */
+    public function shareTitle(): string
+    {
+        return $this->title ?: (setting('seo_home_title') ?: setting('site_name', config('app.name')));
+    }
+
     public function metaDescription(): string
     {
         return str($this->description ?: setting('seo_default_description', ''))->stripTags()->squish()->limit(160)->toString();
@@ -108,7 +133,85 @@ class Seo
 
         $default = setting('seo_og_image');
 
-        return $default ? Storage::disk('public')->url($default) : null;
+        return $default ? Storage::disk('public')->url($default) : asset('images/og-default.png');
+    }
+
+    /**
+     * Page schemas plus the site-wide Organization / WebSite graph. Organization details are
+     * taken only from Website settings — nothing is invented when a field is empty.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function allSchemas(): array
+    {
+        if ($this->noindex) {
+            return $this->schemas;
+        }
+
+        $site = setting('site_name', config('app.name'));
+        $home = url('/');
+        $logo = setting('site_logo') ? Storage::disk('public')->url(setting('site_logo')) : asset('apple-touch-icon.png');
+        $sameAs = array_values(array_filter([setting('social_facebook'), setting('social_instagram'), setting('social_youtube'), setting('social_linkedin'), setting('social_tiktok')]));
+
+        $organization = array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            '@id' => $home.'#organization',
+            'name' => $site,
+            'url' => $home,
+            'logo' => $logo,
+            'email' => setting('contact_email') ?: null,
+            'telephone' => setting('contact_phone') ?: null,
+            'sameAs' => $sameAs ?: null,
+        ]);
+
+        $graph = [$organization];
+
+        $page = array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => $this->pageType,
+            'name' => $this->title ?: $site,
+            'description' => $this->metaDescription() ?: null,
+            'url' => $this->canonical ?? url()->current(),
+            'inLanguage' => 'en-BD',
+            'isPartOf' => ['@id' => $home.'#website'],
+            'publisher' => ['@id' => $home.'#organization'],
+        ]);
+
+        if ($this->isHome) {
+            $graph[] = [
+                '@context' => 'https://schema.org',
+                '@type' => 'WebSite',
+                '@id' => $home.'#website',
+                'name' => $site,
+                'url' => $home,
+                'inLanguage' => 'en-BD',
+                'publisher' => ['@id' => $home.'#organization'],
+                'potentialAction' => [
+                    '@type' => 'SearchAction',
+                    'target' => ['@type' => 'EntryPoint', 'urlTemplate' => route('shop').'?q={search_term_string}'],
+                    'query-input' => 'required name=search_term_string',
+                ],
+            ];
+
+            // A physical store is only described when the business has entered a real address and phone.
+            if (setting('contact_address') && setting('contact_phone')) {
+                $graph[] = array_filter([
+                    '@context' => 'https://schema.org',
+                    '@type' => 'Store',
+                    '@id' => $home.'#store',
+                    'name' => $site,
+                    'url' => $home,
+                    'image' => $logo,
+                    'telephone' => setting('contact_phone'),
+                    'email' => setting('contact_email') ?: null,
+                    'address' => ['@type' => 'PostalAddress', 'streetAddress' => setting('contact_address'), 'addressCountry' => 'BD'],
+                    'parentOrganization' => ['@id' => $home.'#organization'],
+                ]);
+            }
+        }
+
+        return [...$graph, $page, ...$this->schemas];
     }
 
     public function robots(): string

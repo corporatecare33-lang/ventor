@@ -39,20 +39,20 @@ class CatalogSeeder extends Seeder
         $color = fn (string $name) => ProductOption::where('type', OptionType::Color)->where('name', $name)->value('id');
 
         $categories = [
-            'smart-wallets' => ['LeatherX Tap Smart Wallets', 'NFC digital profile | RFID protection | 2-year warranty | Engraving available', true],
-            'classic-wallets' => ['Atelier Classic Wallets', 'Full-grain leather | Hand-finished edges | RFID protection | Engraving available', true],
-            'card-holders' => ['Card Holders', 'Slim everyday carry | 4–8 cards | Engraving available', true],
-            'bags' => ['Bags', 'Office, travel and everyday bags in genuine leather', true],
-            'passport-holders' => ['Passport & Travel', 'Travel organisers with RFID shielding', false],
-            'key-holders' => ['Key Holders', 'Compact leather key organisers', false],
-            'corporate-gifts' => ['Corporate Gift Sets', 'Branded leather gift boxes for teams and clients', true],
+            'smart-wallets' => ['LeatherX Tap Smart Wallets', 'NFC contact profile · RFID-blocking · Engravable', 'Leather wallets and cards with a built-in NFC chip. Tap one on a phone and your LeatherX Tap contact profile opens in the browser — no app needed.'],
+            'classic-wallets' => ['Atelier Classic Wallets', 'Bifold, trifold and zip wallets · RFID-blocking', 'Bifold, trifold and long zip wallets in full-grain, crazy-horse and vegetable-tanned leather.'],
+            'card-holders' => ['Card Holders', 'Slim holders for four to eight cards', 'Minimal card sleeves and magnetic card holders for a lighter pocket.'],
+            'bags' => ['Bags', 'Briefcases, backpacks, totes and crossbody bags', 'Leather bags for the office, for travel and for every day.'],
+            'passport-holders' => ['Passport & Travel', 'Passport covers and travel organisers', 'Passport holders and travel organisers with room for cards, boarding passes and cash.'],
+            'key-holders' => ['Key Holders', 'Compact leather key organisers', 'Key organisers that keep keys quiet, flat and away from your phone screen.'],
+            'corporate-gifts' => ['Corporate Gift Sets', 'Boxed sets for teams and clients', 'Boxed leather sets for employee and client gifting, with optional logo engraving.'],
         ];
         $categoryIds = [];
         $i = 0;
-        foreach ($categories as $slug => [$name, $tagline, $featured]) {
+        foreach ($categories as $slug => [$name, $tagline, $description]) {
             $categoryIds[$slug] = Category::updateOrCreate(['slug' => $slug], [
-                'name' => $name, 'tagline' => $tagline, 'is_featured' => $featured, 'is_active' => true, 'sort_order' => $i++,
-                'description' => "{$name} from LeatherX. {$tagline}.",
+                'name' => $name, 'tagline' => $tagline, 'description' => $description,
+                'is_featured' => true, 'is_active' => true, 'sort_order' => $i++,
             ])->id;
         }
 
@@ -87,15 +87,15 @@ class CatalogSeeder extends Seeder
                 $nfc ? 'Built-in NFC chip opens your LeatherX Tap digital profile — share contacts with one tap' : null,
                 $cards ? "Holds up to {$cards} cards" : null,
                 $engraving ? 'Personalise with laser engraving (name, initials or logo)' : null,
-                $warranty ? ($warranty / 12).'-year LeatherX craftsmanship warranty' : null,
+                $warranty ? $warranty.'-month LeatherX warranty' : null,
             ]);
 
             $product = Product::updateOrCreate(['slug' => $slug], [
                 'category_id' => $categoryIds[$cat],
                 'name' => $name,
                 'sku' => $sku,
-                'short_description' => 'Hand-finished in '.strtolower($leather).($rfid ? ', with RFID protection' : '').($nfc ? ' and a built-in NFC chip for your digital profile' : '').'.',
-                'description' => '<p>'.e($name).' is crafted from '.e(strtolower($leather)).' with hand-burnished edges and reinforced stitching, made to age beautifully with daily use.</p><ul>'.collect($features)->map(fn ($f) => '<li>'.e($f).'</li>')->implode('').'</ul>',
+                'short_description' => ucfirst(strtolower($leather)).($rfid ? ' with an RFID-blocking lining' : '').($nfc ? ' and a built-in NFC chip that opens your LeatherX Tap contact profile' : '').'.',
+                'description' => '<p>'.e($name).' in '.e(strtolower($leather)).'.</p><ul>'.collect($features)->map(fn ($f) => '<li>'.e($f).'</li>')->implode('').'</ul>',
                 'regular_price' => $price,
                 'sale_price' => $sale,
                 'stock_quantity' => 0,
@@ -109,11 +109,7 @@ class CatalogSeeder extends Seeder
                 'cash_capacity' => $cash,
                 'engraving_available' => $engraving,
                 'engraving_price' => $engraving ? 300 : 0,
-                'specifications' => array_filter([
-                    'Stitching' => 'Waxed polyester, hand-finished',
-                    'Edge finish' => 'Burnished & sealed',
-                    'Packaging' => 'LeatherX gift box',
-                ]),
+                'specifications' => null,
                 'status' => ProductStatus::Active,
                 'is_featured' => $featured,
                 'sort_order' => $index,

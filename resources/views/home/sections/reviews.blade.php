@@ -1,24 +1,22 @@
 @if ($reviews->isNotEmpty())
-    <section class="py-20 sm:py-24">
-        <div class="container-lx">
-            <x-section-heading eyebrow="Reviews" :title="$section->title" :subtitle="$section->subtitle" />
-            <div class="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+    <section class="section-y border-t border-line" aria-labelledby="reviews-title">
+        <div class="container-site">
+            <div class="flex flex-wrap items-end justify-between gap-6">
+                <x-ui.section-heading id="reviews-title" :title="$section->title" :intro="$section->subtitle" />
+                <a href="{{ route('reviews.index') }}" class="link-arrow">Read all reviews <x-lx-icon name="arrow-right" class="size-4" /></a>
+            </div>
+            <div class="mt-10 grid gap-10 md:grid-cols-3 md:gap-8">
                 @foreach ($reviews as $review)
-                    <figure class="flex flex-col rounded-2xl border border-ink-900/8 bg-cream-50 p-6">
-                        <x-stars :rating="$review->rating" />
-                        <blockquote class="mt-4 flex-1 text-sm leading-6 text-ink-700">“{{ str($review->body)->limit(220) }}”</blockquote>
-                        <figcaption class="mt-5 flex items-center justify-between gap-3 border-t border-ink-900/8 pt-4 text-xs">
-                            <span class="font-semibold text-ink-950">{{ $review->name }}
-                                @if ($review->is_verified_purchase)<span class="ml-1 font-normal text-emerald-700">· Verified</span>@endif
-                            </span>
-                            @if ($review->product)
-                                <a href="{{ route('products.show', $review->product) }}" class="truncate text-ink-600 hover:text-gold-600">{{ $review->product->name }}</a>
-                            @endif
+                    <figure class="border-t border-line-strong pt-6">
+                        <x-ui.rating :rating="$review->rating" />
+                        <blockquote class="mt-4 font-display text-xl leading-snug text-ink-950">“{{ str($review->body)->limit(180) }}”</blockquote>
+                        <figcaption class="mt-5 text-sm text-ink-600">
+                            <span class="font-medium text-ink-950">{{ $review->name }}</span>@if ($review->is_verified_purchase) · Verified purchase @endif
+                            @if ($review->product)<br><a href="{{ route('products.show', $review->product) }}" class="text-leather-700 underline underline-offset-4">{{ $review->product->name }}</a>@endif
                         </figcaption>
                     </figure>
                 @endforeach
             </div>
-            <div class="mt-10 text-center"><a href="{{ route('reviews.index') }}" class="btn-outline">Read all reviews</a></div>
         </div>
     </section>
 @endif

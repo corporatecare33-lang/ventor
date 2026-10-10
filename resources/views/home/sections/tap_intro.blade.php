@@ -1,44 +1,41 @@
-<section class="bg-ink-900 py-20 text-white sm:py-24">
-    <div class="container-lx grid items-center gap-12 lg:grid-cols-2">
-        <div class="relative order-2 mx-auto w-full max-w-md lg:order-1" aria-hidden="true">
-            <div class="relative aspect-[4/5] overflow-hidden rounded-[32px] border border-white/10 placeholder-leather">
-                <div class="absolute inset-x-10 top-10 bottom-28 rounded-3xl border border-dashed border-tan-300/20"></div>
-                <div class="absolute right-8 bottom-8 left-8 rounded-2xl bg-white p-4 text-ink-900 shadow-2xl">
-                    <div class="flex items-center gap-3">
-                        <span class="grid size-11 place-items-center rounded-full bg-ink-900 font-display text-lg text-gold-400">A</span>
-                        <div>
-                            <p class="text-sm font-semibold">Your Name</p>
-                            <p class="text-xs text-ink-600">Founder · Your Company</p>
-                        </div>
-                        <span class="ml-auto rounded-full bg-gold-500/15 px-2.5 py-1 text-[10px] font-semibold text-gold-600">TAPPED</span>
-                    </div>
-                    <div class="mt-3 grid grid-cols-4 gap-2 text-ink-600">
-                        @foreach (['phone', 'mail', 'globe', 'chat'] as $icon)
-                            <span class="grid h-9 place-items-center rounded-lg bg-cream-100"><x-lx-icon :name="$icon" class="size-4" /></span>
-                        @endforeach
-                    </div>
-                </div>
-                <div class="absolute top-8 right-8 grid size-14 place-items-center rounded-full bg-gold-500 text-ink-950 shadow-lg shadow-gold-500/30">
-                    <x-lx-icon name="signal" class="size-7" />
-                </div>
-            </div>
-        </div>
-        <div class="order-1 lg:order-2">
-            <x-section-heading eyebrow="LeatherX Tap" :title="$section->title" :subtitle="$section->subtitle" align="left" dark />
-            <div class="mt-10 space-y-6">
+<section class="section-y bg-ink-950 text-white" aria-labelledby="tap-title">
+    <div class="container-site grid items-center gap-14 lg:grid-cols-12 lg:gap-8">
+        <div class="lg:col-span-6">
+            <x-ui.section-heading id="tap-title" eyebrow="LeatherX Tap" :title="$section->title" :intro="$section->subtitle" inverse />
+            <ol class="mt-10 border-t border-white/15">
                 @foreach ($section->content['items'] ?? [] as $item)
-                    <div class="flex gap-4">
-                        <span class="grid size-11 shrink-0 place-items-center rounded-full border border-gold-500/30 text-gold-400"><x-lx-icon :name="$item['icon'] ?? 'check'" class="size-5" /></span>
+                    <li class="flex gap-5 border-b border-white/15 py-5">
+                        <span class="font-display text-2xl leading-none text-brass-300" aria-hidden="true">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
                         <div>
-                            <h3 class="font-sans text-[15px] font-semibold">{{ $item['title'] }}</h3>
-                            <p class="mt-1 text-sm leading-6 text-white/60">{{ $item['text'] ?? '' }}</p>
+                            <h3 class="font-sans text-base font-medium text-white">{{ $item['title'] }}</h3>
+                            @if (! empty($item['text']))<p class="mt-1 text-[15px] leading-relaxed text-white/70">{{ $item['text'] }}</p>@endif
                         </div>
-                    </div>
+                    </li>
                 @endforeach
+            </ol>
+            <div class="mt-8 flex flex-wrap gap-3">
+                <a href="{{ $section->content['button_link'] ?? route('tap') }}" class="btn-inverse">{{ $section->content['button_text'] ?? 'How LeatherX Tap works' }}</a>
             </div>
-            @if (! empty($section->content['button_text']))
-                <a href="{{ $section->content['button_link'] ?? route('tap') }}" class="btn-gold mt-10">{{ $section->content['button_text'] }} <x-lx-icon name="arrow-right" class="size-4" /></a>
-            @endif
         </div>
+
+        {{-- Interface preview of a real Tap profile page (uses the store's own name, not a fictional person) --}}
+        <figure class="lg:col-span-5 lg:col-start-8">
+            <div class="mx-auto w-full max-w-[20rem] rounded-[2rem] border border-white/15 bg-ink-900 p-3" aria-hidden="true">
+                <div class="overflow-hidden rounded-[1.5rem] bg-ink-950 px-5 pt-10 pb-6">
+                    <div class="text-center">
+                        <span class="mx-auto flex size-16 items-center justify-center rounded-full border border-brass-300/50 font-display text-2xl text-brass-300">{{ mb_substr(setting('site_name', 'LeatherX'), 0, 1) }}</span>
+                        <p class="mt-4 font-display text-2xl font-semibold text-white">{{ setting('site_name', 'LeatherX') }}</p>
+                        <p class="mt-1 text-xs text-white/60">Leather goods & NFC wallets</p>
+                        <span class="mt-5 flex min-h-11 items-center justify-center gap-2 rounded-xs bg-paper text-sm font-medium text-ink-950"><x-lx-icon name="download" class="size-4" /> Save contact</span>
+                    </div>
+                    <ul class="mt-4 space-y-2 text-sm">
+                        @foreach ([['phone', 'Call'], ['chat', 'WhatsApp'], ['mail', 'Email'], ['globe', 'Website']] as [$icon, $label])
+                            <li class="flex items-center gap-3 rounded-xs border border-white/10 px-4 py-3 text-white/85"><x-lx-icon :name="$icon" class="size-4 text-brass-300" /> {{ $label }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+            <figcaption class="mt-4 text-center text-[13px] text-white/60">What people see when they tap your wallet</figcaption>
+        </figure>
     </div>
 </section>

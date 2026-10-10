@@ -1,20 +1,20 @@
-<section class="relative overflow-hidden bg-ink-950 py-20 text-white sm:py-24">
-    <div class="absolute inset-0 opacity-40 placeholder-leather"></div>
-    <div class="container-lx relative grid items-center gap-12 lg:grid-cols-2">
-        <div>
-            <x-section-heading eyebrow="For teams & clients" :title="$section->title" :subtitle="$section->subtitle" align="left" dark />
-            @if (! empty($section->content['button_text']))
-                <a href="{{ $section->content['button_link'] ?? route('corporate') }}" class="btn-gold mt-9">{{ $section->content['button_text'] }} <x-lx-icon name="arrow-right" class="size-4" /></a>
+<section class="section-y" aria-labelledby="corporate-title">
+    <div class="container-site grid items-center gap-14 lg:grid-cols-12 lg:gap-8">
+        <div class="lg:col-span-6">
+            <x-ui.section-heading id="corporate-title" eyebrow="For teams and clients" :title="$section->title" :intro="$section->subtitle" />
+            @if (! empty($section->content['items']))
+                <ul class="mt-8 space-y-3">
+                    @foreach ($section->content['items'] as $item)
+                        <li class="flex gap-3 text-[15px] text-ink-700"><x-lx-icon name="check" class="mt-1 size-4 shrink-0 text-leather-600" /> <span>{{ $item['title'] }}@if (! empty($item['text']))<span class="text-ink-500"> — {{ $item['text'] }}</span>@endif</span></li>
+                    @endforeach
+                </ul>
             @endif
+            <a href="{{ $section->content['button_link'] ?? route('corporate') }}" class="btn-primary mt-10">{{ $section->content['button_text'] ?? 'Request a quotation' }}</a>
         </div>
-        <div class="grid grid-cols-2 gap-4">
-            @foreach ($section->content['items'] ?? [] as $item)
-                <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur">
-                    <x-lx-icon :name="$item['icon'] ?? 'gift'" class="size-6 text-gold-400" />
-                    <p class="mt-5 font-display text-3xl font-semibold text-white">{{ $item['meta'] ?? '' }}</p>
-                    <p class="mt-1 text-xs leading-5 text-white/60">{{ $item['title'] }}</p>
-                </div>
-            @endforeach
-        </div>
+        @if ($corporateProduct)
+            <div class="lg:col-span-4 lg:col-start-9">
+                <x-product.card :product="$corporateProduct" />
+            </div>
+        @endif
     </div>
 </section>

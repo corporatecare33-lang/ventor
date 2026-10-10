@@ -51,8 +51,9 @@ class Product extends Model implements HasMedia
 
     public function registerMediaConversions(?Media $media = null): void
     {
-        $this->addMediaConversion('thumb')->width(480)->height(480)->format('webp')->nonQueued();
-        $this->addMediaConversion('large')->width(1200)->height(1200)->format('webp')->queued();
+        $this->addMediaConversion('thumb')->width(480)->height(600)->format('webp')->nonQueued();
+        $this->addMediaConversion('medium')->width(800)->height(1000)->format('webp')->queued();
+        $this->addMediaConversion('large')->width(1200)->height(1500)->format('webp')->queued();
     }
 
     public function category(): BelongsTo
@@ -163,6 +164,39 @@ class Product extends Model implements HasMedia
             ->map(fn (ProductOption $color) => ['name' => $color->name, 'hex' => $color->value])
             ->values()
             ->all();
+    }
+
+    /**
+     * Colour shown by the material tile when there is no photo: the lightest real
+     * colourway, because it shows the leather best (black reads as an empty slab).
+     */
+    public function primaryColor(): ?ProductOption
+    {
+        return $this->activeVariants->pluck('color')->filter()
+            ->sortByDesc(fn (ProductOption $color) => self::luminance((string) $color->value))
+            ->first();
+    }
+
+    private static function luminance(string $hex): float
+    {
+        $hex = ltrim($hex, '#');
+        if (strlen($hex) !== 6) {
+            return 0.0;
+        }
+        [$r, $g, $b] = array_map(fn ($c) => hexdec($c) / 255, str_split($hex, 2));
+
+        return 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
+    }
+
+    /** Short feature line for cards, built only from real attributes. */
+    public function featureLine(): string
+    {
+        return collect([
+            $this->nfc_enabled ? 'NFC' : null,
+            $this->rfid_protection ? 'RFID-blocking' : null,
+            $this->card_capacity ? $this->card_capacity.' cards' : null,
+            $this->engraving_available ? 'Engravable' : null,
+        ])->filter()->take(3)->implode(' · ');
     }
 
     public function thumbUrl(): ?string
