@@ -6,10 +6,11 @@
     $buttonText = ($section->content['button_text'] ?? null) ?: 'Start your engraving';
 
     // Columns follow the number of steps so the row never ends with an empty slot.
+    // Cards switch from phone rows to centred tiles at sm, so multi-step grids gain their columns at sm too.
     $stepColumns = match ($items->count()) {
         1 => 'mx-auto max-w-sm',
         2 => 'sm:grid-cols-2',
-        3, 6 => 'md:grid-cols-3',
+        3, 6 => 'sm:grid-cols-3',
         default => 'sm:grid-cols-2 lg:grid-cols-4',
     };
 
@@ -22,17 +23,17 @@
         ['value' => '2–3', 'suffix' => 'days', 'label' => 'Extra making time'],
     ]));
 @endphp
-<section class="py-14 sm:py-16 lg:py-20 bg-white" aria-labelledby="engraving-title">
-    <div class="container-site">
-        <div class="rounded-[20px] bg-ink-950 px-5 py-10 text-white sm:px-10 lg:px-14 lg:py-14">
+<section class="bg-white py-10 sm:py-12 lg:py-14" aria-labelledby="engraving-title">
+    <div class="container-wide">
+        <div class="rounded-card bg-ink-950 px-5 py-10 text-white sm:px-10 lg:px-14 lg:py-12">
             {{-- Like Ventro, the content sits in a narrower centred column inside the wide dark panel. --}}
-            <div class="mx-auto max-w-4xl">
-                <div class="grid items-center gap-10 lg:grid-cols-2">
+            <div class="mx-auto max-w-[60rem]">
+                <div class="grid items-center gap-8 lg:grid-cols-[1.15fr_1fr] lg:gap-12">
                     <div class="reveal">
-                        <p class="pill-label"><span class="size-1.5 rounded-full bg-brass-300" aria-hidden="true"></span>Personalisation</p>
-                        <h2 id="engraving-title" class="mt-5 font-sans text-[clamp(1.75rem,1.3rem+1.6vw,2.75rem)] leading-[1.08] font-bold tracking-[-0.03em] text-balance text-white">{{ $section->title }}</h2>
+                        <p class="pill-label border-brass-300/40 text-brass-300"><span class="size-1.5 rounded-full bg-brass-300" aria-hidden="true"></span>Personalisation</p>
+                        <h2 id="engraving-title" class="mt-4 font-sans text-[clamp(1.625rem,1.3rem+1.2vw,2.25rem)] leading-tight font-bold tracking-[-0.025em] text-balance text-white">{{ $section->title }}</h2>
                         @if ($section->subtitle)
-                            <p class="mt-4 max-w-xl text-[15px] leading-relaxed text-pretty text-white/65 sm:text-base">{{ $section->subtitle }}</p>
+                            <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-pretty text-white/60">{{ $section->subtitle }}</p>
                         @endif
                     </div>
 
@@ -40,17 +41,17 @@
                         @foreach ($stats as $stat)
                             {{-- Label (dt) comes first in the markup for screen readers but sits under the figure visually.
                                  An odd last box spans both columns so the grid never shows a hole.
-                                 px-3 on phones keeps "Engravable" (one long uppercase word) inside a 320px-wide box. --}}
-                            <div class="flex min-w-0 flex-col items-center justify-center rounded-card border border-white/10 bg-white/[0.04] px-3 py-4 text-center odd:last:col-span-2 sm:p-5">
-                                <dt class="order-last mt-1.5 text-[11px] leading-snug font-semibold tracking-[0.12em] text-white/55 uppercase">{{ $stat['label'] }}</dt>
-                                <dd class="text-2xl leading-tight font-bold tracking-tight text-brass-300 tabular-nums sm:text-3xl">
+                                 Tighter label tracking on phones keeps "Engravable" (one long uppercase word) inside a 320px-wide box. --}}
+                            <div class="flex min-w-0 flex-col items-center justify-center rounded-card border border-white/[0.06] bg-white/[0.04] p-3.5 text-center odd:last:col-span-2 sm:p-4">
+                                <dt class="order-last mt-1 text-[11px] leading-snug font-semibold tracking-[0.08em] text-white/60 uppercase sm:tracking-[0.12em]">{{ $stat['label'] }}</dt>
+                                <dd class="text-xl leading-tight font-bold tracking-tight text-brass-300 tabular-nums sm:text-2xl">
                                     {{-- Words around a figure are set small so each box fits two-up on a 320px screen. --}}
                                     @isset($stat['prefix'])
-                                        <span class="text-[13px] font-semibold tracking-normal text-white/65 sm:text-sm">{{ $stat['prefix'] }}</span>
+                                        <span class="text-[13px] font-semibold tracking-normal text-white/65">{{ $stat['prefix'] }}</span>
                                     @endisset
                                     <span class="whitespace-nowrap">{{ $stat['value'] }}</span>
                                     @isset($stat['suffix'])
-                                        <span class="text-[13px] font-semibold tracking-normal text-white/65 sm:text-sm">{{ $stat['suffix'] }}</span>
+                                        <span class="text-[13px] font-semibold tracking-normal text-white/65">{{ $stat['suffix'] }}</span>
                                     @endisset
                                 </dd>
                             </div>
@@ -60,23 +61,26 @@
 
                 @if ($items->isNotEmpty())
                     {{-- role="list" keeps list semantics in Safari/VoiceOver, which drops them when list-style is none --}}
-                    <ol role="list" class="mt-10 grid gap-3 {{ $stepColumns }}">
+                    <ol role="list" class="mt-8 grid gap-2.5 {{ $stepColumns }}">
                         @foreach ($items as $item)
-                            <li class="min-w-0 rounded-card border border-white/10 bg-white/[0.03] p-5 text-center">
-                                <span class="mx-auto flex size-10 items-center justify-center rounded-full bg-brass-300/10 text-brass-300 ring-1 ring-brass-300/30">
-                                    <x-lx-icon :name="($item['icon'] ?? null) ?: 'pen'" class="size-[18px]" />
+                            {{-- Same compact row as the Tap steps on phones (icon left), centred tiles from sm up. --}}
+                            <li class="flex min-w-0 gap-4 rounded-card border border-white/[0.06] bg-white/[0.04] p-4 text-left sm:block sm:p-5 sm:text-center">
+                                <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-brass-300/10 text-brass-300 sm:mx-auto">
+                                    <x-lx-icon :name="($item['icon'] ?? null) ?: 'pen'" class="size-4" />
                                 </span>
-                                <h3 class="mt-4 text-sm leading-snug font-semibold text-white">{{ $item['title'] }}</h3>
-                                @if (filled($item['text'] ?? null))
-                                    <p class="mt-1.5 text-[13px] leading-relaxed text-pretty text-white/55">{{ $item['text'] }}</p>
-                                @endif
+                                <div class="min-w-0">
+                                    <h3 class="text-sm leading-snug font-semibold text-white sm:mt-3">{{ $item['title'] }}</h3>
+                                    @if (filled($item['text'] ?? null))
+                                        <p class="mt-1 text-[13px] leading-relaxed text-pretty text-white/60">{{ $item['text'] }}</p>
+                                    @endif
+                                </div>
                             </li>
                         @endforeach
                     </ol>
                 @endif
 
                 @if ($points->isNotEmpty())
-                    <ul role="list" class="mx-auto mt-8 flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-xs text-white/65">
+                    <ul role="list" class="mx-auto mt-6 flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-xs text-white/65">
                         @foreach ($points as $point)
                             <li class="inline-flex items-center gap-1.5">
                                 <x-lx-icon name="check" class="size-3.5 shrink-0 text-brass-300" />{{ $point }}
@@ -86,7 +90,7 @@
                 @endif
 
                 {{-- px-4 on phones keeps the default label on one line at 320px (the pill is 48px tall either way). --}}
-                <div class="mt-8 text-center">
+                <div class="mt-6 text-center">
                     <a href="{{ $buttonLink }}" class="btn-brass px-4 sm:px-7">{{ $buttonText }} <x-lx-icon name="arrow-right" class="size-4 shrink-0" /></a>
                 </div>
             </div>

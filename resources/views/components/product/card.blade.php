@@ -2,15 +2,16 @@
     Product card: square photo with sale / rating chips, name + price, colours, and two
     feature callouts built from real product attributes. Layout adapts to the card's own
     width (container queries), so it works in 2-up mobile grids and 4-up desktop rows alike.
+    showCategory=false drops the category label where the grid already sits under its name.
 --}}
-@props(['product', 'eager' => false, 'heading' => 'h3', 'sizes' => '(min-width: 1280px) 22vw, (min-width: 768px) 30vw, 46vw'])
+@props(['product', 'eager' => false, 'heading' => 'h3', 'showCategory' => true, 'sizes' => '(min-width: 1280px) 22vw, (min-width: 768px) 30vw, 46vw'])
 @php
     $purchasable = $product->isPurchasable();
     $url = route('products.show', $product);
     $features = $product->cardFeatures();
 @endphp
-<article {{ $attributes->merge(['class' => '@container group relative flex flex-col overflow-hidden rounded-card bg-paper']) }}>
-    <div class="relative aspect-square overflow-hidden bg-paper-200">
+<article {{ $attributes->merge(['class' => '@container group relative flex flex-col overflow-hidden rounded-card bg-mist']) }}>
+    <div class="relative aspect-square overflow-hidden bg-mist-200">
         <a href="{{ $url }}" tabindex="-1" aria-hidden="true" class="block size-full">
             <x-product.media :product="$product" :eager="$eager" :sizes="$sizes" class="transition-transform duration-700 ease-out-quart group-hover:scale-[1.04]" />
         </a>
@@ -35,15 +36,17 @@
     </div>
 
     <div class="flex flex-1 flex-col px-3.5 pt-3.5 pb-4 @[15rem]:px-4">
-        @if ($product->category)
-            <p class="text-[10.5px] font-semibold tracking-[0.14em] text-ink-500 uppercase">{{ $product->category->name }}</p>
+        @if ($showCategory && $product->category)
+            <p class="mb-1.5 truncate text-[10.5px] font-semibold tracking-[0.14em] text-ink-500 uppercase">{{ $product->category->name }}</p>
         @endif
-        <div class="mt-1.5 flex flex-col gap-1.5 @[15rem]:flex-row @[15rem]:items-start @[15rem]:justify-between @[15rem]:gap-3">
-            <{{ $heading }} class="min-w-0 font-sans text-[14px] leading-snug font-semibold tracking-[-0.01em] text-ink-950 @[15rem]:text-[15px]">
+        <div class="flex flex-col gap-1.5 @[15rem]:flex-row @[15rem]:items-start @[15rem]:justify-between @[15rem]:gap-3">
+            {{-- text-pretty overrides the base heading balance, which split names like "Pop-up" at the hyphen. --}}
+            <{{ $heading }} class="min-w-0 font-sans text-[14px] leading-snug font-semibold tracking-[-0.01em] text-pretty text-ink-950 @[15rem]:text-[15px]">
                 <a href="{{ $url }}" class="after:absolute after:inset-0 after:content-[''] hover:text-leather-700">{{ $product->name }}</a>
             </{{ $heading }}>
             <x-product.price :current="$product->currentPrice()" :regular="$product->hasDiscount() ? $product->regular_price : null"
-                             size="text-[14px] @[15rem]:text-[15px]" class="shrink-0" />
+                             size="text-[14px] @[15rem]:text-[15px]"
+                             class="shrink-0 @[15rem]:flex-col @[15rem]:items-end @[15rem]:gap-x-0 @[15rem]:leading-tight" />
         </div>
         @if ($product->reviews_count)
             <x-ui.rating :rating="$product->rating_avg" :count="$product->reviews_count" class="mt-2" size="size-3" />
@@ -52,13 +55,14 @@
     </div>
 
     @if ($features)
-        <ul class="mt-auto grid grid-cols-1 gap-2.5 border-t border-line px-3.5 py-3 @[15rem]:grid-cols-2 @[15rem]:px-4">
+        <ul @class(['mt-auto grid grid-cols-1 gap-2.5 border-t border-line px-3.5 py-3 @[15rem]:px-4', '@[15rem]:grid-cols-2' => count($features) > 1])>
             @foreach ($features as $feature)
                 <li class="flex min-w-0 items-start gap-2 {{ $loop->index > 0 ? '@max-[15rem]:hidden' : '' }}">
                     <x-lx-icon :name="$feature['icon']" class="mt-px size-4 shrink-0 text-ink-600" />
                     <span class="min-w-0 text-[11px] leading-tight">
-                        <span class="line-clamp-2 block font-semibold text-ink-950">{{ $feature['title'] }}</span>
-                        <span class="block truncate text-ink-500">{{ $feature['note'] }}</span>
+                        {{-- No `block` here: it would override line-clamp's display: -webkit-box. --}}
+                        <span class="line-clamp-2 font-semibold text-ink-950">{{ $feature['title'] }}</span>
+                        <span class="line-clamp-2 text-ink-500">{{ $feature['note'] }}</span>
                     </span>
                 </li>
             @endforeach
