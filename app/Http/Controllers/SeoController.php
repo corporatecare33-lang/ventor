@@ -45,7 +45,7 @@ class SeoController extends Controller
     public function robots(): Response
     {
         $lines = setting('seo_allow_indexing', true)
-            ? ['User-agent: *', 'Disallow: /admin', 'Disallow: /account', 'Disallow: /cart', 'Disallow: /checkout', 'Disallow: /tap/', 'Disallow: /livewire']
+            ? ['User-agent: *', 'Disallow: /admin', 'Disallow: /account', 'Disallow: /cart', 'Disallow: /checkout', 'Disallow: /tap/', 'Disallow: /livewire', 'Disallow: /menu/']
             : ['User-agent: *', 'Disallow: /'];
 
         if ($extra = setting('robots_extra')) {

@@ -13,6 +13,7 @@ use App\Http\Controllers\EngravingController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\MegaMenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
@@ -62,6 +63,9 @@ Route::get('/page/{page:slug}', [PageController::class, 'show'])->name('pages.sh
 foreach (['about' => 'about', 'return-policy' => 'return-policy', 'privacy-policy' => 'privacy-policy', 'terms-and-conditions' => 'terms', 'delivery-policy' => 'delivery-policy'] as $slug => $name) {
     Route::get("/{$slug}", [PageController::class, 'fixed'])->defaults('slug', $slug)->name("pages.{$name}");
 }
+
+// Mega-menu product rows (HTML fragment, fetched by the header)
+Route::get('/menu/{group}', MegaMenuController::class)->where('group', '[a-z-]+')->name('menu.group');
 
 // SEO
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');

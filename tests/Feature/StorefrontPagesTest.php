@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
 use App\Models\PaymentMethod;
 use App\Models\Review;
 use Database\Seeders\ContentSeeder;
@@ -29,6 +30,26 @@ class StorefrontPagesTest extends TestCase
             ->assertSee($product->name)
             ->assertSee($product->category->name)
             ->assertSee('application/ld+json', false);
+    }
+
+    public function test_mega_menu_lists_collections_and_serves_product_rows(): void
+    {
+        $category = Category::factory()->create(['name' => 'Classic Wallets', 'slug' => 'classic-wallets']);
+        $product = $this->product(['category_id' => $category->id, 'name' => 'Menu Test Bifold']);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('aria-controls="mega-wallets"', false)
+            ->assertSee(route('categories.show', $category), false)
+            ->assertDontSee('aria-controls="mega-bags"', false); // no live bags yet, so no Bags panel
+
+        $this->get(route('menu.group', 'wallets'))
+            ->assertOk()
+            ->assertHeader('X-Robots-Tag', 'noindex')
+            ->assertSee($product->name)
+            ->assertSee('All Classic Wallets');
+
+        $this->get('/menu/not-a-group')->assertNotFound();
     }
 
     public function test_product_listing_loads(): void

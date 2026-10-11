@@ -17,6 +17,8 @@ Laravel 13 eCommerce (Blade + Livewire 4 storefront, Filament 5 admin). Read `RE
   (small media) / `rounded-card` (product cards, panels) / `rounded-full` (campaign pills). Brass only on dark
   backgrounds; cognac only for large titles on white. The homepage follows ventro.com.bd's structure with our own facts.
 - Hero slides are Banners (position Hero); a `|` in the title puts the rest on a brass second line.
+- Desktop mega menu groups (Wallets, Bags, Smart Accessories) are category slugs in `App\Support\MegaMenu::GROUPS`;
+  product rows load from `/menu/{group}` on first open (cached fragment).
 - Never invent business facts (contact details, statistics, testimonials). Hide sections when data is missing.
 - Scroll containers that hold `sr-only` text need `relative`, or the hidden text widens the page on mobile.
 

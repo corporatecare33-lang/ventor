@@ -1,25 +1,15 @@
 @php
     $announcementText = $layout['announcement']->title ?? (setting('announcement_enabled') ? setting('announcement_text') : null);
     $announcementLink = $layout['announcement']->button_link ?? setting('announcement_link');
-    $categoryLink = function (string $slug, string $label) use ($layout) {
-        $category = $layout['menuCategories']->firstWhere('slug', $slug);
-
-        return $category && $category->active_products_count > 0
-            ? [$label, route('categories.show', $category), request()->is('category/'.$slug)]
-            : null;
-    };
-    // Desktop bar (after "Shop"). Category links drop out while the category has no live products;
-    // smart accessories and the other categories stay reachable through the Shop menu.
-    $nav = array_values(array_filter([
-        $categoryLink('classic-wallets', 'Wallets'),
-        $categoryLink('bags', 'Bags'),
+    // Plain links after the mega-menu groups (Wallets, Bags, Smart Accessories — see App\Support\MegaMenu).
+    $nav = [
         ['Engraving', route('engraving'), request()->routeIs('engraving')],
         ['LeatherX Tap™', route('tap'), request()->routeIs('tap')],
         ['Corporate Gifts', route('corporate'), request()->routeIs('corporate')],
         ['Contact', route('contact'), request()->routeIs('contact')],
         ['About', route('pages.about'), request()->routeIs('pages.about')],
-    ]));
-    $shopActive = request()->routeIs('shop', 'products.show') || (request()->routeIs('categories.show') && ! collect($nav)->contains(fn ($item) => $item[2]));
+    ];
+    $pill = 'inline-flex min-h-11 items-center gap-1 rounded-full px-3.5 whitespace-nowrap transition-colors xl:px-4';
 @endphp
 @if ($announcementText)
     <aside class="bg-ink-950 text-white/85" aria-label="Store announcement">
@@ -33,8 +23,14 @@
     </aside>
 @endif
 <header class="sticky top-0 z-40 {{ $announcementText ? 'bg-ink-950' : 'bg-white' }}"
-        x-data="{ menu: false, search: false, scrolled: false }" @scroll.window.throttle.100ms="scrolled = window.scrollY > 40"
-        @keydown.escape.window="menu = false; search = false">
+        x-data="{
+            menu: false, search: false, scrolled: false, mega: null, megaTimer: null,
+            // Hover intent: a short delay before the first panel opens; switching between items is instant.
+            openMega(key) { clearTimeout(this.megaTimer); this.megaTimer = setTimeout(() => { this.mega = key; this.search = false }, this.mega ? 0 : 90) },
+            closeMega(key, delay = 180) { clearTimeout(this.megaTimer); this.megaTimer = setTimeout(() => { if (this.mega === key) this.mega = null }, delay) },
+        }"
+        @scroll.window.throttle.100ms="scrolled = window.scrollY > 40"
+        @keydown.escape.window="menu = false; search = false; mega = null">
     <div class="border-b border-line bg-white transition-[border-radius] duration-200 {{ $announcementText ? 'rounded-t-[1.25rem]' : '' }}" :class="scrolled && 'rounded-t-none'">
         {{-- Utility row: menu + search · logo · account + cart --}}
         <div class="container-wide grid h-16 grid-cols-[1fr_auto_1fr] items-center lg:h-[4.75rem]">
@@ -44,7 +40,7 @@
                     <x-lx-icon name="menu" class="size-6" />
                 </button>
                 <button type="button" class="inline-flex size-11 items-center justify-center text-ink-950 hover:text-leather-700"
-                        @click="search = ! search; $nextTick(() => search && $refs.q.focus())" aria-controls="site-search" :aria-expanded="search.toString()" aria-label="Search products">
+                        @click="search = ! search; mega = null; $nextTick(() => search && $refs.q.focus())" aria-controls="site-search" :aria-expanded="search.toString()" aria-label="Search products">
                     <x-lx-icon name="search" class="size-5" />
                 </button>
             </div>
@@ -62,35 +58,83 @@
             </div>
         </div>
 
-        {{-- Primary navigation (desktop): eight items at 15px need about 690px with the lg gap, so the row fits on one line from 1024px --}}
-        <nav class="hidden lg:block" aria-label="Primary">
-            <ul class="container-wide flex h-12 items-stretch justify-center gap-6 text-[15px] xl:gap-9">
-                <li class="relative flex items-stretch" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false" @focusout="if (! $el.contains($event.relatedTarget)) open = false">
-                    <button type="button" @click="open = ! open" :aria-expanded="open.toString()" aria-controls="shop-menu"
-                            class="flex items-center gap-1 border-b-2 {{ $shopActive ? 'border-ink-950 text-ink-950' : 'border-transparent text-ink-800 hover:text-ink-950' }}">
-                        Shop <x-lx-icon name="chevron-down" class="size-3.5 transition-transform" ::class="open && 'rotate-180'" />
-                    </button>
-                    {{-- Opens from "Shop" (text lined up with it) rather than centred on it, which pushed it off-screen at 1024–1280px --}}
-                    <div id="shop-menu" x-cloak x-show="open" x-transition.opacity.duration.150ms
-                         class="absolute top-full -left-6 w-[36rem] border border-line bg-white p-6 shadow-pop">
-                        <p class="label-caps mb-3 text-ink-500">Categories</p>
-                        <ul class="grid grid-cols-2 gap-x-6">
-                            @foreach ($layout['menuCategories'] as $category)
-                                <li>
-                                    <a href="{{ route('categories.show', $category) }}" class="flex items-baseline justify-between gap-3 border-b border-line py-2.5 text-ink-950 hover:text-leather-700">
-                                        <span>{{ $category->name }}</span>
-                                        <span class="text-xs text-ink-500">{{ $category->active_products_count }}</span>
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                        <a href="{{ route('shop') }}" class="link-arrow mt-5">All products <x-lx-icon name="arrow-right" class="size-4" /></a>
-                    </div>
-                </li>
+        {{--
+            Primary navigation (desktop). Wallets, Bags and Smart Accessories open a full-width
+            panel (Ventro-style): collection names on the left — hovering or focusing one switches
+            the product row on the right. Product rows are fetched once, on first open.
+        --}}
+        <nav class="hidden lg:block" aria-label="Primary" @click.outside="mega = null">
+            <ul class="container-wide flex h-14 items-center justify-center gap-0.5 text-[14px] xl:gap-1.5 xl:text-[15px]">
+                @foreach ($layout['megaMenu'] as $key => $group)
+                    @php($groupActive = $group['categories']->contains(fn ($category) => request()->is('category/'.$category->slug)))
+                    <li class="flex" @mouseenter="openMega(@js($key))" @mouseleave="closeMega(@js($key))"
+                        @focusout="if (! $el.contains($event.relatedTarget)) closeMega(@js($key), 0)"
+                        @keydown.escape.stop="mega = null; $refs.trigger.focus()">
+                        <button type="button" x-ref="trigger" @click="mega = mega === @js($key) ? null : @js($key)"
+                                :aria-expanded="(mega === @js($key)).toString()" aria-expanded="false" aria-controls="mega-{{ $key }}"
+                                class="{{ $pill }} {{ $groupActive ? 'bg-mist-200 text-ink-950' : 'text-ink-800 hover:bg-mist-200 hover:text-ink-950' }}"
+                                :class="mega === @js($key) && '!bg-ink-950 !text-white'">
+                            {{ $group['label'] }}
+                        </button>
+
+                        <div id="mega-{{ $key }}" x-cloak x-show="mega === @js($key)"
+                             x-transition:enter="transition duration-150 ease-out-quart" x-transition:enter-start="opacity-0 -translate-y-1"
+                             x-transition:leave="transition duration-100" x-transition:leave-end="opacity-0"
+                             class="absolute inset-x-0 top-full max-h-[calc(100svh-10rem)] overflow-y-auto border-t border-line bg-white shadow-pop"
+                             x-data="{
+                                active: @js($group['categories']->first()->slug), html: '', loading: false, loaded: false, failed: false,
+                                load() {
+                                    if (this.loaded || this.loading) return;
+                                    this.loading = true; this.failed = false;
+                                    fetch(@js(route('menu.group', $key, false)), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                                        .then((response) => response.ok ? response.text() : Promise.reject(response.status))
+                                        .then((html) => { this.html = html; this.loaded = true })
+                                        .catch(() => { this.failed = true })
+                                        .finally(() => { this.loading = false });
+                                },
+                             }"
+                             x-effect="if (mega === @js($key)) load()">
+                            <div class="container-wide grid grid-cols-[minmax(13rem,17rem)_minmax(0,1fr)] gap-10 py-9 xl:grid-cols-[minmax(15rem,22rem)_minmax(0,1fr)] xl:gap-14">
+                                <div>
+                                    <p class="text-[15px] font-medium text-ink-950">Collections</p>
+                                    <ul class="mt-5 space-y-2.5">
+                                        @foreach ($group['categories'] as $category)
+                                            <li>
+                                                <a href="{{ route('categories.show', $category) }}"
+                                                   @mouseenter="active = @js($category->slug)" @focus="active = @js($category->slug)"
+                                                   class="block text-[clamp(1.375rem,0.9rem+0.9vw,1.875rem)] leading-[1.12] font-bold tracking-[-0.03em] text-pretty transition-colors"
+                                                   :class="active === @js($category->slug) ? 'text-ink-950' : 'text-ink-500 hover:text-ink-950'">{{ $category->name }}</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                    <a href="{{ route('shop') }}" class="link-arrow mt-7 min-h-11">Shop all products <x-lx-icon name="arrow-right" class="size-4" /></a>
+                                </div>
+
+                                <div class="min-w-0">
+                                    {{-- Loading: the row's shape, so the panel doesn't jump when products arrive --}}
+                                    <div x-show="! loaded && ! failed" aria-hidden="true">
+                                        <div class="flex items-center justify-between"><div class="skeleton h-3 w-24"></div><div class="skeleton h-5 w-44"></div></div>
+                                        <div class="mt-6 flex gap-4 overflow-hidden">
+                                            @for ($i = 0; $i < 4; $i++)
+                                                <div class="w-[15rem] shrink-0 xl:w-[16.5rem]"><div class="skeleton aspect-square w-full rounded-card"></div><div class="skeleton mt-4 h-4 w-3/4"></div><div class="skeleton mt-2 h-4 w-1/3"></div></div>
+                                            @endfor
+                                        </div>
+                                    </div>
+                                    <p x-show="failed" x-cloak class="text-[15px] text-ink-600">
+                                        We couldn't load the products just now.
+                                        <button type="button" class="font-medium text-leather-700 underline underline-offset-4" @click="load()">Try again</button>
+                                        or open a collection on the left.
+                                    </p>
+                                    <div x-html="html"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                @endforeach
                 @foreach ($nav as [$label, $url, $active])
-                    <li class="flex items-stretch">
+                    <li class="flex">
                         <a href="{{ $url }}" @if ($active) aria-current="page" @endif
-                           class="flex items-center border-b-2 {{ $active ? 'border-ink-950 text-ink-950' : 'border-transparent text-ink-800 hover:text-ink-950' }}">{{ $label }}</a>
+                           class="{{ $pill }} {{ $active ? 'bg-mist-200 text-ink-950' : 'text-ink-800 hover:bg-mist-200 hover:text-ink-950' }}">{{ $label }}</a>
                     </li>
                 @endforeach
             </ul>
@@ -133,7 +177,7 @@
                 </ul>
                 <p class="label-caps mt-8 text-ink-500">Discover</p>
                 <ul class="mt-2">
-                    @foreach ([...array_filter($nav, fn ($item) => ! str_contains($item[1], '/category/')), ['Track an order', route('orders.track'), request()->routeIs('orders.track')], ['Warranty registration', route('warranty'), request()->routeIs('warranty')], ['Journal', route('blog.index'), request()->routeIs('blog.*')]] as [$label, $url, $active])
+                    @foreach ([...$nav, ['Track an order', route('orders.track'), request()->routeIs('orders.track')], ['Warranty registration', route('warranty'), request()->routeIs('warranty')], ['Journal', route('blog.index'), request()->routeIs('blog.*')]] as [$label, $url, $active])
                         <li><a href="{{ $url }}" @if ($active) aria-current="page" @endif class="flex min-h-12 items-center border-b border-line text-[15px] {{ $active ? 'font-semibold' : '' }}">{{ $label }}</a></li>
                     @endforeach
                 </ul>
