@@ -27,12 +27,15 @@ class Category extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('image')->singleFile();
+        // Background of the dark "Shop all" tile on the homepage collection: portrait, product at the top.
+        $this->addMediaCollection('tile')->singleFile();
     }
 
     public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('thumb')->width(160)->height(160)->format('webp')->quality(78)->nonQueued();
         $this->addMediaConversion('card')->width(640)->height(800)->format('webp')->quality(78)->nonQueued();
+        $this->addMediaConversion('tile')->width(960)->format('webp')->quality(80)->performOnCollections('tile')->nonQueued();
     }
 
     public function parent(): BelongsTo

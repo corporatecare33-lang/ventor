@@ -14,6 +14,8 @@
         'linkedin' => setting('social_linkedin'),
     ]);
     $wa = setting('contact_whatsapp');
+    // Shop assistant launcher (bottom-right corner); can be switched off in Website settings → Store.
+    $assistant = ! setting('assistant_hidden');
     // The best-sellers shortcut stays off pages where the visitor is already buying or managing an account.
     $showBestSellers = ! request()->routeIs('products.show', 'cart', 'checkout', 'orders.confirmation', 'orders.invoice', 'account.*', 'login', 'register', 'password.*');
     // Below lg every footer link is a 44px-tall touch target; from lg the lists return to their compact rhythm.
@@ -159,11 +161,17 @@
     <div id="footer-bottom" class="border-t border-white/10">
         <div class="container-wide">
             {{--
-                Right padding keeps the legal links clear of the fixed WhatsApp button. Below lg the links are 44px
+                Right padding keeps the legal links clear of the fixed WhatsApp and assistant buttons. Below lg the links are 44px
                 touch targets, so the bar's own padding shrinks to keep the same visual spacing.
             --}}
-            <div class="flex flex-col pt-6 pb-3 text-[13px] text-white/55 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:py-3 lg:py-6 {{ $wa ? 'pr-16' : '' }}">
-                <p>{{ setting('copyright_text') ?: '© '.date('Y').' '.setting('site_name', 'LeatherX').'. All rights reserved.' }}</p>
+            <div class="flex flex-col pt-6 pb-3 text-[13px] text-white/55 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:py-3 lg:py-6 {{ $wa || $assistant ? 'pr-16' : '' }}">
+                <div class="lg:space-y-1">
+                    <p>{{ setting('copyright_text') ?: '© '.date('Y').' '.setting('site_name', 'LeatherX').'. All rights reserved.' }}</p>
+                    <p>
+                        Designed and Developed By
+                        <a href="https://digitalwebars.com/" target="_blank" rel="noopener" class="{{ $legalLink }} font-medium text-white/75">Digital Webars<span class="sr-only"> (opens in a new tab)</span></a>
+                    </p>
+                </div>
                 <ul class="flex flex-wrap gap-x-5 lg:gap-y-2" aria-label="Legal">
                     <li><a href="{{ route('pages.privacy-policy') }}" class="{{ $legalLink }}">Privacy policy</a></li>
                     <li><a href="{{ route('pages.terms') }}" class="{{ $legalLink }}">Terms &amp; conditions</a></li>
@@ -177,14 +185,15 @@
     {{--
         Floating controls live inside the footer landmark so no page content sits outside a landmark. They float over
         any section, so they override the footer's brass focus ring (too faint on white) with a ring drawn on their own
-        surface: leather on the white pill, white inset on the green WhatsApp button.
+        surface: leather on the white pill and the dark assistant button, white inset on the green WhatsApp button.
+        The assistant launcher holds the bottom-right corner; WhatsApp stacks above it.
     --}}
     @if ($showBestSellers)
         {{--
             Floating "Shop best sellers" shortcut (Ventro-style). Appears after 600px of scrolling, steps aside once the
             footer's legal bar is on screen so it never covers those links, and remembers a dismissal per browser.
             On phones it also tucks away while the visitor scrolls down and returns on any scroll up.
-            With a WhatsApp button it sits bottom-left on small screens and left of the button on large ones.
+            With a WhatsApp or assistant button it sits bottom-left on small screens and left of the buttons on large ones.
         --}}
         <div x-data="{
                  shown: false,
@@ -227,7 +236,7 @@
              x-cloak x-show="shown"
              x-transition:enter="transition duration-300 ease-out-quart" x-transition:enter-start="translate-y-3 opacity-0" x-transition:enter-end="translate-y-0 opacity-100"
              x-transition:leave="transition duration-200 ease-out-quart" x-transition:leave-start="translate-y-0 opacity-100" x-transition:leave-end="translate-y-3 opacity-0"
-             class="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 print:hidden sm:bottom-4 lg:bottom-6 {{ $wa ? 'left-4 lg:right-24 lg:left-auto' : 'right-4 lg:right-6' }}">
+             class="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 print:hidden sm:bottom-4 lg:bottom-6 {{ $wa || $assistant ? 'left-4 lg:right-24 lg:left-auto' : 'right-4 lg:right-6' }}">
             <a href="{{ route('shop', ['sort' => 'popular']) }}"
                class="group flex items-center gap-3 rounded-full bg-white py-1.5 pr-10 pl-1.5 text-ink-950 shadow-pop ring-1 ring-line transition hover:ring-line-strong focus-visible:outline-leather-700 focus-visible:-outline-offset-4">
                 <span class="grid size-11 shrink-0 place-items-center rounded-full bg-ink-950 text-white transition-transform group-hover:scale-105">
@@ -245,8 +254,12 @@
 
     @if ($wa)
         <a href="https://wa.me/{{ preg_replace('/\D/', '', $wa) }}" target="_blank" rel="noopener"
-           class="fixed right-4 bottom-20 z-30 inline-flex size-12 items-center justify-center rounded-full bg-[#1d7a46] text-white shadow-pop transition-transform hover:scale-105 focus-visible:outline-white focus-visible:-outline-offset-4 print:hidden lg:bottom-6">
+           class="fixed right-4 z-30 inline-flex size-12 items-center justify-center rounded-full bg-[#1d7a46] text-white shadow-pop transition-transform hover:scale-105 focus-visible:outline-white focus-visible:-outline-offset-4 print:hidden {{ $assistant ? 'bottom-[calc(max(1rem,env(safe-area-inset-bottom))+4rem)] sm:bottom-20 lg:right-6 lg:bottom-22' : 'bottom-20 lg:bottom-6' }}">
             <x-lx-icon name="chat" class="size-6" /><span class="sr-only">Chat with us on WhatsApp (opens in a new tab)</span>
         </a>
+    @endif
+
+    @if ($assistant)
+        <livewire:assistant-chat />
     @endif
 </footer>

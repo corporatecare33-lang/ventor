@@ -56,6 +56,8 @@ class CatalogSeeder extends Seeder
             $this->attachImage($category, 'image', 'products/'.$image, $name);
             $categoryIds[$slug] = $category->id;
         }
+        $this->attachImage(Category::find($categoryIds['smart-wallets']), 'tile', 'categories/leatherx-tap-wallet-trio.png',
+            'LeatherX Tap wallets in tan, black and brown leather');
 
         foreach ($this->products() as $index => $p) {
             $sku = 'LX-'.strtoupper(Str::substr(Str::slug($p['category'], ''), 0, 3)).'-'.str_pad((string) ($index + 1), 3, '0', STR_PAD_LEFT);

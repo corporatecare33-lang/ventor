@@ -69,6 +69,8 @@ class CategoryResource extends Resource
                 Toggle::make('is_featured')->label('Show as series on homepage'),
                 TextInput::make('sort_order')->numeric()->default(0),
                 SpatieMediaLibraryFileUpload::make('image')->collection('image')->image()->maxSize(2048),
+                SpatieMediaLibraryFileUpload::make('tile')->collection('tile')->label('Homepage tile image')->image()->maxSize(4096)
+                    ->helperText('Background of the dark "Shop all" tile beside this collection on the homepage. Portrait, product at the top, dark space below for the text.'),
             ]),
         ]);
     }

@@ -20,5 +20,7 @@ Laravel 13 eCommerce (Blade + Livewire 4 storefront, Filament 5 admin). Read `RE
 - Desktop mega menu groups (Wallets, Bags, Smart Accessories) are category slugs in `App\Support\MegaMenu::GROUPS`;
   product rows load from `/menu/{group}` on first open (cached fragment).
 - Never invent business facts (contact details, statistics, testimonials). Hide sections when data is missing.
+- The shop assistant (`App\Services\Assistant`) is rule-based with no external AI; every answer must come from store
+  data (products, cart, orders, FAQs, zones, payment methods, settings). Add words/spellings in `Lexicon.php`.
 - Scroll containers that hold `sr-only` text need `relative`, or the hidden text widens the page on mobile.
 

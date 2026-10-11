@@ -1,7 +1,8 @@
 {{--
     One homepage collection: centred title, the feature line derived from its products and a
     2-up / 4-up product grid. From md, a dark tile fills the last row's empty columns and links
-    to the full category; a text link appears only when the category holds more than is shown.
+    to the full category (over the category's "tile" photo when one is uploaded); a text link
+    appears only when the category holds more than is shown.
     Variant "lead" sets the title in ink with the cognac swoosh; with $afterFade it also
     tightens the top padding, as it then sits right under the dark LeatherX Tap section's fade.
 --}}
@@ -91,7 +92,29 @@
                         tile is clickable, while the tagline and count stay plain text. Wrapping all of it in
                         the link would give it a name that does not match its visible label.
                     --}}
-                    <div class="relative flex w-full flex-col justify-end rounded-card bg-ink-950 p-5 text-white transition-colors hover:bg-ink-900 lg:p-8">
+                    @php($tile = $category->getFirstMedia('tile'))
+                    <div @class([
+                        'group/tile relative isolate flex w-full flex-col justify-end overflow-hidden rounded-card bg-ink-950 p-5 text-white transition-colors hover:bg-ink-900 lg:p-8',
+                        'pr-[52%] lg:pr-[52%]' => $tile && $fill > 1,
+                    ])>
+                        @if ($tile)
+                            {{--
+                                Decorative (the tile already names the collection). One column: the photo spans the
+                                tile's width from the top, so the product stays above the text at every tile height,
+                                and its foot fades into the ink. Wider tiles: it fills the right half and fades in
+                                from the text side.
+                            --}}
+                            <div aria-hidden="true" @class(['absolute top-0 right-0 -z-10', 'left-0' => $fill === 1, 'bottom-0 w-1/2' => $fill > 1])>
+                                <img src="{{ $tile->getAvailableUrl(['tile']) }}" alt="" loading="lazy" decoding="async"
+                                     style="object-position: {{ $tile->getCustomProperty('focus', '50% 0%') }}"
+                                     @class(['transition-transform duration-700 ease-out-quart group-hover/tile:scale-[1.03]', 'block h-auto w-full' => $fill === 1, 'size-full object-cover' => $fill > 1])>
+                                <div @class([
+                                    'absolute inset-0',
+                                    'bg-linear-to-t from-ink-950 to-transparent to-40%' => $fill === 1,
+                                    'bg-linear-to-r from-ink-950 to-transparent to-40%' => $fill > 1,
+                                ])></div>
+                            </div>
+                        @endif
                         <p class="eyebrow-inverse">{{ $category->name }}</p>
                         @if ($tagline)
                             <p @class([

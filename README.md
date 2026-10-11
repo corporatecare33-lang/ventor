@@ -39,9 +39,25 @@ Run the tests: `php artisan test` (SQLite in-memory, no setup needed).
 | Blade pages & UI components | `resources/views` |
 | SEO (meta, Open Graph, JSON-LD, sitemap, robots) | `app/Support/Seo.php`, `SeoController` |
 | Caching | `app/Support/StorefrontCache.php` (versioned, auto-flushed on admin changes) |
+| Shop assistant (chat widget) | `app/Services/Assistant`, `app/Livewire/AssistantChat.php` |
 | Seed data (sample catalogue, no images) | `database/seeders` |
 | Tests | `tests/Feature` |
 | Deployment guide (cPanel / shared hosting) | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) |
+
+## Shop assistant
+
+The chat button in the bottom-right corner is a free, built-in assistant: it runs on the server with no AI
+service, API key or per-message cost. It understands English, Banglish and Bangla ("wallets under 3k",
+"৩০০০ টাকার মধ্যে ওয়ালেট", "amar order kothay") and answers only from the store's own data:
+
+- **Products**: search by category, colour, price, NFC / RFID / engraving / sale; product details; "show more".
+- **Cart**: add to cart (it asks for the colour when there are several), "add the second one", cart summary, checkout link.
+- **Orders**: tracking needs the order number and the checkout phone (signed-in customers see their own orders).
+- **Store questions**: delivery zones, active payment methods, FAQs, return policy, warranty, engraving, contact settings.
+
+To improve its answers, keep **Content → FAQs**, delivery zones, payment methods and contact details up to date.
+New words and spellings go in `app/Services/Assistant/Lexicon.php`. Hide the widget in
+**Settings → Website settings → Store**. The conversation lives in the visitor's session.
 
 ## Images & brand assets
 

@@ -57,6 +57,8 @@ class WebsiteSettings extends SettingsPage
                     TextInput::make('order_notification_email')->email()->helperText('New-order emails go here.'),
                     TextInput::make('trusted_customers')->label('Trust counter text')->placeholder('25,000+ happy customers'),
                     Textarea::make('checkout_note')->label('Checkout notice')->rows(2)->columnSpanFull(),
+                    Toggle::make('assistant_hidden')->label('Hide the shop assistant')->inline(false)->columnSpanFull()
+                        ->helperText('The chat button in the bottom-right corner. It answers from your products, FAQs, delivery zones, payment methods and contact details, so keep those up to date.'),
                     Section::make('Integrations (not connected yet)')->columnSpanFull()->schema([
                         Text::make('Courier APIs (Steadfast, Pathao, RedX), SMS gateways and online payment gateways are not connected. Add their API credentials to the .env file when available; see docs/DEPLOYMENT.md → "Third-party integrations".'),
                     ]),

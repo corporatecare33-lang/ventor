@@ -222,8 +222,9 @@
     </section>
 @endif
 
-{{-- Mobile purchase bar: appears once the buy buttons scroll out of view --}}
+{{-- Mobile purchase bar: appears once the buy buttons scroll out of view (the assistant launcher steps aside meanwhile) --}}
 <div x-data="{ show: false }" x-init="new IntersectionObserver(([entry]) => show = ! entry.isIntersecting && entry.boundingClientRect.top < 0).observe(document.getElementById('purchase'))"
+     x-effect="$dispatch('purchase-bar', { shown: show })"
      x-cloak x-show="show" x-transition.opacity class="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 backdrop-blur lg:hidden">
     <div class="container-site flex items-center justify-between gap-4 py-3">
         <div class="min-w-0">
