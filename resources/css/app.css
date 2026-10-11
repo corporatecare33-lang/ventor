@@ -65,6 +65,12 @@
     /* Sale price and "Save %" badge */
     --color-sale: #b8243a;
 
+    /* Rating stars (Ventro's amber). Decorative: every rating also shows its number as text. */
+    --color-star: #f59e0b;
+
+    /* Live dot in the hero badge (on dark photography only) */
+    --color-live: #22c55e;
+
     --color-success: #2f6b3f;
     --color-success-bg: #edf4ee;
     --color-danger: #9b2c2c;
@@ -88,6 +94,14 @@
     --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
     --default-transition-duration: 200ms;
     --default-transition-timing-function: var(--ease-out-quart);
+
+    /* Hero scroll cue: a brass drop running down its line */
+    --animate-scroll-drop: scroll-drop 1.5s ease-in-out infinite;
+
+    @keyframes scroll-drop {
+        from { translate: 0 -100%; }
+        to { translate: 0 100%; }
+    }
 }
 
 @layer base {
@@ -161,6 +175,33 @@
     }
 }
 
+/* Hero column (Ventro): 1400px wide, 20px sides on phones, 5vw (24–80px) from tablets */
+@utility container-hero {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 87.5rem;
+    padding-inline: 1.25rem;
+
+    @media (width >= 48rem) {
+        padding-inline: clamp(1.5rem, 5vw, 5rem);
+    }
+}
+
+/* Full-screen hero (Ventro): the viewport height, kept between 500px (600px from tablets) and 1000px */
+@utility min-h-hero {
+    min-height: clamp(31.25rem, 100svh, 62.5rem);
+
+    @media (width >= 48rem) {
+        min-height: clamp(37.5rem, 100svh, 62.5rem);
+    }
+}
+
+/* Fine film grain over hero photography (used at about 4% opacity) */
+@utility bg-grain {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 8rem 8rem;
+}
+
 @utility section-y {
     padding-block: clamp(4rem, 2.75rem + 4.5vw, 7rem);
 }
@@ -221,6 +262,43 @@
     .link-arrow {
         @apply inline-flex items-center gap-1.5 text-sm font-medium text-leather-700 underline decoration-line-strong underline-offset-4 transition-colors hover:text-ink-950 hover:decoration-ink-950;
     }
+
+    /*
+     * Header navigation item (Ventro): a 42px pill, medium 14–18px type. On hover, and while its
+     * panel is open, a dark copy of the label rises into the pill as the light one lifts away.
+     * Markup: <a class="nav-pill"><span class="nav-pill__text">…</span><span class="nav-pill__fill" aria-hidden="true">…</span></a>
+     */
+    .nav-pill {
+        @apply relative inline-flex h-[2.625rem] items-center overflow-hidden rounded-full px-5 font-medium whitespace-nowrap text-ink-950;
+        font-size: clamp(0.875rem, 0.748rem + 0.3174vw, 1.125rem);
+    }
+    .nav-pill[aria-current='page'] { @apply bg-mist-200; }
+    .nav-pill__fill {
+        @apply absolute inset-0 flex items-center justify-center rounded-full bg-ink-950 text-white;
+        transform: translateY(100%) scale(0.6);
+    }
+    .nav-pill__text,
+    .nav-pill__fill {
+        transition: transform 500ms cubic-bezier(0.3, 1, 0.3, 1), opacity 500ms cubic-bezier(0.3, 1, 0.3, 1);
+    }
+    .nav-pill[aria-expanded='true'] .nav-pill__fill { transform: none; }
+    .nav-pill[aria-expanded='true'] .nav-pill__text { opacity: 0; transform: translateY(-10%) scale(0.6); }
+    @media (hover: hover) and (pointer: fine) {
+        .nav-pill:hover .nav-pill__fill { transform: none; }
+        .nav-pill:hover .nav-pill__text { opacity: 0; transform: translateY(-10%) scale(0.6); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .nav-pill__text,
+        .nav-pill__fill { transition: none; }
+    }
+
+    /* Underline that draws in from the left on hover, and stays under the current page (header dropdown links) */
+    .link-reveal {
+        background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+        transition: background-size 500ms cubic-bezier(0.3, 1, 0.3, 1);
+    }
+    .link-reveal:hover,
+    .link-reveal[aria-current='page'] { background-size: 100% 1px; }
 
     /* Typography helpers */
     .eyebrow { @apply label-caps text-leather-600; }

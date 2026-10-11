@@ -13,6 +13,7 @@ use App\Models\Product;
 use App\Models\Review;
 use App\Models\ShippingZone;
 use App\Support\CollectionSummary;
+use App\Support\Comparison;
 use App\Support\Seo;
 use App\Support\StorefrontCache;
 use Illuminate\View\View;
@@ -24,9 +25,6 @@ class HomeController extends Controller
 
     /** Corporate gift sets are shown inside the corporate gifting section, not as a collection. */
     private const CORPORATE = 'corporate-gifts';
-
-    /** The two collections compared side by side after the first collection. */
-    private const COMPARE = ['smart-wallets', 'classic-wallets'];
 
     public function __invoke(): View
     {
@@ -43,19 +41,11 @@ class HomeController extends Controller
                         'category' => $category,
                         'products' => $all->take(8)->values(),
                         'features' => CollectionSummary::features($all),
-                        'all' => $all,
                     ];
                 })
                 ->filter(fn (array $c) => $c['products']->isNotEmpty())->values();
 
-            $pair = $collections->filter(fn (array $c) => in_array($c['category']->slug, self::COMPARE, true))
-                ->sortBy(fn (array $c) => array_search($c['category']->slug, self::COMPARE, true))->values();
-            $comparison = $pair->count() === 2 ? [
-                'collections' => [$pair[0]['category'], $pair[1]['category']],
-                'rows' => CollectionSummary::compare($pair[0]['category'], $pair[0]['all'], $pair[1]['category'], $pair[1]['all']),
-            ] : null;
-
-            $collections = $collections->map(fn (array $c) => collect($c)->except('all')->all());
+            $sections = HomeSection::where('is_active', true)->with('media')->orderBy('sort_order')->get()->keyBy('key');
 
             $zones = ShippingZone::active()->get();
             $visible = Product::visible();
@@ -95,7 +85,7 @@ class HomeController extends Controller
                         'icon' => 'pen',
                     ] : null,
                 ]),
-                'sections' => HomeSection::where('is_active', true)->with('media')->orderBy('sort_order')->get()->keyBy('key'),
+                'sections' => $sections,
                 // Brand promises for the scrolling strip — each shown only when the catalogue backs it up.
                 'promises' => array_values(array_filter([
                     (clone $visible)->where('leather_type', 'like', '%full-grain%')->exists() ? 'Full-grain leather' : null,
@@ -106,7 +96,8 @@ class HomeController extends Controller
                     $zones->isNotEmpty() ? 'Delivery across Bangladesh' : null,
                 ])),
                 'collections' => $collections,
-                'comparison' => $comparison,
+                // Two categories side by side, set up in the admin (Homepage sections → comparison).
+                'comparison' => $sections->has('comparison') ? Comparison::build($sections['comparison']->content ?? []) : null,
                 'additions' => Product::visible()->forCard()
                     ->whereHas('category', fn ($query) => $query->whereIn('slug', self::ADDITIONS))
                     ->orderByDesc('is_featured')->orderBy('sort_order')->limit(12)->get(),

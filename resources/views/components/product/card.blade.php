@@ -1,7 +1,7 @@
 {{--
-    Product card: square photo with sale / rating chips, name + price, colours, and two
-    feature callouts built from real product attributes. Layout adapts to the card's own
-    width (container queries), so it works in 2-up mobile grids and 4-up desktop rows alike.
+    Product card: square photo with sale / rating chips, name + rating + price, colour swatches, and a
+    sideways-scrolling strip of feature callouts built from real product attributes. Layout adapts to the
+    card's own width (container queries), so it works in 2-up mobile grids and 4-up desktop rows alike.
     showCategory=false drops the category label where the grid already sits under its name.
 
     Proportions follow ventro.com.bd's card: padding (--card-pad, ~9% of the card's width) and
@@ -58,7 +58,7 @@
 
             @if ($product->reviews_count)
                 <span class="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-white/75 px-2.5 py-1.5 text-[11px] leading-none font-medium text-ink-950 backdrop-blur-md transition-opacity duration-200 lg:group-hover:opacity-0 lg:group-has-[[data-quick-view]:focus-visible]:opacity-0 @[19rem]:top-5 @[19rem]:right-5 @[19rem]:gap-1.5 @[19rem]:px-4 @[19rem]:py-2.5 @[19rem]:text-[13px]">
-                    <x-lx-icon name="star-solid" class="size-3 text-brass-600 @[19rem]:size-3.5" />{{ number_format((float) $product->rating_avg, 1) }}
+                    <x-lx-icon name="star-solid" class="size-3 text-star @[19rem]:size-3.5" />{{ number_format((float) $product->rating_avg, 1) }}
                     <span class="sr-only">out of 5</span>
                 </span>
             @endif
@@ -94,34 +94,60 @@
         @if ($showCategory && $product->category)
             <p class="mb-2 truncate text-[10.5px] leading-none font-medium tracking-[0.1em] text-ink-500 uppercase @[19rem]:text-[11px]">{{ $product->category->name }}</p>
         @endif
-        <div class="flex flex-col gap-1.5 @[15rem]:flex-row @[15rem]:items-baseline @[15rem]:justify-between @[15rem]:gap-2">
+        {{--
+            Name, rating and price in Ventro's order. Narrow cards stack them; from 15rem the price sits
+            beside the name with the rating on its own line; from 24rem all three share one row and the
+            rating block is only as wide as its stars, so "4.9 Stars | 12 Reviews" wraps under them.
+        --}}
+        <div class="grid grid-cols-1 gap-1.5 @[15rem]:grid-cols-[minmax(0,1fr)_auto] @[15rem]:items-baseline @[15rem]:gap-x-2 @[24rem]:grid-cols-[minmax(0,1fr)_auto_auto] @[24rem]:gap-x-3">
             {{-- text-pretty overrides the base heading balance, which split names like "Pop-up" at the hyphen. --}}
             <{{ $heading }} class="min-w-0 font-sans text-[clamp(0.875rem,0.47rem+3.125cqw,1.25rem)] leading-tight font-medium tracking-[-0.01em] text-pretty text-ink-950">
                 <a href="{{ $url }}" class="after:absolute after:inset-0 after:content-[''] hover:text-leather-700">{{ $product->name }}</a>
             </{{ $heading }}>
-            <x-product.price :current="$product->currentPrice()" :regular="$product->hasDiscount() ? $product->regular_price : null"
+            @if ($product->reviews_count)
+                <p class="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px] leading-tight text-ink-700 @[15rem]:col-span-2 @[15rem]:row-start-2 @[19rem]:text-[13px] @[24rem]:col-span-1 @[24rem]:row-start-auto @[24rem]:w-min @[24rem]:text-[15px]">
+                    <x-ui.rating :rating="$product->rating_avg" class="shrink-0" size="size-3.5 @[24rem]:size-[1.125rem]" />
+                    <span>{{ (float) $product->rating_avg }}&nbsp;{{ Str::plural('Star', (float) $product->rating_avg) }} | {{ number_format($product->reviews_count) }}&nbsp;{{ Str::plural('Review', $product->reviews_count) }}</span>
+                </p>
+            @endif
+            <x-product.price :current="$product->currentPrice()" :regular="$product->hasDiscount() ? $product->regular_price : null" :quiet="true"
                              size="text-[14px] @[15rem]:text-[15px] @[20rem]:text-base"
                              class="shrink-0 @[15rem]:flex-col @[15rem]:items-end @[15rem]:gap-x-0 @[15rem]:gap-y-1 @[15rem]:leading-tight" />
         </div>
-        @if ($product->reviews_count)
-            <x-ui.rating :rating="$product->rating_avg" :count="$product->reviews_count" class="mt-2" size="size-3 @[19rem]:size-3.5" />
-        @endif
-        <x-product.swatches :swatches="$product->colorSwatches()" class="mt-3 @[19rem]:mt-4" size="size-3 @[19rem]:size-4" />
+        <x-product.swatches :swatches="$product->colorSwatches()" class="mt-3 @[19rem]:mt-4" size="size-6 @[19rem]:size-8" />
     </div>
 
     @if ($features)
-        {{-- Ventro's spec tray: white, hairline sides and foot, half the card padding around each callout, a divider between them. --}}
-        <ul @class(['mt-auto grid grid-cols-1 rounded-b-card border border-t-0 border-line/50 bg-white px-[calc(var(--card-pad)/2)] py-1.5 @[19rem]:py-2', '@[15rem]:grid-cols-2' => count($features) > 1])>
-            @foreach ($features as $feature)
-                <li class="my-1.5 flex min-w-0 items-start gap-2 px-[calc(var(--card-pad)/2)] not-first:border-l not-first:border-line/50 {{ $loop->index > 0 ? '@max-[15rem]:hidden' : '' }}">
-                    <x-lx-icon :name="$feature['icon']" class="size-4 shrink-0 text-ink-700 @[19rem]:size-5" />
-                    <span class="min-w-0 leading-tight">
-                        {{-- No `block` here: it would override line-clamp's display: -webkit-box. --}}
-                        <span class="line-clamp-2 text-[11px] font-medium text-ink-950 @[19rem]:text-xs">{{ $feature['title'] }}</span>
-                        <span class="mt-0.5 line-clamp-2 text-[10.5px] text-ink-500">{{ $feature['note'] }}</span>
-                    </span>
-                </li>
-            @endforeach
-        </ul>
+        {{--
+            Ventro's spec strip: a white tray (hairline sides and foot) holding every real feature in a
+            row that scrolls sideways. Each callout takes at least 60% of a narrow card (icon over text)
+            or 40% (never under 8.75rem) from 17rem (icon beside text), so the next one peeks in; edge
+            fades show there is more. With a mouse, the strip slides to its end on hover and back on
+            leave, as on Ventro. It sits above the title's stretched link so it can be swiped, and is a
+            tab stop only when it overflows.
+        --}}
+        <div class="relative z-1 mt-auto overflow-hidden rounded-b-card border border-t-0 border-line/50 bg-white"
+             x-data="{ start: false, end: false, measure() { const el = this.$refs.strip; this.start = el.scrollLeft > 1; this.end = el.scrollLeft + el.clientWidth < el.scrollWidth - 1 } }"
+             x-intersect="measure()" @resize.window.debounce.150ms="measure()">
+            <ul x-ref="strip" @scroll.passive="measure()" :tabindex="start || end ? 0 : null" aria-label="Features"
+                @mouseenter="matchMedia('(hover: hover)').matches && $el.scrollTo({ left: $el.scrollWidth })"
+                @mouseleave="matchMedia('(hover: hover)').matches && $el.scrollTo({ left: 0 })"
+                class="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain px-[calc(var(--card-pad)/2)] py-1.5 [scrollbar-width:none] motion-safe:scroll-smooth @[19rem]:py-2 [&::-webkit-scrollbar]:hidden">
+                @foreach ($features as $feature)
+                    <li class="my-1.5 flex min-w-[60%] shrink-0 grow basis-0 snap-start flex-col items-center gap-2 px-[calc(var(--card-pad)/2)] text-center not-first:border-l not-first:border-line/50 @[17rem]:min-w-[max(40%,8.75rem)] @[17rem]:flex-row @[17rem]:items-start @[17rem]:text-left">
+                        <x-lx-icon :name="$feature['icon']" class="size-[1.125rem] shrink-0 text-ink-700 @[17rem]:size-5 @[24rem]:size-6" />
+                        <span class="min-w-0 leading-tight">
+                            {{-- No `block` here: it would override line-clamp's display: -webkit-box. --}}
+                            <span class="line-clamp-2 text-[11px] font-medium text-ink-950 @[19rem]:text-xs">{{ $feature['title'] }}</span>
+                            <span class="mt-1 line-clamp-2 text-[10px] text-ink-500 @[19rem]:text-[10.5px]">{{ $feature['note'] }}</span>
+                        </span>
+                    </li>
+                @endforeach
+            </ul>
+            <span x-cloak x-show="start" x-transition.opacity.duration.300ms aria-hidden="true"
+                  class="pointer-events-none absolute inset-y-0 left-0 w-8 bg-linear-to-r from-white to-transparent @[24rem]:w-12"></span>
+            <span x-cloak x-show="end" x-transition.opacity.duration.300ms aria-hidden="true"
+                  class="pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-white to-transparent @[24rem]:w-12"></span>
+        </div>
     @endif
 </article>

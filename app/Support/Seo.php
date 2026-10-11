@@ -150,7 +150,7 @@ class Seo
 
         $site = setting('site_name', config('app.name'));
         $home = url('/');
-        $logo = setting('site_logo') ? Storage::disk('public')->url(setting('site_logo')) : asset('apple-touch-icon.png');
+        $logo = setting('site_logo') ? Storage::disk('public')->url(setting('site_logo')) : asset('images/brand/leatherx-logo.png');
         $sameAs = array_values(array_filter([setting('social_facebook'), setting('social_instagram'), setting('social_youtube'), setting('social_linkedin'), setting('social_tiktok')]));
 
         $organization = array_filter([

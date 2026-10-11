@@ -94,49 +94,51 @@
                     --}}
                     @php($tile = $category->getFirstMedia('tile'))
                     <div @class([
-                        'group/tile relative isolate flex w-full flex-col justify-end overflow-hidden rounded-card bg-ink-950 p-5 text-white transition-colors hover:bg-ink-900 lg:p-8',
-                        'pr-[52%] lg:pr-[52%]' => $tile && $fill > 1,
+                        'group/tile relative isolate flex w-full flex-col justify-end overflow-hidden rounded-card bg-ink-950 p-5 text-white ring-1 ring-white/10 transition-shadow duration-500 hover:shadow-pop lg:p-8',
                     ])>
                         @if ($tile)
                             {{--
-                                Decorative (the tile already names the collection). One column: the photo spans the
-                                tile's width from the top, so the product stays above the text at every tile height,
-                                and its foot fades into the ink. Wider tiles: it fills the right half and fades in
-                                from the text side.
+                                Decorative (the tile already names the collection). Wide tiles use the complete
+                                photograph as an editorial backdrop, retaining its negative space for the copy.
+                                Layered gradients keep the text readable without introducing a hard split between
+                                content and photography. A one-column tile keeps the product above the compact copy.
                             --}}
-                            <div aria-hidden="true" @class(['absolute top-0 right-0 -z-10', 'left-0' => $fill === 1, 'bottom-0 w-1/2' => $fill > 1])>
+                            <div aria-hidden="true" class="absolute inset-0 -z-10 overflow-hidden">
                                 <img src="{{ $tile->getAvailableUrl(['tile']) }}" alt="" loading="lazy" decoding="async"
                                      style="object-position: {{ $tile->getCustomProperty('focus', '50% 0%') }}"
-                                     @class(['transition-transform duration-700 ease-out-quart group-hover/tile:scale-[1.03]', 'block h-auto w-full' => $fill === 1, 'size-full object-cover' => $fill > 1])>
-                                <div @class([
-                                    'absolute inset-0',
-                                    'bg-linear-to-t from-ink-950 to-transparent to-40%' => $fill === 1,
-                                    'bg-linear-to-r from-ink-950 to-transparent to-40%' => $fill > 1,
-                                ])></div>
+                                     class="size-full object-cover transition-transform duration-700 ease-out-quart group-hover/tile:scale-[1.025]">
+                                @if ($fill === 1)
+                                    <div class="absolute inset-0 bg-linear-to-t from-ink-950 via-ink-950/35 to-transparent"></div>
+                                @else
+                                    <div class="absolute inset-0 bg-linear-to-r from-ink-950 from-0% via-ink-950/95 via-40% to-transparent to-78%"></div>
+                                    <div class="absolute inset-0 bg-linear-to-t from-ink-950/45 via-transparent to-ink-950/10"></div>
+                                @endif
                             </div>
                         @endif
-                        <p class="eyebrow-inverse">{{ $category->name }}</p>
-                        @if ($tagline)
-                            <p @class([
-                                'mt-2 leading-snug font-bold tracking-tight text-balance',
-                                'text-base' => $fill === 1,
-                                'text-lg lg:text-2xl' => $fill === 2,
-                                'text-xl lg:text-3xl' => $fill === 3,
-                            ])>{!! $tagline !!}</p>
-                        @endif
-                        {{-- Wide tiles (short collections) carry the category description so they read as an editorial banner, not an empty slab. --}}
-                        @if ($fill > 1 && $category->description)
-                            <p class="mt-3 line-clamp-3 max-w-md text-[15px] leading-relaxed text-white/65">{{ $category->description }}</p>
-                        @endif
-                        @if ($total)
-                            <p class="mt-2 text-sm text-white/60">{{ $total }} {{ str('piece')->plural($total) }}</p>
-                        @endif
-                        {{-- A one-column tile has ~124px for the pill at md: it goes full width with less padding below xl. --}}
-                        <a href="{{ route('categories.show', $category) }}"
-                           @class(['btn-brass btn-sm mt-5 self-start after:absolute after:inset-0 after:rounded-card', 'max-xl:self-stretch max-xl:px-2' => $fill === 1])>
-                            Shop all<span class="sr-only"> {{ $category->name }}</span>
-                            <x-lx-icon name="arrow-right" class="size-4" />
-                        </a>
+                        <div @class(['relative z-10', 'max-w-lg' => $fill > 1])>
+                            <p class="eyebrow-inverse">{{ $category->name }}</p>
+                            @if ($tagline)
+                                <p @class([
+                                    'mt-2 leading-snug font-bold tracking-tight text-balance',
+                                    'text-base' => $fill === 1,
+                                    'text-lg lg:text-2xl' => $fill === 2,
+                                    'text-xl lg:text-3xl' => $fill === 3,
+                                ])>{!! $tagline !!}</p>
+                            @endif
+                            {{-- Wide tiles (short collections) carry the category description so they read as an editorial banner, not an empty slab. --}}
+                            @if ($fill > 1 && $category->description)
+                                <p class="mt-3 line-clamp-3 max-w-md text-[15px] leading-relaxed text-white/70">{{ $category->description }}</p>
+                            @endif
+                            @if ($total)
+                                <p class="mt-2 text-sm font-medium text-white/65">{{ $total }} {{ str('piece')->plural($total) }}</p>
+                            @endif
+                            {{-- A one-column tile has ~124px for the pill at md: it goes full width with less padding below xl. --}}
+                            <a href="{{ route('categories.show', $category) }}"
+                               @class(['btn-brass btn-sm mt-5 self-start after:absolute after:inset-0 after:rounded-card', 'max-xl:flex max-xl:w-full max-xl:px-2' => $fill === 1])>
+                                Shop all<span class="sr-only"> {{ $category->name }}</span>
+                                <x-lx-icon name="arrow-right" class="size-4 transition-transform group-hover/tile:translate-x-1" />
+                            </a>
+                        </div>
                     </div>
                 </li>
             @endif

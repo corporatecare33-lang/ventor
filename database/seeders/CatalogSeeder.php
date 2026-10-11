@@ -58,6 +58,10 @@ class CatalogSeeder extends Seeder
         }
         $this->attachImage(Category::find($categoryIds['smart-wallets']), 'tile', 'categories/leatherx-tap-wallet-trio.png',
             'LeatherX Tap wallets in tan, black and brown leather');
+        $this->attachImage(Category::find($categoryIds['card-holders']), 'tile', 'categories/slim-black-leather-card-holder.png',
+            'Slim black leather card holder with cards');
+        $this->attachImage(Category::find($categoryIds['passport-holders']), 'tile', 'categories/luxury-leather-passport-travel-set.png',
+            'Black and cognac leather passport holder and travel card holder set');
 
         foreach ($this->products() as $index => $p) {
             $sku = 'LX-'.strtoupper(Str::substr(Str::slug($p['category'], ''), 0, 3)).'-'.str_pad((string) ($index + 1), 3, '0', STR_PAD_LEFT);

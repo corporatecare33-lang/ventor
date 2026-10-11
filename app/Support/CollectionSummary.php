@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Collection;
 
@@ -38,31 +37,36 @@ class CollectionSummary
         ]));
     }
 
+    /** Comparison-table rows that can be read from a collection's products, keyed for HomeSection content. */
+    public const METRICS = [
+        'leather' => 'Leather',
+        'nfc' => 'LeatherX Tap™ NFC',
+        'rfid' => 'RFID protection',
+        'cards' => 'Card capacity',
+        'notes' => 'Cash capacity',
+        'warranty' => 'Warranty',
+        'price' => 'Price range',
+        'engraving' => 'Engraving',
+    ];
+
     /**
-     * Rows comparing two collections. Values are strings; booleans become "Yes", "Selected pieces" or "—".
+     * One comparison-table value for a collection. Booleans become "Yes", "Selected pieces" or "—".
      *
-     * @param  Collection<int, Product>  $a
-     * @param  Collection<int, Product>  $b
-     * @return array<int, array{label: string, values: array{0: string, 1: string}}>
+     * @param  Collection<int, Product>  $products
      */
-    public static function compare(Category $first, Collection $a, Category $second, Collection $b): array
+    public static function metric(string $metric, Collection $products): string
     {
-        $rows = [
-            'Leather' => fn (Collection $p) => $p->map(fn (Product $product) => $product->namedLeather())->filter()->unique()->take(2)->implode(', ') ?: '—',
-            'LeatherX Tap™ NFC' => fn (Collection $p) => self::share($p, 'nfc_enabled'),
-            'RFID protection' => fn (Collection $p) => self::share($p, 'rfid_protection'),
-            'Card capacity' => fn (Collection $p) => $p->max('card_capacity') ? 'Up to '.$p->max('card_capacity').' cards' : '—',
-            'Warranty' => fn (Collection $p) => self::warrantyYears($p) ?? '—',
-            'Price range' => fn (Collection $p) => self::priceRange($p),
-            'Engraving' => fn (Collection $p) => self::share($p, 'engraving_available'),
-        ];
-
-        $result = [];
-        foreach ($rows as $label => $value) {
-            $result[] = ['label' => $label, 'values' => [$value($a), $value($b)]];
-        }
-
-        return $result;
+        return match ($metric) {
+            'leather' => $products->map(fn (Product $product) => $product->namedLeather())->filter()->unique()->take(2)->implode(', ') ?: '—',
+            'nfc' => self::share($products, 'nfc_enabled'),
+            'rfid' => self::share($products, 'rfid_protection'),
+            'cards' => $products->max('card_capacity') ? 'Up to '.$products->max('card_capacity').' cards' : '—',
+            'notes' => $products->max('cash_capacity') ? 'Up to '.$products->max('cash_capacity').' notes' : '—',
+            'warranty' => self::warrantyYears($products) ?? '—',
+            'price' => self::priceRange($products),
+            'engraving' => self::share($products, 'engraving_available'),
+            default => '—',
+        };
     }
 
     /** @param  Collection<int, Product>  $products */

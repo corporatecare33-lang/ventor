@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -54,6 +55,8 @@ class Product extends Model implements HasMedia
         $this->addMediaConversion('thumb')->width(480)->height(600)->format('webp')->quality(78)->nonQueued();
         $this->addMediaConversion('medium')->width(800)->height(1000)->format('webp')->quality(78)->nonQueued();
         $this->addMediaConversion('large')->width(1200)->height(1500)->format('webp')->quality(78)->nonQueued();
+        // Square crop for the colour swatches on product cards (shown at up to 32px).
+        $this->addMediaConversion('swatch')->fit(Fit::Crop, 96, 96)->format('webp')->quality(78)->nonQueued();
     }
 
     public function category(): BelongsTo
@@ -154,14 +157,26 @@ class Product extends Model implements HasMedia
         return $this->stock_quantity <= $this->low_stock_threshold;
     }
 
-    /** @return array<int, array{name: string, hex: ?string}> */
+    /**
+     * Colours for card swatches, each with the photo linked to it (media custom property `color`) when there is one.
+     *
+     * @return array<int, array{name: string, hex: ?string, image: ?string}>
+     */
     public function colorSwatches(): array
     {
+        $photos = $this->getMedia('images')
+            ->filter(fn (Media $media) => filled($media->getCustomProperty('color')))
+            ->keyBy(fn (Media $media) => mb_strtolower(trim((string) $media->getCustomProperty('color'))));
+
         return $this->activeVariants
             ->pluck('color')
             ->filter()
             ->unique('id')
-            ->map(fn (ProductOption $color) => ['name' => $color->name, 'hex' => $color->value])
+            ->map(fn (ProductOption $color) => [
+                'name' => $color->name,
+                'hex' => $color->value,
+                'image' => $photos->get(mb_strtolower(trim($color->name)))?->getAvailableUrl(['swatch', 'thumb']),
+            ])
             ->values()
             ->all();
     }
@@ -200,7 +215,7 @@ class Product extends Model implements HasMedia
     }
 
     /**
-     * Up to two short feature callouts for product cards, built only from real attributes.
+     * Short feature callouts for the product card's spec strip, built only from real attributes.
      *
      * @return array<int, array{icon: string, title: string, note: string}>
      */
@@ -216,7 +231,7 @@ class Product extends Model implements HasMedia
             $this->rfid_protection ? ['icon' => 'shield', 'title' => 'RFID blocking', 'note' => 'Card protection'] : null,
             $warranty ? ['icon' => 'badge', 'title' => ucfirst($warranty), 'note' => 'Stitching & hardware'] : null,
             $this->engraving_available ? ['icon' => 'pen', 'title' => 'Engravable', 'note' => 'Names & logos'] : null,
-        ])->filter()->take(2)->values()->all();
+        ])->filter()->values()->all();
     }
 
     /** The leather type when it says more than just "Leather". */

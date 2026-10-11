@@ -64,7 +64,7 @@ New words and spellings go in `app/Services/Assistant/Lexicon.php`. Hide the wid
 | What | Where |
 | --- | --- |
 | Product, banner and section photos (originals, used by the seeders) | `public/images/products`, `public/images/banners` |
-| Logo (light background / dark background) | `public/images/brand/leatherx-logo.svg`, `leatherx-logo-inverse.svg` |
+| Logo (light background / dark background) | `public/images/brand/leatherx-logo.png`, `leatherx-logo-inverse.svg` |
 | Favicons, app icons, default social share image | `public/favicon.*`, `public/icon-*.png`, `public/images/og-default.jpg` |
 
 New photos are uploaded in the admin (Products, Banners, Homepage sections, Categories) and converted to WebP

@@ -5,15 +5,22 @@
     $nav = [
         ['Engraving', route('engraving'), request()->routeIs('engraving')],
         ['LeatherX Tap™', route('tap'), request()->routeIs('tap')],
-        ['Corporate Gifts', route('corporate'), request()->routeIs('corporate')],
-        ['Contact', route('contact'), request()->routeIs('contact')],
-        ['About', route('pages.about'), request()->routeIs('pages.about')],
+        ['Contact Us', route('contact'), request()->routeIs('contact')],
     ];
-    $pill = 'inline-flex min-h-11 items-center gap-1 rounded-full px-3.5 whitespace-nowrap transition-colors xl:px-4';
+    // "About Us" opens a short dropdown, as on Ventro.
+    $about = [
+        ['Our story', route('pages.about'), request()->routeIs('pages.about')],
+        ['Corporate gifts', route('corporate'), request()->routeIs('corporate')],
+        ['Warranty registration', route('warranty'), request()->routeIs('warranty')],
+    ];
+    $aboutActive = collect($about)->contains(fn ($link) => $link[2]);
+    $iconButton = 'inline-flex size-11 items-center justify-center text-ink-950 transition-colors hover:text-leather-700';
+    $navItem = 'flex pb-(--header-pad)';
 @endphp
+{{-- Announcement bar (Ventro): 48px (56px from 1536px), italic 13–14px type on near-black --}}
 @if ($announcementText)
-    <aside class="bg-ink-950 text-white/85" aria-label="Store announcement">
-        <p class="container-site py-2.5 text-center text-[12.5px] leading-snug italic">
+    <aside id="announcement-bar" class="flex h-12 items-center bg-ink-900 text-[13px] text-white/95 2xl:h-14 2xl:text-sm" aria-label="Store announcement">
+        <p class="container-site text-center leading-tight italic">
             @if ($announcementLink)
                 <a href="{{ $announcementLink }}" class="underline-offset-4 hover:text-white hover:underline">{{ $announcementText }}</a>
             @else
@@ -22,37 +29,58 @@
         </p>
     </aside>
 @endif
-<header class="sticky top-0 z-40 {{ $announcementText ? 'bg-ink-950' : 'bg-white' }}"
+{{--
+    Header (Ventro): a white panel with rounded top corners over the announcement bar, edge to edge
+    with 20/36/48px sides. 24px above and below on phones, 32px from tablets (--header-pad). The nav
+    items carry the bottom padding, so a panel opens flush with no hover gap.
+    Once it sticks (the announcement bar has scrolled away) the corners square off and a hairline
+    appears. Its height never changes with scrolling: a shrinking sticky header moves the scroll
+    position, which can flip the state back and leave it stuck.
+--}}
+<header class="group/header sticky top-0 z-40 [--header-pad:1.5rem] md:[--header-pad:2rem] {{ $announcementText ? 'bg-ink-900' : 'bg-white' }}"
         x-data="{
-            menu: false, search: false, scrolled: false, mega: null, megaTimer: null,
+            menu: false, search: false, scrolled: false, mega: null, megaTimer: null, scrollFrame: null,
             // Hover intent: a short delay before the first panel opens; switching between items is instant.
             openMega(key) { clearTimeout(this.megaTimer); this.megaTimer = setTimeout(() => { this.mega = key; this.search = false }, this.mega ? 0 : 90) },
             closeMega(key, delay = 180) { clearTimeout(this.megaTimer); this.megaTimer = setTimeout(() => { if (this.mega === key) this.mega = null }, delay) },
+            // Checked on the next frame, so the last scroll position always counts (a throttle can drop it).
+            checkScroll() {
+                if (this.scrollFrame) return;
+                this.scrollFrame = requestAnimationFrame(() => {
+                    this.scrollFrame = null;
+                    this.scrolled = window.scrollY > 0 && window.scrollY >= (document.getElementById('announcement-bar')?.offsetHeight ?? 0);
+                });
+            },
         }"
-        @scroll.window.throttle.100ms="scrolled = window.scrollY > 40"
+        x-init="checkScroll()" :data-scrolled="scrolled"
+        @scroll.window.passive="checkScroll()" @resize.window.passive="checkScroll()" @pageshow.window="checkScroll()"
         @keydown.escape.window="menu = false; search = false; mega = null">
-    <div class="border-b border-line bg-white transition-[border-radius] duration-200 {{ $announcementText ? 'rounded-t-[1.25rem]' : '' }}" :class="scrolled && 'rounded-t-none'">
-        {{-- Utility row: menu + search · logo · account + cart --}}
-        <div class="container-wide grid h-16 grid-cols-[1fr_auto_1fr] items-center lg:h-[4.75rem]">
-            <div class="-ml-2.5 flex items-center">
-                <button type="button" class="inline-flex size-11 items-center justify-center text-ink-950 hover:text-leather-700" @click="menu = true"
+    <div class="border-b border-transparent bg-white transition-[border-radius,border-color] duration-200 group-data-scrolled/header:rounded-t-none group-data-scrolled/header:border-line {{ $announcementText ? 'rounded-t-[clamp(1rem,1.578vw,1.875rem)]' : '' }}">
+        {{-- Utility row: menu + search · logo · account + cart (phones: menu · logo · search + cart) --}}
+        <div class="grid grid-cols-[1fr_auto_1fr] items-center px-5 pt-(--header-pad) pb-(--header-pad) md:px-9 lg:px-12 lg:pb-0">
+            <div class="-ml-2.5 flex items-center gap-1.5">
+                <button type="button" class="{{ $iconButton }}" @click="menu = true"
                         aria-controls="mobile-menu" :aria-expanded="menu.toString()" aria-label="Open menu">
                     <x-lx-icon name="menu" class="size-6" />
                 </button>
-                <button type="button" class="inline-flex size-11 items-center justify-center text-ink-950 hover:text-leather-700"
+                <button type="button" class="{{ $iconButton }} max-lg:hidden"
                         @click="search = ! search; mega = null; $nextTick(() => search && $refs.q.focus())" aria-controls="site-search" :aria-expanded="search.toString()" aria-label="Search products">
-                    <x-lx-icon name="search" class="size-5" />
+                    <x-lx-icon name="search" class="size-6" />
                 </button>
             </div>
 
-            <a href="{{ route('home') }}" class="justify-self-center" @if (request()->routeIs('home')) aria-current="page" @endif>
-                <x-logo height="h-[17px] sm:h-5 lg:h-[22px]" />
+            <a href="{{ route('home') }}" class="flex items-center justify-self-center lg:h-12" @if (request()->routeIs('home')) aria-current="page" @endif>
+                <x-logo height="h-6 sm:h-7 lg:h-8" />
             </a>
 
-            <div class="-mr-2.5 flex items-center justify-self-end">
-                <a href="{{ auth()->check() ? route('account.dashboard') : route('login') }}" class="hidden size-11 items-center justify-center text-ink-950 hover:text-leather-700 sm:inline-flex"
+            <div class="-mr-2.5 flex items-center gap-1.5 justify-self-end">
+                <button type="button" class="{{ $iconButton }} lg:hidden"
+                        @click="search = ! search; mega = null; $nextTick(() => search && $refs.q.focus())" aria-controls="site-search" :aria-expanded="search.toString()" aria-label="Search products">
+                    <x-lx-icon name="search" class="size-6" />
+                </button>
+                <a href="{{ auth()->check() ? route('account.dashboard') : route('login') }}" class="{{ $iconButton }} max-lg:hidden"
                    aria-label="{{ auth()->check() ? 'My account' : 'Sign in' }}">
-                    <x-lx-icon name="user" class="size-5" />
+                    <x-lx-icon name="account" class="size-6" />
                 </a>
                 <livewire:cart-counter />
             </div>
@@ -64,17 +92,16 @@
             the product row on the right. Product rows are fetched once, on first open.
         --}}
         <nav class="hidden lg:block" aria-label="Primary" @click.outside="mega = null">
-            <ul class="container-wide flex h-14 items-center justify-center gap-0.5 text-[14px] xl:gap-1.5 xl:text-[15px]">
+            <ul class="flex items-start justify-center px-12 pt-4">
                 @foreach ($layout['megaMenu'] as $key => $group)
                     @php($groupActive = $group['categories']->contains(fn ($category) => request()->is('category/'.$category->slug)))
-                    <li class="flex" @mouseenter="openMega(@js($key))" @mouseleave="closeMega(@js($key))"
+                    <li class="{{ $navItem }}" @mouseenter="openMega(@js($key))" @mouseleave="closeMega(@js($key))"
                         @focusout="if (! $el.contains($event.relatedTarget)) closeMega(@js($key), 0)"
                         @keydown.escape.stop="mega = null; $refs.trigger.focus()">
                         <button type="button" x-ref="trigger" @click="mega = mega === @js($key) ? null : @js($key)"
                                 :aria-expanded="(mega === @js($key)).toString()" aria-expanded="false" aria-controls="mega-{{ $key }}"
-                                class="{{ $pill }} {{ $groupActive ? 'bg-mist-200 text-ink-950' : 'text-ink-800 hover:bg-mist-200 hover:text-ink-950' }}"
-                                :class="mega === @js($key) && '!bg-ink-950 !text-white'">
-                            {{ $group['label'] }}
+                                class="nav-pill {{ $groupActive ? 'bg-mist-200' : '' }}">
+                            <span class="nav-pill__text">{{ $group['label'] }}</span><span class="nav-pill__fill" aria-hidden="true">{{ $group['label'] }}</span>
                         </button>
 
                         <div id="mega-{{ $key }}" x-cloak x-show="mega === @js($key)"
@@ -133,11 +160,31 @@
                     </li>
                 @endforeach
                 @foreach ($nav as [$label, $url, $active])
-                    <li class="flex">
-                        <a href="{{ $url }}" @if ($active) aria-current="page" @endif
-                           class="{{ $pill }} {{ $active ? 'bg-mist-200 text-ink-950' : 'text-ink-800 hover:bg-mist-200 hover:text-ink-950' }}">{{ $label }}</a>
+                    <li class="{{ $navItem }}">
+                        <a href="{{ $url }}" @if ($active) aria-current="page" @endif class="nav-pill">
+                            <span class="nav-pill__text">{{ $label }}</span><span class="nav-pill__fill" aria-hidden="true">{{ $label }}</span>
+                        </a>
                     </li>
                 @endforeach
+                <li class="relative {{ $navItem }}" @mouseenter="openMega('about')" @mouseleave="closeMega('about')"
+                    @focusout="if (! $el.contains($event.relatedTarget)) closeMega('about', 0)"
+                    @keydown.escape.stop="mega = null; $refs.aboutTrigger.focus()">
+                    <button type="button" x-ref="aboutTrigger" @click="mega = mega === 'about' ? null : 'about'"
+                            :aria-expanded="(mega === 'about').toString()" aria-expanded="false" aria-controls="about-menu"
+                            class="nav-pill {{ $aboutActive ? 'bg-mist-200' : '' }}">
+                        <span class="nav-pill__text">About Us</span><span class="nav-pill__fill" aria-hidden="true">About Us</span>
+                    </button>
+                    <div id="about-menu" x-cloak x-show="mega === 'about'"
+                         x-transition:enter="transition duration-150 ease-out-quart" x-transition:enter-start="opacity-0 -translate-y-1"
+                         x-transition:leave="transition duration-100" x-transition:leave-end="opacity-0"
+                         class="absolute top-full -left-3 w-max min-w-[15.625rem] rounded-b-[clamp(1rem,1.052vw,1.25rem)] bg-white px-8 pt-6 pb-10 shadow-pop">
+                        <ul class="flex flex-col gap-1.5 text-[clamp(0.875rem,0.8115rem+0.1587vw,1rem)] xl:gap-2">
+                            @foreach ($about as [$label, $url, $active])
+                                <li><a href="{{ $url }}" @if ($active) aria-current="page" @endif class="link-reveal leading-normal text-ink-950">{{ $label }}</a></li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </li>
             </ul>
         </nav>
     </div>
@@ -159,7 +206,7 @@
              x-transition:enter="transition duration-300 ease-out-quart" x-transition:enter-start="-translate-x-full"
              x-transition:leave="transition duration-200 ease-out-quart" x-transition:leave-end="-translate-x-full">
             <div class="flex h-16 items-center justify-between border-b border-line px-5">
-                <x-logo height="h-[17px]" />
+                <x-logo height="h-6" />
                 <button type="button" @click="menu = false" class="-mr-2 inline-flex size-11 items-center justify-center" aria-label="Close menu">
                     <x-lx-icon name="x" class="size-6" />
                 </button>
@@ -178,7 +225,7 @@
                 </ul>
                 <p class="label-caps mt-8 text-ink-500">Discover</p>
                 <ul class="mt-2">
-                    @foreach ([...$nav, ['Track an order', route('orders.track'), request()->routeIs('orders.track')], ['Warranty registration', route('warranty'), request()->routeIs('warranty')], ['Journal', route('blog.index'), request()->routeIs('blog.*')]] as [$label, $url, $active])
+                    @foreach ([...$nav, ...$about, ['Track an order', route('orders.track'), request()->routeIs('orders.track')], ['Journal', route('blog.index'), request()->routeIs('blog.*')]] as [$label, $url, $active])
                         <li><a href="{{ $url }}" @if ($active) aria-current="page" @endif class="flex min-h-12 items-center border-b border-line text-[15px] {{ $active ? 'font-semibold' : '' }}">{{ $label }}</a></li>
                     @endforeach
                 </ul>

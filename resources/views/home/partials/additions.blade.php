@@ -3,8 +3,8 @@
     categories, laid out like Ventro's "Smart Additions" slider. A native horizontal scroll-snap
     track (swipe, trackpad or arrow keys once focused) with large round prev / next buttons
     centred above it. Buttons scroll by one card plus the gap and are marked disabled at either
-    end. The title is deliberately smaller than the collection titles above, so it reads as a
-    coda rather than another collection.
+    end. Its heading uses the same collection-title scale as every product section so the
+    homepage keeps one consistent visual hierarchy.
 --}}
 @php
     $titleId = 'additions-title';
@@ -44,7 +44,7 @@
          @resize.window.debounce.150ms="update()">
     <div class="container-wide">
         <header class="reveal text-center">
-            <h2 id="{{ $titleId }}" class="font-display text-[clamp(1.875rem,1.3rem+2vw,2.75rem)] leading-[1.05] font-bold tracking-[-0.04em] text-balance text-cognac-500">{{ $section->title }}</h2>
+            <h2 id="{{ $titleId }}" class="title-collection text-balance text-cognac-500">{{ $section->title }}</h2>
             @if ($section->subtitle)
                 <p class="mx-auto mt-4 max-w-2xl text-[clamp(1rem,1.052vw,1.25rem)] leading-normal text-pretty text-ink-800">{{ $section->subtitle }}</p>
             @endif
