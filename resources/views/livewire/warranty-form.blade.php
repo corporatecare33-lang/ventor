@@ -4,7 +4,7 @@
             <span class="mx-auto flex size-12 items-center justify-center rounded-full bg-success-bg text-success"><x-lx-icon name="check" class="size-6" /></span>
             <h2 class="mt-5 font-display text-[1.875rem] text-ink-950">{{ $type === 'claim' ? 'Claim received' : 'Warranty registered' }}</h2>
             <p class="mt-2 text-[15px] text-ink-600">Your reference number is <strong class="tracking-wide text-ink-950">{{ $reference }}</strong>.</p>
-            <p class="mx-auto mt-3 max-w-sm text-sm text-ink-600">Keep it for your records. We review submissions within two working days.</p>
+            <p class="mx-auto mt-3 max-w-sm text-sm text-ink-600">Keep it for your records. We will contact you once your submission has been reviewed.</p>
         </div>
     @else
         <div class="grid grid-cols-2 border-b border-line" role="tablist" aria-label="Request type">

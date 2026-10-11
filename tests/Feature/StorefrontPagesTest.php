@@ -150,7 +150,8 @@ class StorefrontPagesTest extends TestCase
 
     public function test_contact_form_stores_message_and_blocks_honeypot(): void
     {
-        $this->post('/contact', ['name' => 'Karim', 'email' => 'k@example.com', 'message' => 'Do you ship to Sylhet?'])
+        // Browsers always submit the (empty) honeypot field.
+        $this->post('/contact', ['name' => 'Karim', 'email' => 'k@example.com', 'message' => 'Do you ship to Sylhet?', 'website' => ''])
             ->assertSessionHas('success');
         $this->assertDatabaseHas('contact_messages', ['email' => 'k@example.com']);
 

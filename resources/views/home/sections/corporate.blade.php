@@ -31,7 +31,7 @@
         ])>
             <div @class(['w-full', 'mx-auto max-w-xl' => ! $hasAside])>
                 @if ($items->isNotEmpty())
-                    <ul role="list" class="divide-y divide-line border-y border-line">
+                    <ul role="list" data-anim="stagger" class="divide-y divide-line border-y border-line">
                         @foreach ($items as $item)
                             <li class="flex items-start gap-3.5 py-3.5">
                                 <span class="grid size-7 shrink-0 place-items-center rounded-full bg-paper text-cognac-600">
@@ -61,7 +61,7 @@
                     Two sets fill the column 2-up; a lone set keeps a single card's width instead of
                     stretching. The category label is dropped: the section title already says it.
                 --}}
-                <ul role="list" @class([
+                <ul role="list" data-anim="cards" @class([
                     'grid gap-3 sm:gap-4',
                     'grid-cols-2' => $gifts->count() > 1,
                     'mx-auto w-full max-w-80' => $gifts->count() === 1,

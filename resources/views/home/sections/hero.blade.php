@@ -7,7 +7,7 @@
 @endphp
 
 @if ($slides->isNotEmpty())
-    <section class="relative isolate overflow-hidden bg-ink-950 text-white" aria-roledescription="carousel" aria-label="Featured collections"
+    <section class="relative isolate overflow-hidden bg-ink-950 text-white" aria-roledescription="carousel" aria-label="Featured collections" data-hero
              x-data="{
                 i: 0,
                 n: {{ $slides->count() }},
@@ -15,7 +15,7 @@
                 timer: null,
                 start() { this.stop(); if (this.playing && this.n > 1) this.timer = setInterval(() => this.go(this.i + 1), 7000) },
                 stop() { clearInterval(this.timer) },
-                go(k) { this.i = (k + this.n) % this.n },
+                go(k) { const next = (k + this.n) % this.n; if (next === this.i) return; this.i = next; this.$dispatch('hero:slide', { index: next }) },
                 toggle() { this.playing = ! this.playing; this.playing ? this.start() : this.stop() },
                 sx: null,
                 sy: 0,
@@ -56,7 +56,7 @@
                      :class="i === {{ $index }} ? 'opacity-100' : 'pointer-events-none opacity-0'"
                      :inert="i !== {{ $index }}" :aria-hidden="(i !== {{ $index }}).toString()"
                      @if ($index > 0) inert aria-hidden="true" @endif
-                     role="group" aria-roledescription="slide" aria-label="{{ $index + 1 }} of {{ $slides->count() }}">
+                     role="group" aria-roledescription="slide" aria-label="{{ $index + 1 }} of {{ $slides->count() }}" data-hero-slide="{{ $index }}">
                     <picture class="absolute inset-0 -z-10">
                         @if ($mobile)
                             <source media="(max-width: 639px)" srcset="{{ $mobile->getUrl('mobile') }} 800w" sizes="100vw">
@@ -73,18 +73,18 @@
                         <div class="w-full lg:mx-auto lg:max-w-[62.5rem]">
                             <div class="max-w-[40rem]">
                                 @if ($slide->eyebrow)
-                                    <p class="pill-label"><span class="size-1.5 rounded-full bg-brass-300" aria-hidden="true"></span>{{ $slide->eyebrow }}</p>
+                                    <p class="pill-label" data-hero-item><span class="size-1.5 rounded-full bg-brass-300" aria-hidden="true"></span>{{ $slide->eyebrow }}</p>
                                 @endif
-                                <{{ $index === 0 ? 'h1' : 'h2' }} @if ($index === 0) id="hero-title" @endif
+                                <{{ $index === 0 ? 'h1' : 'h2' }} @if ($index === 0) id="hero-title" @endif data-hero-title
                                     class="mt-5 font-sans text-[clamp(2.25rem,1.5rem+2.8vw,3.75rem)] leading-[1.04] font-bold tracking-[-0.035em] text-white">
                                     {{ $line1 }}
                                     @if ($line2)<span class="block text-brass-300">{{ $line2 }}</span>@endif
                                 </{{ $index === 0 ? 'h1' : 'h2' }}>
                                 @if ($slide->subtitle)
-                                    <p class="mt-4 max-w-[34rem] text-[15px] leading-relaxed text-white/75 sm:text-base">{{ $slide->subtitle }}</p>
+                                    <p class="mt-4 max-w-[34rem] text-[15px] leading-relaxed text-white/75 sm:text-base" data-hero-item>{{ $slide->subtitle }}</p>
                                 @endif
                                 {{-- Full-width pills on phones, side by side from sm --}}
-                                <div class="mt-8 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
+                                <div class="mt-8 grid gap-3 sm:flex sm:flex-wrap sm:items-center" data-hero-item>
                                     <a href="{{ $slide->button_link ?: route('shop') }}" class="btn-brass">
                                         {{ $slide->button_text ?: 'Explore collection' }} <x-lx-icon name="arrow-right" class="size-4" />
                                     </a>
@@ -93,7 +93,7 @@
                                     @endif
                                 </div>
                                 @if ($trust->isNotEmpty())
-                                    <ul class="mt-8 flex flex-wrap gap-x-6 gap-y-2.5 text-[11px] font-semibold tracking-[0.12em] text-white/60 uppercase">
+                                    <ul class="mt-8 flex flex-wrap gap-x-6 gap-y-2.5 text-[11px] font-semibold tracking-[0.12em] text-white/60 uppercase" data-hero-item>
                                         @foreach ($trust as $fact)
                                             <li class="flex items-center gap-2">
                                                 <x-lx-icon :name="$fact['icon']" class="size-4 text-brass-300" />

@@ -59,9 +59,15 @@ Prices, stock and capacities in the starter catalogue are sample values: review 
 
 ## Design system
 
-Tokens live in `resources/css/app.css` (`@theme`): warm neutrals, one brown (`leather-*`) and one brass accent
-(`brass-*`, dark backgrounds only), Cormorant Garamond for display type and Inter for text, 2px radius for
-controls and 4px for media. Reusable Blade components are in `resources/views/components/{ui,form,product}`.
+Tokens live in `resources/css/app.css` (`@theme`): warm neutrals, one brown (`leather-*`), a brass accent
+(`brass-*`, dark backgrounds only) and cognac for large titles. Inter only — bold, tightly tracked headings.
+Radius: 2px controls, 4px small media, 12px cards/panels, full pills for campaign buttons. Reusable Blade
+components are in `resources/views/components/{ui,form,product}`. The logo is a monoline SVG wordmark in
+`public/images/brand/` (an uploaded logo in Website settings replaces it).
+
+Motion lives in `resources/js/motion.js` (GSAP, ScrollTrigger, SplitText) and is driven by markup hooks
+(`.reveal`, `data-anim="stagger|cards|panel"`, `data-count`, `data-hero-*`, `data-marquee`). It only runs when
+the visitor has not asked for reduced motion.
 
 ## Admin roles
 

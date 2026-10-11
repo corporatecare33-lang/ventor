@@ -19,7 +19,7 @@
 
         @if ($items->isNotEmpty())
             {{-- role="list" keeps list semantics in Safari/VoiceOver, which drops them when list-style is none --}}
-            <ol role="list" class="mx-auto mt-8 grid max-w-[54rem] gap-3 text-left md:grid-cols-3">
+            <ol role="list" data-anim="stagger" class="mx-auto mt-8 grid max-w-[54rem] gap-3 text-left md:grid-cols-3">
                 @foreach ($items as $item)
                     {{-- Icon beside the text on phones, stacked on top from md up. The faint border keeps the
                          card outlined in forced-colours mode, where the translucent background is dropped. --}}
@@ -39,7 +39,7 @@
         @endif
 
         @if ($points->isNotEmpty())
-            <ul role="list" class="mx-auto mt-6 flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-xs text-white/65">
+            <ul role="list" data-anim="stagger" class="mx-auto mt-6 flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-xs text-white/65">
                 @foreach ($points as $point)
                     <li class="inline-flex items-center gap-1.5">
                         <x-lx-icon name="check" class="size-3.5 shrink-0 text-brass-300" />{{ $point }}

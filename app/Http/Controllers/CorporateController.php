@@ -45,6 +45,6 @@ class CorporateController extends Controller
             'status' => InquiryStatus::New,
         ]);
 
-        return back()->with('success', 'Thank you! Our corporate team will send you a quotation within one working day.');
+        return back()->with('success', 'Thank you! We have your request and will send the quotation by email.');
     }
 }

@@ -28,8 +28,9 @@ class ContactController extends Controller
             'website' => ['prohibited'], // honeypot
         ]);
 
-        ContactMessage::create(collect($data)->map(fn ($v) => is_string($v) ? strip_tags($v) : $v)->all());
+        // The honeypot is validated above but is not a column (browsers submit it empty).
+        ContactMessage::create(collect($data)->except('website')->map(fn ($v) => is_string($v) ? strip_tags($v) : $v)->all());
 
-        return back()->with('success', 'Thanks for reaching out — we usually reply within a few hours.');
+        return back()->with('success', 'Thanks — your message has been sent. We will reply to the email address you gave.');
     }
 }

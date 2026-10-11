@@ -20,7 +20,7 @@
 </head>
 <body>
     <main>
-        <img src="/images/brand/leatherx-logo.svg" alt="LeatherX" width="143" height="48">
+        <img src="/images/brand/leatherx-logo.svg" alt="LeatherX" width="151" height="23">
         <p class="code">Error {{ $code }}</p>
         <h1>{{ $title }}</h1>
         <p class="msg">{{ $message }}</p>

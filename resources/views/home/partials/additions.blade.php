@@ -76,7 +76,7 @@
         <div id="{{ $trackId }}" x-ref="track" @scroll="onScroll()" tabindex="0" role="region"
              aria-label="{{ $section->title }}: product carousel, scrolls horizontally"
              class="@container relative -mx-5 mt-6 snap-x snap-mandatory scroll-px-5 overflow-x-auto overscroll-x-contain px-5 scrollbar-none motion-safe:scroll-smooth sm:-mx-8 sm:mt-8 sm:scroll-px-8 sm:px-8 lg:mx-0 lg:-mr-[max(2.5rem,calc((100cqw-90rem)/2+2.5rem))] lg:scroll-px-0 lg:px-0 lg:pr-10">
-            <ul role="list" x-ref="list" class="flex w-max gap-3 sm:gap-4 lg:gap-5">
+            <ul role="list" x-ref="list" data-anim="cards" class="flex w-max gap-3 sm:gap-4 lg:gap-5">
                 @foreach ($products as $product)
                     <li class="flex w-[60cqw] shrink-0 snap-start sm:w-[40cqw] md:w-[30cqw] lg:w-[18.5rem] xl:w-[20rem]">
                         <x-product.card :product="$product" class="w-full"

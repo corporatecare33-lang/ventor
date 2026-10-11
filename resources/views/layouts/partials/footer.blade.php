@@ -81,7 +81,7 @@
     <div class="container-wide grid gap-8 py-10 lg:grid-cols-12 lg:gap-12 lg:py-16">
         <div class="lg:col-span-3 xl:col-span-4">
             <a href="{{ route('home') }}" class="inline-block">
-                <x-logo inverse height="h-12" />
+                <x-logo inverse height="h-6" />
             </a>
             @if ($about = setting('footer_about'))
                 <p class="mt-4 max-w-sm text-sm leading-relaxed wrap-break-word text-white/65">{{ $about }}</p>

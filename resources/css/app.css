@@ -293,15 +293,21 @@
         text-shadow: -1px -1px 0 rgb(0 0 0 / 0.35), 1px 1px 0 rgb(255 255 255 / 0.16);
     }
 
-    /* Reveal-on-scroll (only when JS is running and motion is allowed) */
-    .js .reveal {
+    /*
+     * Hero copy waits for the GSAP intro (resources/js/motion.js). If the script never runs, it
+     * appears anyway after 3s; visitors who prefer reduced motion see it straight away.
+     */
+    .js:not(.motion-ready) :is([data-hero-title], [data-hero-item]) {
         opacity: 0;
-        transform: translateY(14px);
-        transition: opacity 600ms var(--ease-out-quart), transform 600ms var(--ease-out-quart);
+        animation: lx-show 0s linear 3s forwards;
     }
-    .js .reveal.is-visible {
-        opacity: 1;
-        transform: none;
+
+    /* Arrow icons in buttons and arrow links nudge forward on hover */
+    :is(.btn-brass, .btn-primary, .btn-outline-inverse, .link-arrow) > svg:last-child {
+        transition: translate 200ms var(--ease-out-quart);
+    }
+    :is(.btn-brass, .btn-primary, .btn-outline-inverse, .link-arrow):hover > svg:last-child {
+        translate: 3px 0;
     }
 
     .scrollbar-none { scrollbar-width: none; }
@@ -311,6 +317,10 @@
         @apply rounded-xs bg-paper-200;
         animation: skeleton-pulse 1.4s ease-in-out infinite;
     }
+}
+
+@keyframes lx-show {
+    to { opacity: 1; }
 }
 
 @keyframes skeleton-pulse {
@@ -335,6 +345,6 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
-    .js .reveal { opacity: 1; transform: none; }
+    .js:not(.motion-ready) :is([data-hero-title], [data-hero-item]) { opacity: 1; animation: none; }
     .marquee-track { animation: none; }
 }

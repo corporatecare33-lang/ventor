@@ -1,5 +1,5 @@
 @props(['faqs'])
-<div {{ $attributes->merge(['class' => 'border-t border-line']) }} x-data="{ open: null }">
+<div {{ $attributes->merge(['class' => 'border-t border-line']) }} x-data="{ open: null }" data-anim="stagger">
     @foreach ($faqs as $faq)
         <div class="border-b border-line">
             <h3 class="font-sans text-base font-medium">

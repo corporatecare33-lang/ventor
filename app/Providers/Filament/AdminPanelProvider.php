@@ -38,6 +38,10 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->profile(isSimple: false)
             ->brandName('LeatherX Admin')
+            ->brandLogo(asset('images/brand/leatherx-logo.svg'))
+            ->darkModeBrandLogo(asset('images/brand/leatherx-logo-inverse.svg'))
+            ->brandLogoHeight('1.125rem')
+            ->favicon(asset('favicon.svg'))
             ->colors([
                 'primary' => Color::hex('#a8742f'),
                 'gray' => Color::Stone,

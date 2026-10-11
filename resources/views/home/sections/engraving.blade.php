@@ -29,7 +29,7 @@
 @endphp
 <section class="bg-white py-10 sm:py-12 lg:py-14" aria-labelledby="engraving-title">
     <div class="container-wide">
-        <div class="rounded-card bg-ink-950 px-5 py-10 text-white sm:px-10 lg:px-14 lg:py-12">
+        <div data-anim="panel" class="rounded-card bg-ink-950 px-5 py-10 text-white sm:px-10 lg:px-14 lg:py-12">
             {{-- Like Ventro, the content sits in a narrower centred column inside the wide dark panel. --}}
             <div class="mx-auto max-w-[60rem]">
                 <div class="grid items-center gap-8 lg:grid-cols-[1.15fr_1fr] lg:gap-12">
@@ -41,14 +41,14 @@
                         @endif
                     </div>
 
-                    <dl class="grid grid-cols-2 gap-3 {{ $statColumns }}">
+                    <dl data-anim="stagger" class="grid grid-cols-2 gap-3 {{ $statColumns }}">
                         @foreach ($stats as $stat)
                             {{-- Label (dt) comes first in the markup for screen readers but sits under the figure visually.
                                  An odd last box spans both columns so the grid never shows a hole.
                                  Tighter label tracking on phones keeps "Engravable" (one long uppercase word) inside a 320px-wide box. --}}
                             <div class="flex min-w-0 flex-col items-center justify-center rounded-card border border-white/[0.06] bg-white/[0.04] p-3.5 text-center odd:last:col-span-2 sm:p-4">
                                 <dt class="order-last mt-1 text-[11px] leading-snug font-semibold tracking-[0.08em] text-white/60 uppercase sm:tracking-[0.12em]">{{ $stat['label'] }}</dt>
-                                <dd class="text-xl leading-tight font-bold tracking-tight text-brass-300 tabular-nums sm:text-2xl">
+                                <dd data-count class="text-xl leading-tight font-bold tracking-tight text-brass-300 tabular-nums sm:text-2xl">
                                     {{-- Words around a figure are set small so each box fits two-up on a 320px screen. --}}
                                     @isset($stat['prefix'])
                                         <span class="text-[13px] font-semibold tracking-normal text-white/65">{{ $stat['prefix'] }}</span>
@@ -65,7 +65,7 @@
 
                 @if ($items->isNotEmpty())
                     {{-- role="list" keeps list semantics in Safari/VoiceOver, which drops them when list-style is none --}}
-                    <ol role="list" class="mt-8 grid gap-2.5 {{ $stepColumns }}">
+                    <ol role="list" data-anim="stagger" class="mt-8 grid gap-2.5 {{ $stepColumns }}">
                         @foreach ($items as $item)
                             {{-- Same compact row as the Tap steps on phones (icon left), centred tiles from sm up. --}}
                             <li class="flex min-w-0 gap-4 rounded-card border border-white/[0.06] bg-white/[0.04] p-4 text-left sm:block sm:p-5 sm:text-center">
@@ -84,7 +84,7 @@
                 @endif
 
                 @if ($points->isNotEmpty())
-                    <ul role="list" class="mx-auto mt-6 flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-xs text-white/65">
+                    <ul role="list" data-anim="stagger" class="mx-auto mt-6 flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-xs text-white/65">
                         @foreach ($points as $point)
                             <li class="inline-flex items-center gap-1.5">
                                 <x-lx-icon name="check" class="size-3.5 shrink-0 text-brass-300" />{{ $point }}

@@ -4,7 +4,7 @@
     copy is decorative and hidden from assistive tech; the list below it is read instead.
     The track holds the promises twice and slides by half its width, so the loop is seamless.
 --}}
-<section class="marquee relative overflow-hidden bg-white py-3 sm:py-4" aria-label="What LeatherX offers"
+<section data-marquee class="marquee relative overflow-hidden bg-white py-3 sm:py-4" aria-label="What LeatherX offers"
          x-data="{ paused: false }">
     <ul role="list" class="sr-only">
         @foreach ($promises as $promise)
@@ -37,7 +37,7 @@
     <div class="pointer-events-none absolute inset-y-0 right-0 w-20 bg-linear-to-l from-white to-transparent sm:w-32" aria-hidden="true"></div>
 
     {{-- Moving content needs a way to stop it (WCAG 2.2.2); hidden when motion is reduced, as the strip is static then. --}}
-    <button type="button" @click="paused = ! paused" :aria-pressed="paused.toString()" aria-pressed="false"
+    <button type="button" data-marquee-toggle @click="paused = ! paused" :aria-pressed="paused.toString()" aria-pressed="false"
             class="absolute top-1/2 left-3 z-10 grid size-11 -translate-y-1/2 place-items-center rounded-full border border-line-strong bg-white text-ink-950 transition-colors hover:border-ink-950 motion-reduce:hidden sm:left-5">
         <span class="sr-only">Pause the scrolling promises</span>
         <x-lx-icon name="pause" class="size-4" x-show="! paused" />

@@ -56,7 +56,7 @@
                             </tr>
                         </thead>
                         @if ($different->isNotEmpty())
-                            <tbody>
+                            <tbody data-anim="stagger">
                                 @foreach ($different as $row)
                                     <tr class="border-t border-line">
                                         <th scope="row" class="{{ $cell }} text-left align-top text-[12px] font-normal text-ink-600 sm:text-[13px]">{{ $row['label'] }}</th>

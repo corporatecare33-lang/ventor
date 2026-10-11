@@ -50,7 +50,7 @@
                     area to 44px (gap-y-2 keeps neighbouring rows' strips from overlapping).
                 --}}
                 @php($separator = '<span class="mr-0.5 ml-1.5 text-ink-500/50 max-lg:hidden" aria-hidden="true">|</span>')
-                <ul role="list" class="mx-auto mt-5 flex max-w-3xl flex-wrap justify-center gap-x-1.5 gap-y-2 text-[13px] text-ink-700 sm:mt-6 lg:block lg:text-[15px] lg:leading-relaxed lg:text-balance">
+                <ul role="list" data-anim="stagger" class="mx-auto mt-5 flex max-w-3xl flex-wrap justify-center gap-x-1.5 gap-y-2 text-[13px] text-ink-700 sm:mt-6 lg:block lg:text-[15px] lg:leading-relaxed lg:text-balance">
                     @foreach ($features as $feature)
                         @php($length = mb_strlen($feature['label']))
                         @php($wrap = ['whitespace-nowrap' => $length <= 28, 'sm:whitespace-nowrap' => $length > 28 && $length <= 48])
@@ -67,7 +67,7 @@
             @endif
         </header>
 
-        <ul role="list" class="mt-8 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 lg:mt-12 lg:gap-5">
+        <ul role="list" data-anim="cards" class="mt-8 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 lg:mt-12 lg:gap-5">
             @foreach ($products as $product)
                 {{-- An odd last card sits centred on its own row in the 2-up grid (half width minus half the gap). --}}
                 <li @class([

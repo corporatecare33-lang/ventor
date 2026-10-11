@@ -46,7 +46,7 @@
             </div>
 
             <a href="{{ route('home') }}" class="justify-self-center" @if (request()->routeIs('home')) aria-current="page" @endif>
-                <x-logo height="h-9 lg:h-11" />
+                <x-logo height="h-[17px] sm:h-5 lg:h-[22px]" />
             </a>
 
             <div class="-mr-2.5 flex items-center justify-self-end">
@@ -93,7 +93,8 @@
                                         .finally(() => { this.loading = false });
                                 },
                              }"
-                             x-effect="if (mega === @js($key)) load()">
+                             x-effect="if (mega === @js($key)) load()"
+                             x-init="$watch('mega', (value) => value === @js($key) && window.lxMotion?.menuPanel($el))">
                             <div class="container-wide grid grid-cols-[minmax(13rem,17rem)_minmax(0,1fr)] gap-10 py-9 xl:grid-cols-[minmax(15rem,22rem)_minmax(0,1fr)] xl:gap-14">
                                 <div>
                                     <p class="text-[15px] font-medium text-ink-950">Collections</p>
@@ -158,7 +159,7 @@
              x-transition:enter="transition duration-300 ease-out-quart" x-transition:enter-start="-translate-x-full"
              x-transition:leave="transition duration-200 ease-out-quart" x-transition:leave-end="-translate-x-full">
             <div class="flex h-16 items-center justify-between border-b border-line px-5">
-                <x-logo height="h-8" />
+                <x-logo height="h-[17px]" />
                 <button type="button" @click="menu = false" class="-mr-2 inline-flex size-11 items-center justify-center" aria-label="Close menu">
                     <x-lx-icon name="x" class="size-6" />
                 </button>

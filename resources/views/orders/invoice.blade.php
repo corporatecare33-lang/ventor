@@ -12,7 +12,7 @@
     <div class="mx-auto max-w-3xl bg-white p-8 shadow-sm sm:p-12 print:shadow-none">
         <div class="flex items-start justify-between gap-6 border-b border-ink-900/10 pb-8">
             <div>
-                <x-logo height="h-12" />
+                <x-logo height="h-6" />
                 <p class="mt-2 text-xs leading-5 text-ink-600">{{ setting('contact_address') }}<br>{{ setting('contact_phone') }} · {{ setting('contact_email') }}</p>
             </div>
             <div class="text-right">
